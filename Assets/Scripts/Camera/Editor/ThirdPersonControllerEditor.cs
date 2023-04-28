@@ -11,15 +11,18 @@ public class ThirdPersonControllerEditor : Editor
     }
 
     SerializedProperty orbitsProperty;
+    SerializedProperty mouseSensitivityProperty;
 
     void OnEnable() {
         orbitsProperty = serializedObject.FindProperty("orbits");
+        mouseSensitivityProperty = serializedObject.FindProperty("mouseSensitivity");
     }
 
     private void CustomInspector() {
         serializedObject.Update();
 
         EditorGUILayout.PropertyField(orbitsProperty, new GUIContent("Orbits"));
+        EditorGUILayout.PropertyField(mouseSensitivityProperty, new GUIContent("Mouse Sensitivity"));
 
         serializedObject.ApplyModifiedProperties();
     }

@@ -17,11 +17,13 @@ public class OrbitalRail
     }
 
     /*
-     * Returns the position of an object at a given angle on the rail
+     * Returns the position of an object at a given percentage along the rail starting from rightAxis
      */
-    public Vector3 Evaluate(float angle) {
+    public Vector3 Evaluate(float position) {
 
-        Vector3 offset = new Vector3(Mathf.Sin(angle * Mathf.Deg2Rad), 0, Mathf.Cos(angle * Mathf.Deg2Rad));
+        float angle = position * 2 * Mathf.PI;
+
+        Vector3 offset = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
 
         //Simple circle on xz plane, no transformation needed
         if (upAxis == Vector3.up) {
@@ -32,6 +34,13 @@ public class OrbitalRail
         offset = rotation * offset;
 
         return centre + offset * radius;
+    }
+
+    public void DrawGizmos(int resolution) {
+        float step = 1f / resolution;
+        for (int i = 1; i < resolution + 1; i++) {
+            Gizmos.DrawLine(Evaluate(i * step), Evaluate((i - 1) * step));
+        }
     }
 
 }
