@@ -20,7 +20,7 @@ public class PlayerMovementEditor : Editor
         gravityProperty = serializedObject.FindProperty("gravity");
     }
 
-    private void CustomEditor() {
+    private void CustomInspector() {
         serializedObject.Update();
 
         EditorGUILayout.PropertyField(speedProperty, new GUIContent("Speed"));

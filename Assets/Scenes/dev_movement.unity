@@ -364,6 +364,7 @@ GameObject:
   - component: {fileID: 90140307}
   - component: {fileID: 90140311}
   - component: {fileID: 90140310}
+  - component: {fileID: 90140312}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -429,7 +430,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 90140305}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.25, z: 0}
+  m_LocalPosition: {x: 0.22, y: 4.88, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -450,7 +451,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 10
   accelerationTime: 0.1
-  gravity: 0
+  gravity: 1
 --- !u!143 &90140311
 CharacterController:
   m_ObjectHideFlags: 0
@@ -469,6 +470,26 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &90140312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 90140305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b651d4458b370c04dacc17657f5f4eec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  orbits:
+  - offset: {x: 0, y: 0.5, z: 0}
+    radius: 2
+  - offset: {x: 0, y: 1, z: 0}
+    radius: 1
+  - offset: {x: 0, y: 0, z: 0}
+    radius: 3.5
+  testDivisions: 50
 --- !u!1 &112717548
 GameObject:
   m_ObjectHideFlags: 0
@@ -4819,8 +4840,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1328012193}
-  m_LocalRotation: {x: 0.11894517, y: -0.88110673, z: 0.32260707, w: 0.3246965}
-  m_LocalPosition: {x: 10.1468725, y: 12.278038, z: 13.316303}
+  m_LocalRotation: {x: -0.34803805, y: 0.010449349, z: -0.0037849543, w: -0.9374146}
+  m_LocalPosition: {x: -1.30543, y: 18.42618, z: -22.5372}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
