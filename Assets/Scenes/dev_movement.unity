@@ -486,10 +486,13 @@ MonoBehaviour:
   orbits:
   - offset: {x: 0, y: 7.5, z: 0}
     radius: 5
+    height: 0
   - offset: {x: 0, y: 4, z: 0}
     radius: 8
-  - offset: {x: 0, y: 0, z: 0}
+    height: 3.5
+  - offset: {x: 0, y: 1, z: 0}
     radius: 3.5
+    height: 6.5
   cameraHolder: {fileID: 1328012193}
   testDivisions: 35
   mouseSensitivity: {x: 1, y: 1}

@@ -11,7 +11,6 @@ public class ThirdPersonController : MonoBehaviour
 
     public Vector2 mouseSensitivity;
 
-    //To remove
     private OrbitalRail[] rings;
 
     private float currentAngle;
@@ -24,52 +23,43 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     private Vector3 CalculateCameraPosition() {
-        //These cases had issues so patchwork fix here
-        if(currentHeight == 0) {
-            OrbitalRail rail = new OrbitalRail(transform.position + transform.TransformDirection(orbits[^1].offset), orbits[^1].radius, transform.up);
-            return rail.Evaluate(currentAngle);
-        }
-        if (currentHeight == 1) {
-            OrbitalRail rail = new OrbitalRail(transform.position + transform.TransformDirection(orbits[0].offset), orbits[0].radius, transform.up);
-            return rail.Evaluate(currentAngle);
-        }
+        //Brings height between 0->Difference between first and last orbit
+        float scaledHeight = currentHeight * orbits[^1].height;
+        for(int i = 0; i < orbits.Length; i++) {
 
-        float currentHeightScaled = orbits[^1].offset.y + currentHeight * (orbits[0].offset.y - orbits[^1].offset.y);
-        OrbitInfo lower = new OrbitInfo(new Vector3(0, float.NegativeInfinity, 0), 0);
-        OrbitInfo upper = new OrbitInfo(new Vector3(0, float.PositiveInfinity, 0), 0);
+            //Most likely camera is on bottom or top rail
+            if (orbits[i].height == scaledHeight) {
+                return rings[i].Evaluate(currentAngle);
+            }else if (orbits[i].height > scaledHeight) {
+                //Find lerp
+                float diff = orbits[i].height - orbits[i-1].height;
+                float start = orbits[i-1].height;
+                float lerp = (scaledHeight - start) / diff;
 
-        //Calculate the orbit above and below the currentHeight
-        foreach (OrbitInfo o in orbits) {
-            if(o.offset.y < currentHeightScaled && o.offset.y > lower.offset.y) {
-                lower = o;
-            }
-            if (o.offset.y > currentHeightScaled && o.offset.y < upper.offset.y) {
-                upper = o;
+                return Vector3.Lerp(rings[i - 1].Evaluate(currentAngle), rings[i].Evaluate(currentAngle), lerp);
             }
         }
-
-        float gap = upper.offset.y - lower.offset.y;
-        float lerp = (currentHeightScaled - lower.offset.y) / gap;
-
-        OrbitalRail lowerRail = new OrbitalRail(transform.position + transform.TransformDirection(lower.offset), lower.radius, transform.up);
-        OrbitalRail upperRail = new OrbitalRail(transform.position + transform.TransformDirection(upper.offset), upper.radius, transform.up);
-
-        return Vector3.Lerp(lowerRail.Evaluate(currentAngle), upperRail.Evaluate(currentAngle), lerp);
+        Debug.Log("Error in Camera Position Evalutation");
+        return Vector3.one; //Shouldn't reach here
     }
 
     private void ReadInput() {
         Cursor.lockState = CursorLockMode.Locked;
         Vector2 lookInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
-        lookInput *= mouseSensitivity;
+        lookInput *= mouseSensitivity * 0.01f;
 
-        currentAngle = Mathf.Repeat(currentAngle + (lookInput.x * Time.deltaTime), 1);
-        currentHeight = Mathf.Clamp01(currentHeight + (lookInput.y * Time.deltaTime));
+        currentAngle = Mathf.Repeat(currentAngle + lookInput.x, 1);
+        currentHeight = Mathf.Clamp01(currentHeight + lookInput.y);
     }
 
     private void SetupRings() {
         rings = new OrbitalRail[orbits.Length];
+        float height = 0;
         for(int i = 0; i < orbits.Length; i++) {
             rings[i] = new OrbitalRail(transform.position + transform.TransformDirection(orbits[i].offset), orbits[i].radius, transform.up);
+            orbits[i].height = height;
+            if (i == orbits.Length - 1) continue;
+            height += orbits[i].offset.y - orbits[i + 1].offset.y;
         }
     }
 
@@ -79,6 +69,9 @@ public class ThirdPersonController : MonoBehaviour
         public Vector3 offset;
         [Tooltip("Radius of orbit")]
         [Min(0)] public float radius;
+
+        [HideInInspector] 
+        public float height; //Height starts at 0 at the top
 
         public OrbitInfo(Vector3 offset, float radius) {
             this.offset = offset;
