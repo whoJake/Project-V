@@ -27,7 +27,6 @@ public class PlayerMovement : MonoBehaviour
 
     //Stick to ground when grounded
     //Jumping
-    //Camera Controller
 
     void Update()
     {

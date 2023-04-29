@@ -13,6 +13,8 @@ public class ThirdPersonController : MonoBehaviour
     [Tooltip("Mouse sensitivity of this camera controller")]
     public Vector2 mouseSensitivity;
 
+    public Vector3 focusOffset;
+
     [Tooltip("Display the wireframes of setup orbits in the editor")]
     public bool showOrbitWireframes = false;
 
@@ -21,6 +23,12 @@ public class ThirdPersonController : MonoBehaviour
     private float previousAngle;
     private float currentAngle;
     private float currentHeight;
+
+    //TODO
+    //Focus offset made into a rod that can interact with the world through a ray
+    //Add some kind of zoom setting to make that easy to change
+    //Made camera on rod so that it can interact with world
+    //Focus point needs to move with camera
 
     private void Start() {
         //Must be done in order for camera to line up with transform forward facing
@@ -32,7 +40,7 @@ public class ThirdPersonController : MonoBehaviour
         UpdateRings();
         ReadInput();
         cameraHolder.transform.position = CalculateCameraPosition();
-        cameraHolder.transform.LookAt(transform);
+        cameraHolder.transform.LookAt(transform.TransformPoint(focusOffset));
 
         float eulerDifference = (previousAngle * 360) - (currentAngle * 360);
         transform.Rotate(0, -eulerDifference, 0);
@@ -73,7 +81,7 @@ public class ThirdPersonController : MonoBehaviour
         rings = new OrbitalRail[orbits.Length];
         float height = 0;
         for(int i = 0; i < orbits.Length; i++) {
-            rings[i] = new OrbitalRail(transform.position + transform.TransformDirection(orbits[i].offset), orbits[i].radius, transform.up);
+            rings[i] = new OrbitalRail(transform.TransformPoint(orbits[i].offset), orbits[i].radius, transform.up);
             orbits[i].height = height;
             if (i == orbits.Length - 1) continue;
             height += orbits[i].offset.y - orbits[i + 1].offset.y;
