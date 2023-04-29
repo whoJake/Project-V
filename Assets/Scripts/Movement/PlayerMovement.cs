@@ -35,7 +35,8 @@ public class PlayerMovement : MonoBehaviour
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
         dampedInput = Vector2.SmoothDamp(dampedInput, input, ref dampedInputVelocity, accelerationTime);
 
-        movementVelocity = new Vector3(dampedInput.x * speed, 0, dampedInput.y * speed);
+        movementVelocity = (transform.forward * -dampedInput.x * speed) +
+                           (transform.right * dampedInput.y * speed);
         gravitationalVelocity = new Vector3(0, -gravity * 9.81f, 0);
 
         controller.Move((movementVelocity + gravitationalVelocity) * Time.deltaTime);

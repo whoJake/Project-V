@@ -18,9 +18,9 @@ public class OrbitalRail
 
     /*
      * Returns the position of an object at a given percentage along the rail starting from rightAxis
+     * Amount is given as a value from 0-1 representing 0-360 degrees or 0-2PI radians
      */
     public Vector3 Evaluate(float amount) {
-
         float angle = amount * 2 * Mathf.PI;
 
         Vector3 offset = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));

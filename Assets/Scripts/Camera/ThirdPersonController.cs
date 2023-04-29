@@ -6,20 +6,37 @@ public class ThirdPersonController : MonoBehaviour
 {
     [Tooltip("Array of Orbits used to control the movement of the 3rd person camera")]
     public OrbitInfo[] orbits;
-    public GameObject cameraHolder;
-    [Min(4)] public int testDivisions;
 
+    [Tooltip("GameObject that will be controlled as the camera")]
+    public GameObject cameraHolder;
+
+    [Tooltip("Mouse sensitivity of this camera controller")]
     public Vector2 mouseSensitivity;
+
+    [Tooltip("Display the wireframes of setup orbits in the editor")]
+    public bool showOrbitWireframes = false;
 
     private OrbitalRail[] rings;
 
+    private float previousAngle;
     private float currentAngle;
     private float currentHeight;
 
+    private void Start() {
+        //Must be done in order for camera to line up with transform forward facing
+        previousAngle = transform.rotation.eulerAngles.y;
+        currentAngle = previousAngle;
+    }
+
     private void Update() {
+        UpdateRings();
         ReadInput();
         cameraHolder.transform.position = CalculateCameraPosition();
         cameraHolder.transform.LookAt(transform);
+
+        float eulerDifference = (previousAngle * 360) - (currentAngle * 360);
+        transform.Rotate(0, -eulerDifference, 0);
+        previousAngle = currentAngle;
     }
 
     private Vector3 CalculateCameraPosition() {
@@ -52,7 +69,7 @@ public class ThirdPersonController : MonoBehaviour
         currentHeight = Mathf.Clamp01(currentHeight + lookInput.y);
     }
 
-    private void SetupRings() {
+    private void UpdateRings() {
         rings = new OrbitalRail[orbits.Length];
         float height = 0;
         for(int i = 0; i < orbits.Length; i++) {
@@ -80,14 +97,12 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     private void OnDrawGizmosSelected() {
-        SetupRings();
-        Gizmos.color = Color.blue;
-        foreach (OrbitalRail r in rings) {
-            r.DrawGizmos(testDivisions);
+        if (showOrbitWireframes) {
+            UpdateRings();
+            Gizmos.color = Color.blue;
+            foreach (OrbitalRail r in rings) {
+                r.DrawGizmos(50);
+            }
         }
-    }
-
-    private void OnValidate() {
-        SetupRings();
     }
 }
