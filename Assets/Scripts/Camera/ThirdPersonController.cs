@@ -7,38 +7,69 @@ public class ThirdPersonController : MonoBehaviour
     [Tooltip("Array of Orbits used to control the movement of the 3rd person camera")]
     public OrbitalInfo[] orbits;
 
+    [Tooltip("The transform which the orbits will orbit around")]
+    public Transform orbitAround;
+
     [Tooltip("GameObject that will be controlled as the camera")]
-    public GameObject cameraHolder;
+    public Camera affectedCamera;
 
     [Tooltip("Mouse sensitivity of this camera controller")]
-    public Vector2 mouseSensitivity;
+    public Vector2 mouseSensitivity = new Vector2(1, 1);
 
-    public Vector3 focusOffset;
+    [Tooltip("The transform that the camera will focus on and always face towards")]
+    public Transform focusPoint;
+
+    [Tooltip("Will this camera control the forward direction of another transform")]
+    public bool willControlTransformDirection;
+
+    [Tooltip("Will control the forward direction of this transform")]
+    public Transform controlTransform;
+
+    [Tooltip("Determines which parts of the rotation will be controlled by the camera")]
+    public ControlTransformType controlTransformType = ControlTransformType.NoVerticalControl;
 
     [Tooltip("Display the wireframes of setup orbits in the editor")]
     public bool showOrbitWireframes = false;
 
     private OrbitalRail[] rings;
 
-    private float previousAngle;
     private float currentAngle;
     private float currentHeight;
-
-    private void Start() {
-        //Must be done in order for camera to line up with transform forward facing
-        previousAngle = transform.rotation.eulerAngles.y;
-        currentAngle = previousAngle;
-    }
 
     private void Update() {
         UpdateRings();
         ReadInput();
-        cameraHolder.transform.position = CalculateCameraPosition();
-        cameraHolder.transform.LookAt(transform.TransformPoint(focusOffset));
 
-        float eulerDifference = (previousAngle * 360) - (currentAngle * 360);
-        transform.Rotate(0, -eulerDifference, 0);
-        previousAngle = currentAngle;
+        affectedCamera.transform.position = CalculateCameraPosition();
+
+        FocusOnTransform();
+
+        if (willControlTransformDirection) ControlTransformDirection();
+    }
+
+    private void FocusOnTransform() {
+        if(focusPoint == null) {
+            Debug.Log("Focus Transform is not set");
+            return;
+        }
+        affectedCamera.transform.LookAt(focusPoint.position);
+    }
+
+    private void ControlTransformDirection() {
+        Vector3 vecFromCamera = (controlTransform.position - affectedCamera.transform.position).normalized;
+
+        switch (controlTransformType) {
+            case ControlTransformType.FullControl:
+                controlTransform.right = vecFromCamera;
+                break;
+            case ControlTransformType.NoVerticalControl:
+                vecFromCamera.y = 0;
+                controlTransform.right = vecFromCamera;
+                break;
+            default:
+                Debug.Log("ControlTransformType is not set");
+                break;
+        }
     }
 
     private Vector3 CalculateCameraPosition() {
@@ -75,7 +106,7 @@ public class ThirdPersonController : MonoBehaviour
         rings = new OrbitalRail[orbits.Length];
         float height = 0;
         for(int i = 0; i < orbits.Length; i++) {
-            rings[i] = new OrbitalRail(transform.TransformPoint(orbits[i].offset), orbits[i].radius, transform.up);
+            rings[i] = new OrbitalRail(orbitAround.TransformPoint(orbits[i].offset), orbits[i].radius, orbitAround.transform.up);
             orbits[i].height = height;
             if (i == orbits.Length - 1) continue;
             height += orbits[i].offset.y - orbits[i + 1].offset.y;
@@ -84,7 +115,7 @@ public class ThirdPersonController : MonoBehaviour
 
     [System.Serializable]
     public class OrbitalInfo {
-        [Tooltip("Offset relative to transform of orbit")]
+        [Tooltip("Offset relative to transform that is being orbitted around")]
         public Vector3 offset;
         [Tooltip("Radius of orbit")]
         [Min(0)] public float radius;
@@ -96,6 +127,11 @@ public class ThirdPersonController : MonoBehaviour
             this.offset = offset;
             this.radius = radius;
         }
+    }
+
+    public enum ControlTransformType {
+        FullControl,
+        NoVerticalControl
     }
 
     private void OnDrawGizmosSelected() {

@@ -1,21 +1,20 @@
 Camera
 	ThirdPersonController.cs
-		Have focus point be a GameObject
 		Collision for focus point towards camera
-		Move outside of Player like Cinemachine
 		Add collision to camera
 		Let collision layers for this be editable
 		?Zoom settings
-		This controller needs to be seperated from Player so that the camera can be controller by other scripts more easily
+		Add better orbit setup
+	ThirdPersonControllerEditor.cs
+		Have rect/seperator around willControlTransform bool so that it looks nicer
 Player
 	PlayerMovement.cs
 		Update PlayerMovementEditor.cs
 		Refactor code in Update() to be more readable
 		Change/fix interaction and equations between gravity and jump velocity
 		Add some events that are triggered by actions like Jump or HitGround
+		Think about moving gravity and jump height to StatHandler
 	StatHandler.cs
-		Create
-		Holds all stats of the player like movespeed etc
 		Is queried by mechanics in order to get statistics such as PlayerMovement.cs asking for the speed when its about to move
 		Events for StatChanged etc to get ready for implementing it into UI
 	Animation
@@ -33,6 +32,7 @@ Player
 Items
 	Design
 		Item rarity colours
+		?Items are held by different types of plants/objects (ice, big plant) which dictates their rarity aswell as their element
 		How they should be displayed on the ground
 		Rotate or follow camera
 	Gameplay

@@ -5,8 +5,6 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
-    [Tooltip("Max speed the body can reach through controlled movement")]
-    [Min(0)] public float speed;
     [Tooltip("How fast the body will reach max speed and decelerate back to standing")]
     [Min(0)] public float accelerationTime;
     [Tooltip("The effect of gravity on this body")]
@@ -16,16 +14,21 @@ public class PlayerMovement : MonoBehaviour
     [Min(0)] public float jumpHeight;
 
     private Vector3 movementVelocity;
-    public Vector3 gravitationalVelocity;
+    private Vector3 gravitationalVelocity;
 
     private Vector2 dampedInput;
     private Vector2 dampedInputVelocity;
 
     public bool isGrounded;
     public bool isJumping;
-    public Vector3 jumpVelocity;
+    private Vector3 jumpVelocity;
 
     private CharacterController controller;
+    private StatHandler statHandler;
+
+    private void Awake() {
+        statHandler = gameObject.GetComponent<StatHandler>();
+    }
 
     void Start()
     {
@@ -56,8 +59,8 @@ public class PlayerMovement : MonoBehaviour
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
         dampedInput = Vector2.SmoothDamp(dampedInput, input, ref dampedInputVelocity, accelerationTime);
 
-        movementVelocity = (transform.forward * -dampedInput.x * speed) +
-                           (transform.right * dampedInput.y * speed);
+        movementVelocity = (transform.forward * -dampedInput.x * statHandler.movementSpeed) +
+                           (transform.right * dampedInput.y * statHandler.movementSpeed);
 
 
         if (controller.isGrounded) {
