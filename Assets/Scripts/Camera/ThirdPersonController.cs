@@ -5,7 +5,7 @@ using UnityEngine;
 public class ThirdPersonController : MonoBehaviour
 {
     [Tooltip("Array of Orbits used to control the movement of the 3rd person camera")]
-    public OrbitInfo[] orbits;
+    public OrbitalInfo[] orbits;
 
     [Tooltip("GameObject that will be controlled as the camera")]
     public GameObject cameraHolder;
@@ -23,12 +23,6 @@ public class ThirdPersonController : MonoBehaviour
     private float previousAngle;
     private float currentAngle;
     private float currentHeight;
-
-    //TODO
-    //Focus offset made into a rod that can interact with the world through a ray
-    //Add some kind of zoom setting to make that easy to change
-    //Made camera on rod so that it can interact with world
-    //Focus point needs to move with camera
 
     private void Start() {
         //Must be done in order for camera to line up with transform forward facing
@@ -89,7 +83,7 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     [System.Serializable]
-    public class OrbitInfo {
+    public class OrbitalInfo {
         [Tooltip("Offset relative to transform of orbit")]
         public Vector3 offset;
         [Tooltip("Radius of orbit")]
@@ -98,7 +92,7 @@ public class ThirdPersonController : MonoBehaviour
         [HideInInspector] 
         public float height; //Height starts at 0 at the top
 
-        public OrbitInfo(Vector3 offset, float radius) {
+        public OrbitalInfo(Vector3 offset, float radius) {
             this.offset = offset;
             this.radius = radius;
         }

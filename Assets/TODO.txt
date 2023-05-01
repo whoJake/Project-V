@@ -1,0 +1,49 @@
+Camera
+	ThirdPersonController.cs
+		Have focus point be a GameObject
+		Collision for focus point towards camera
+		Move outside of Player like Cinemachine
+		Add collision to camera
+		Let collision layers for this be editable
+		?Zoom settings
+		This controller needs to be seperated from Player so that the camera can be controller by other scripts more easily
+Player
+	PlayerMovement.cs
+		Update PlayerMovementEditor.cs
+		Refactor code in Update() to be more readable
+		Change/fix interaction and equations between gravity and jump velocity
+		Add some events that are triggered by actions like Jump or HitGround
+	StatHandler.cs
+		Create
+		Holds all stats of the player like movespeed etc
+		Is queried by mechanics in order to get statistics such as PlayerMovement.cs asking for the speed when its about to move
+		Events for StatChanged etc to get ready for implementing it into UI
+	Animation
+		Seperate movement of Upper and Lower body
+		Upper body is controlled by look direction and always aims at it
+		Lower body responds to movement and lightly follows the upper body to align itself
+
+		Upper Body
+			Holds torso, arms and head
+			Faces towards focus point on all axis
+		Lower Body
+			Holds hips and legs
+			Follows closely behind the upper body to align itself overtime instead of instantly
+			Will rotate based on player movement
+Items
+	Design
+		Item rarity colours
+		How they should be displayed on the ground
+		Rotate or follow camera
+	Gameplay
+		How are items discovered across runs
+		?Check-points to hand in items so they can be upgraded
+		?Risk keeping the item for the run or hand it in so that you can upgrade/unlock it for the next run
+		How does rarity change with depth/layer
+		When are items dropped. From bosses? From monster packs? From chests/item areas?
+	Implementation
+		Base item class that can hold an item
+		Interactable interface? onInteract(Player player)?
+		Will the stat buff directly affect stats or will it be added to a pool that recalculates stats after a pickup
+World
+	

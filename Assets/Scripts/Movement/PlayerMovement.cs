@@ -32,11 +32,6 @@ public class PlayerMovement : MonoBehaviour
         controller = gameObject.GetComponent<CharacterController>();
     }
 
-    //Jump cooldown
-    //Refactor code
-    //Fix gravity and jump velocity interaction a bit
-    //Update PlayerMovementEditor
-
     void Jump() {
         isJumping = true;
         jumpVelocity = new Vector3(0, jumpHeight * gravity, 0);
