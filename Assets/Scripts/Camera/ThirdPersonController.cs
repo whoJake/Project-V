@@ -60,11 +60,11 @@ public class ThirdPersonController : MonoBehaviour
 
         switch (controlTransformType) {
             case ControlTransformType.FullControl:
-                controlTransform.right = vecFromCamera;
+                controlTransform.forward = vecFromCamera;
                 break;
             case ControlTransformType.NoVerticalControl:
                 vecFromCamera.y = 0;
-                controlTransform.right = vecFromCamera;
+                controlTransform.forward = vecFromCamera;
                 break;
             default:
                 Debug.Log("ControlTransformType is not set");

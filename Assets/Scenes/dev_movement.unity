@@ -400,12 +400,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cc7fdffacdd65648adc738c83c58c28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  accelerationTime: 0.1
-  gravity: 3
-  maxFallSpeed: 9.81
+  groundAccelerationTime: 0.2
+  gravity: 1
+  terminalVelocity: 30
   jumpHeight: 7
-  isGrounded: 0
-  isJumping: 0
 --- !u!143 &90140311
 CharacterController:
   m_ObjectHideFlags: 0

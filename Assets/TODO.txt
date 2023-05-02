@@ -5,15 +5,20 @@ Camera
 		Let collision layers for this be editable
 		?Zoom settings
 		Add better orbit setup
+		Maybe implement some kind of focus point catch up when object is moving fast but camera isnt
 	ThirdPersonControllerEditor.cs
 		Have rect/seperator around willControlTransform bool so that it looks nicer
 Player
 	PlayerMovement.cs
 		Update PlayerMovementEditor.cs
-		Refactor code in Update() to be more readable
-		Change/fix interaction and equations between gravity and jump velocity
 		Add some events that are triggered by actions like Jump or HitGround
 		Think about moving gravity and jump height to StatHandler
+		Implement the jump implementation that was explained in the video
+		Move JumpHeight to StatHandler
+		JumpTime stays in PlayerMovement
+		Maybe look at switching to UnityInput 2.0 as it uses input events that you subscribe to rather than reading them straight from Input class
+		Implement momentum to movement whilst in the air
+		Convert movement to adding an acceleration instead of setting velocity
 	StatHandler.cs
 		Is queried by mechanics in order to get statistics such as PlayerMovement.cs asking for the speed when its about to move
 		Events for StatChanged etc to get ready for implementing it into UI
