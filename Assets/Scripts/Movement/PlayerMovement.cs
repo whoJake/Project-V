@@ -11,7 +11,7 @@ public class PlayerMovement : MonoBehaviour
 
     //Refactor
     public float groundAccelerationTime;
-    private Vector3 velocity;
+    public Vector3 velocity;
     public float gravity;
     public float terminalVelocity = 10f;
     public float jumpHeight;
@@ -40,8 +40,12 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void HandleGravity() {
-        velocity.y -= gravity * 9.81f * Time.deltaTime;
-        if (velocity.y < -terminalVelocity) velocity.y = -terminalVelocity;
+        if (controller.isGrounded) {
+            velocity.y = -0.1f;
+        } else {
+            velocity.y -= gravity * 9.81f * Time.deltaTime;
+            if (velocity.y < -terminalVelocity) velocity.y = -terminalVelocity;
+        }
     }
 
     void HandleJump() {

@@ -19,6 +19,7 @@ Player
 		Maybe look at switching to UnityInput 2.0 as it uses input events that you subscribe to rather than reading them straight from Input class
 		Implement momentum to movement whilst in the air
 		Convert movement to adding an acceleration instead of setting velocity
+		Look for disable of bunnyhopping (might be in switching to UnityInput 2.0)
 	StatHandler.cs
 		Is queried by mechanics in order to get statistics such as PlayerMovement.cs asking for the speed when its about to move
 		Events for StatChanged etc to get ready for implementing it into UI
@@ -40,6 +41,16 @@ Items
 		?Items are held by different types of plants/objects (ice, big plant) which dictates their rarity aswell as their element
 		How they should be displayed on the ground
 		Rotate or follow camera
+
+		Item comes up from ground, hung slightly away from the floor with a small plant branch
+		Element erupts from underneath it which infuses it with its element
+		Elemental eruption under item seems good with a generic holder for the item
+
+		Element types
+			Fire/Ice/Water/Ground + others Gravitational etc
+			Something more abstract? Starrail types
+			How should they interact with eachother? Synergies ofc but should some detriment others? Maybe sacrifice one part of them for something different
+
 	Gameplay
 		How are items discovered across runs
 		?Check-points to hand in items so they can be upgraded
