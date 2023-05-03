@@ -4,34 +4,46 @@ using UnityEngine;
 
 public class ThirdPersonController : MonoBehaviour
 {
-    [Tooltip("Array of Orbits used to control the movement of the 3rd person camera")]
-    public OrbitalInfo[] orbits;
-
-    [Tooltip("The transform which the orbits will orbit around")]
-    public Transform orbitAround;
-
-    [Tooltip("GameObject that will be controlled as the camera")]
-    public Camera affectedCamera;
-
-    [Tooltip("Mouse sensitivity of this camera controller")]
-    public Vector2 mouseSensitivity = new Vector2(1, 1);
-
-    [Tooltip("The transform that the camera will focus on and always face towards")]
-    public Transform focusPoint;
-
-    [Tooltip("Will this camera control the forward direction of another transform")]
-    public bool willControlTransformDirection;
-
-    [Tooltip("Will control the forward direction of this transform")]
-    public Transform controlTransform;
-
-    [Tooltip("Determines which parts of the rotation will be controlled by the camera")]
-    public ControlTransformType controlTransformType = ControlTransformType.NoVerticalControl;
-
-    [Tooltip("Display the wireframes of setup orbits in the editor")]
-    public bool showOrbitWireframes = false;
+    [SerializeField] [Tooltip("Array of Orbits used to control the movement of the 3rd person camera")]
+    private OrbitalInfo[] orbits;
 
     private OrbitalRail[] rings;
+
+    [SerializeField] [Tooltip("The transform which the orbits will orbit around")]
+    private Transform orbitAround;
+
+    [SerializeField] [Tooltip("GameObject that will be controlled as the camera")]
+    private Camera affectedCamera;
+
+    [SerializeField] [Tooltip("Mouse sensitivity of this camera controller")]
+    private Vector2 mouseSensitivity = new Vector2(1, 1);
+
+    [SerializeField] [Tooltip("The transform that the camera will focus on and always face towards")]
+    private Transform focusPoint;
+
+    [SerializeField] [Tooltip("Will this camera control the forward direction of another transform")]
+    private bool willControlTransformDirection;
+
+    [SerializeField] [Tooltip("Will control the forward direction of this transform")]
+    private Transform controlTransform;
+
+    [SerializeField] [Tooltip("Determines which parts of the rotation will be controlled by the camera")]
+    private ControlTransformType controlTransformType = ControlTransformType.NoVerticalControl;
+
+    [SerializeField] [Tooltip("This camera will avoid occluding the focus point")]
+    private bool avoidOcclusion;
+
+    [SerializeField] [Tooltip("The time it takes for the camera move towards its un-occluded state")]
+    [Min(0)] private float avoidOcclusionSmoothingTime;
+
+    [SerializeField] [Tooltip("Buffer length between detected occlusion location and the new location of the camera")]
+    [Min(0)] private float avoidOcclusionBufferLength;
+
+    private Vector3 avoidOcclusionVelocity;
+
+    [SerializeField] [Tooltip("Display the wireframes of setup orbits in the editor")]
+    private bool showOrbitWireframes = false;
+
 
     private float currentAngle;
     private float currentHeight;
@@ -40,10 +52,11 @@ public class ThirdPersonController : MonoBehaviour
         UpdateRings();
         ReadInput();
 
-        affectedCamera.transform.position = CalculateCameraPosition();
+        Vector3 updatedCameraPosition = CalculateCameraPosition();
+        if (avoidOcclusion) AvoidOcclusion(ref updatedCameraPosition);
+        affectedCamera.transform.position = updatedCameraPosition;
 
         FocusOnTransform();
-
         if (willControlTransformDirection) ControlTransformDirection();
     }
 
@@ -93,8 +106,23 @@ public class ThirdPersonController : MonoBehaviour
         return Vector3.one; //Shouldn't reach here
     }
 
+    private void AvoidOcclusion(ref Vector3 position) {
+        Vector3 vecToFocusPoint = position - focusPoint.position;
+        Ray ray = new Ray(focusPoint.position, vecToFocusPoint.normalized);
+        RaycastHit hit;
+        if(Physics.Raycast(ray, out hit, vecToFocusPoint.magnitude)) {
+            Vector3 targetPosition = hit.point - (vecToFocusPoint.normalized * avoidOcclusionBufferLength);
+            position = Vector3.SmoothDamp(affectedCamera.transform.position, targetPosition, ref avoidOcclusionVelocity, avoidOcclusionSmoothingTime);
+        }
+    }
+
     private void ReadInput() {
-        Cursor.lockState = CursorLockMode.Locked;
+        if (Application.isFocused) Cursor.lockState = CursorLockMode.Locked;
+        else {
+            Cursor.lockState = CursorLockMode.None;
+            return;
+        }
+
         Vector2 lookInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
         lookInput *= mouseSensitivity * 0.01f;
 
@@ -117,6 +145,7 @@ public class ThirdPersonController : MonoBehaviour
     public class OrbitalInfo {
         [Tooltip("Offset relative to transform that is being orbitted around")]
         public Vector3 offset;
+
         [Tooltip("Radius of orbit")]
         [Min(0)] public float radius;
 

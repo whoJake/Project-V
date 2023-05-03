@@ -1,0 +1,22 @@
+LIST OF TASKS
+	Basics of Player Controller
+		Movement
+		Gravity
+		Jump
+		Sprinting
+	Complex of Player Controller
+		Dashing
+		Item specific abilities
+		External Forces
+	Item Element Visuals
+	Item Visuals
+	Item Tier Visuals
+	Item Implementation
+	Character Modelling
+		Model Character
+		Add Rigs and bones
+	Map Generation
+	Saving/Loading Map
+	Map Editing during and between runs
+	Setup good orbits for camera
+	Collision for camera DONE

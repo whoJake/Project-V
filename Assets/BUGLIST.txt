@@ -1,0 +1,3 @@
+On the ThirdPersonCamera, when AvoidOcclusion is on and the player runs straight forwards, the camera flickers back and forth
+	Only happens when actually moving forwards
+	Only happens when moving forwards, no other direction

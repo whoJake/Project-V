@@ -19,6 +19,9 @@ public class ThirdPersonControllerEditor : Editor
     SerializedProperty willControlTransformDirectionProperty;
     SerializedProperty controlTransformProperty;
     SerializedProperty controlTransformTypeProperty;
+    SerializedProperty avoidOcclusionProperty;
+    SerializedProperty avoidOcclusionSmoothingTimeProperty;
+    SerializedProperty avoidOcclusionBufferLengthProperty;
     SerializedProperty showOrbitWireframesProperty;
 
     void OnEnable() {
@@ -30,6 +33,9 @@ public class ThirdPersonControllerEditor : Editor
         willControlTransformDirectionProperty = serializedObject.FindProperty("willControlTransformDirection");
         controlTransformProperty = serializedObject.FindProperty("controlTransform");
         controlTransformTypeProperty = serializedObject.FindProperty("controlTransformType");
+        avoidOcclusionProperty = serializedObject.FindProperty("avoidOcclusion");
+        avoidOcclusionSmoothingTimeProperty = serializedObject.FindProperty("avoidOcclusionSmoothingTime");
+        avoidOcclusionBufferLengthProperty = serializedObject.FindProperty("avoidOcclusionBufferLength");
         showOrbitWireframesProperty = serializedObject.FindProperty("showOrbitWireframes");
     }
 
@@ -41,10 +47,15 @@ public class ThirdPersonControllerEditor : Editor
         EditorGUILayout.PropertyField(affectedCameraProperty, new GUIContent("Affected Camera"));
         EditorGUILayout.PropertyField(mouseSensitivityProperty, new GUIContent("Mouse Sensitivity"));
         EditorGUILayout.PropertyField(focusPointProperty, new GUIContent("Focus Point"));
-        EditorGUILayout.PropertyField(willControlTransformDirectionProperty, new GUIContent("Will Control Transform Direction?"));
+        EditorGUILayout.PropertyField(willControlTransformDirectionProperty, new GUIContent("Control Transform Direction"));
         if (willControlTransformDirectionProperty.boolValue) {
             EditorGUILayout.PropertyField(controlTransformProperty, new GUIContent("Control Transform"));
             EditorGUILayout.PropertyField(controlTransformTypeProperty, new GUIContent("Control Transform Type"));
+        }
+        EditorGUILayout.PropertyField(avoidOcclusionProperty, new GUIContent("Avoid Occlusion"));
+        if (avoidOcclusionProperty.boolValue) {
+            EditorGUILayout.PropertyField(avoidOcclusionSmoothingTimeProperty, new GUIContent("Smoothing Time"));
+            EditorGUILayout.PropertyField(avoidOcclusionBufferLengthProperty, new GUIContent("Buffer Length"));
         }
 
         EditorGUILayout.PropertyField(showOrbitWireframesProperty, new GUIContent("Show Orbit Wireframes"));

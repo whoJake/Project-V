@@ -1,7 +1,5 @@
 Camera
 	ThirdPersonController.cs
-		Collision for focus point towards camera
-		Add collision to camera
 		Let collision layers for this be editable
 		?Zoom settings
 		Add better orbit setup
