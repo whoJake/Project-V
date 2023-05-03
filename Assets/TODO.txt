@@ -62,5 +62,12 @@ Items
 	Implementation
 		Base item class that can hold an item
 		Will the stat buff directly affect stats or will it be added to a pool that recalculates stats after a pickup
+
+		Element
+			Fire
+				Spawn some particles, shader then colours fire based on how many particles are nearby
+				More particles nearby = brighter shade from colour
+				Less particles nearby = colder fire colour
+				Particle has lifetime, once it reaches end of lifetime it respawns at the bottom as a fresh particle
 World
 	

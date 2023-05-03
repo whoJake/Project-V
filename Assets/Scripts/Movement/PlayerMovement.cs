@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour
     private StatHandler statHandler;
 
     public float groundAccelerationTime;
-    private Vector3 velocity;
+    public Vector3 velocity;
     public float gravity;
     public float terminalVelocity = 10f;
     public float jumpHeight;
