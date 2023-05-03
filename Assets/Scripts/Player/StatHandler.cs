@@ -13,4 +13,12 @@ public class StatHandler : MonoBehaviour
     [Min(0)]          public float baseHealthPoints;
     [HideInInspector] public float bonusHealthPoints;
                       public float healthPoints { get { return baseHealthPoints + bonusHealthPoints; } }
+
+    //Interact with items
+    private void OnTriggerEnter(Collider other) {
+        PickupItem pickupItem;
+        if(other.gameObject.TryGetComponent<PickupItem>(out pickupItem)) {
+            pickupItem.OnInteract(gameObject);
+        }
+    }
 }

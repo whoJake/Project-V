@@ -9,9 +9,8 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController controller;
     private StatHandler statHandler;
 
-    //Refactor
     public float groundAccelerationTime;
-    public Vector3 velocity;
+    private Vector3 velocity;
     public float gravity;
     public float terminalVelocity = 10f;
     public float jumpHeight;
