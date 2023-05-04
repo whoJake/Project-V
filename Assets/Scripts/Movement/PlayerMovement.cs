@@ -9,12 +9,20 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController controller;
     private StatHandler statHandler;
 
-    public float groundAccelerationTime;
-    public Vector3 velocity;
-    public float gravity;
-    public float terminalVelocity = 10f;
-    public float jumpHeight;
-    public float hitGroundEventThreshold = 5f;
+    [SerializeField]
+    private Vector3 velocity;
+    [SerializeField]
+    private float gravity;
+    [SerializeField] [Tooltip("Maximum downward velocity caused by gravity")]
+    private float terminalVelocity;
+    [SerializeField]
+    private float jumpHeight;
+    [SerializeField] [Tooltip("Time taken to accelerate to player movement speed")]
+    private float groundAccelerationTime;
+    [SerializeField]
+    private float hitGroundEventThreshold;
+
+
     private bool isFalling;
     private bool isJumping;
 
