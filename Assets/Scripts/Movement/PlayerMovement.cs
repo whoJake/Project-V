@@ -14,11 +14,16 @@ public class PlayerMovement : MonoBehaviour
     public float gravity;
     public float terminalVelocity = 10f;
     public float jumpHeight;
+    public float hitGroundEventThreshold = 5f;
     private bool isFalling;
     private bool isJumping;
 
     private Vector2 dampedInput;
     private Vector2 dampedInputVelocity;
+
+    //Events
+    public delegate void onHitGround(Vector3 position, float downwardSpeed);
+    public event onHitGround OnHitGround;
 
     private void Awake() {
         statHandler = gameObject.GetComponent<StatHandler>();
@@ -39,6 +44,18 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void HandleGravity() {
+        //This accounts for hitting head
+        if(isJumping && controller.velocity.y == 0) {
+            velocity.y = 0;
+        }
+
+        //Hit ground event
+        if(isFalling && controller.isGrounded && 
+           velocity.y <= -hitGroundEventThreshold) {
+
+           if(OnHitGround != null) OnHitGround.Invoke(transform.position, velocity.y);
+        }
+
         if (controller.isGrounded) {
             velocity.y = -0.1f;
         } else {

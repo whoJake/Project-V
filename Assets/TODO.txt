@@ -18,8 +18,6 @@ Player
 		Implement momentum to movement whilst in the air
 		Convert movement to adding an acceleration instead of setting velocity
 		Look for disable of bunnyhopping (might be in switching to UnityInput 2.0)
-
-		BUG : Jump continues even after being hit on the head
 	StatHandler.cs
 		Is queried by mechanics in order to get statistics such as PlayerMovement.cs asking for the speed when its about to move
 		Events for StatChanged etc to get ready for implementing it into UI

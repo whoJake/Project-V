@@ -405,6 +405,7 @@ MonoBehaviour:
   gravity: 3
   terminalVelocity: 30
   jumpHeight: 15
+  hitGroundEventThreshold: 5
 --- !u!143 &90140311
 CharacterController:
   m_ObjectHideFlags: 0
@@ -420,7 +421,7 @@ CharacterController:
   m_Radius: 0.5
   m_SlopeLimit: 35
   m_StepOffset: 0.3
-  m_SkinWidth: 0.08
+  m_SkinWidth: 0.0001
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &90140313
@@ -3028,7 +3029,6 @@ GameObject:
   m_Component:
   - component: {fileID: 812083500}
   - component: {fileID: 812083499}
-  - component: {fileID: 812083501}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -3113,18 +3113,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!114 &812083501
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 812083498}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &816658438
 GameObject:
   m_ObjectHideFlags: 0
@@ -5144,7 +5132,6 @@ GameObject:
   - component: {fileID: 1328012196}
   - component: {fileID: 1328012195}
   - component: {fileID: 1328012194}
-  - component: {fileID: 1328012197}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -5218,18 +5205,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1328012197
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1328012193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1347260874
 GameObject:
   m_ObjectHideFlags: 0
