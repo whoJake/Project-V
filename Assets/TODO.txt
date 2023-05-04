@@ -1,6 +1,5 @@
 Camera
 	ThirdPersonController.cs
-		Let collision layers for this be editable
 		?Zoom settings
 		Add better orbit setup
 		Maybe implement some kind of focus point catch up when object is moving fast but camera isnt
@@ -8,7 +7,6 @@ Camera
 		Have rect/seperator around willControlTransform bool so that it looks nicer
 Player
 	PlayerMovement.cs
-		Update PlayerMovementEditor.cs
 		Add some events that are triggered by actions like Jump or HitGround
 		Think about moving gravity and jump height to StatHandler
 		Implement the jump implementation that was explained in the video

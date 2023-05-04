@@ -20,6 +20,7 @@ public class ThirdPersonControllerEditor : Editor
     SerializedProperty controlTransformProperty;
     SerializedProperty controlTransformTypeProperty;
     SerializedProperty avoidOcclusionProperty;
+    SerializedProperty avoidOcclusionLayersProperty;
     SerializedProperty avoidOcclusionSmoothingTimeProperty;
     SerializedProperty avoidOcclusionBufferLengthProperty;
     SerializedProperty showOrbitWireframesProperty;
@@ -34,6 +35,7 @@ public class ThirdPersonControllerEditor : Editor
         controlTransformProperty = serializedObject.FindProperty("controlTransform");
         controlTransformTypeProperty = serializedObject.FindProperty("controlTransformType");
         avoidOcclusionProperty = serializedObject.FindProperty("avoidOcclusion");
+        avoidOcclusionLayersProperty = serializedObject.FindProperty("avoidOcclusionLayers");
         avoidOcclusionSmoothingTimeProperty = serializedObject.FindProperty("avoidOcclusionSmoothingTime");
         avoidOcclusionBufferLengthProperty = serializedObject.FindProperty("avoidOcclusionBufferLength");
         showOrbitWireframesProperty = serializedObject.FindProperty("showOrbitWireframes");
@@ -54,6 +56,7 @@ public class ThirdPersonControllerEditor : Editor
         }
         EditorGUILayout.PropertyField(avoidOcclusionProperty, new GUIContent("Avoid Occlusion"));
         if (avoidOcclusionProperty.boolValue) {
+            EditorGUILayout.PropertyField(avoidOcclusionLayersProperty, new GUIContent("Occlusion Blacklisted Layers"));
             EditorGUILayout.PropertyField(avoidOcclusionSmoothingTimeProperty, new GUIContent("Smoothing Time"));
             EditorGUILayout.PropertyField(avoidOcclusionBufferLengthProperty, new GUIContent("Buffer Length"));
         }

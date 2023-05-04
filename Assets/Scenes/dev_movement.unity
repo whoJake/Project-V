@@ -363,7 +363,7 @@ GameObject:
   - component: {fileID: 90140311}
   - component: {fileID: 90140310}
   - component: {fileID: 90140313}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -400,11 +400,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cc7fdffacdd65648adc738c83c58c28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  groundAccelerationTime: 0.2
   velocity: {x: 0, y: 0, z: 0}
   gravity: 3
   terminalVelocity: 30
   jumpHeight: 15
+  groundAccelerationTime: 0.2
   hitGroundEventThreshold: 5
 --- !u!143 &90140311
 CharacterController:
@@ -436,7 +436,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 608a76f30570cf643bea4abf167bc796, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseMovementSpeed: 20
+  baseMovementSpeed: 10
   bonusMovementSpeed: 0
   baseHealthPoints: 10
   bonusHealthPoints: 0
@@ -1203,7 +1203,7 @@ GameObject:
   - component: {fileID: 283067817}
   - component: {fileID: 283067819}
   - component: {fileID: 283067818}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1480,7 +1480,7 @@ GameObject:
   - component: {fileID: 369005851}
   - component: {fileID: 369005853}
   - component: {fileID: 369005852}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1795,7 +1795,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 504503119}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2021,7 +2021,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 602699295}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Upper Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5172,7 +5172,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 100
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -5311,7 +5311,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1354460033}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Lower Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5752,15 +5752,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   orbits:
-  - offset: {x: 0, y: 4, z: 0}
-    radius: 7.5
+  - offset: {x: 0, y: 3, z: 0}
+    radius: 5
     height: 0
   - offset: {x: 0, y: 1, z: 0}
-    radius: 5
-    height: 3
+    radius: 2.5
+    height: 2
   - offset: {x: 0, y: -0.5, z: 0}
-    radius: 2
-    height: 4.5
+    radius: 1
+    height: 3.5
   orbitAround: {fileID: 90140309}
   affectedCamera: {fileID: 1328012195}
   mouseSensitivity: {x: 1, y: 1}
@@ -5768,9 +5768,12 @@ MonoBehaviour:
   willControlTransformDirection: 1
   controlTransform: {fileID: 90140309}
   controlTransformType: 1
-  avoidOcclusion: 0
+  avoidOcclusion: 1
+  avoidOcclusionLayers:
+    serializedVersion: 2
+    m_Bits: 64
   avoidOcclusionSmoothingTime: 0
-  avoidOcclusionBufferLength: 0
+  avoidOcclusionBufferLength: 0.2
   showOrbitWireframes: 0
 --- !u!4 &1430129884
 Transform:
@@ -6511,7 +6514,7 @@ GameObject:
   - component: {fileID: 1589445419}
   - component: {fileID: 1589445421}
   - component: {fileID: 1589445420}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}

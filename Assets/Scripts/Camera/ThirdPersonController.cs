@@ -15,10 +15,10 @@ public class ThirdPersonController : MonoBehaviour
     [SerializeField] [Tooltip("GameObject that will be controlled as the camera")]
     private Camera affectedCamera;
 
-    [SerializeField] [Tooltip("Mouse sensitivity of this camera controller")]
+    [SerializeField]
     private Vector2 mouseSensitivity = new Vector2(1, 1);
 
-    [SerializeField] [Tooltip("The transform that the camera will focus on and always face towards")]
+    [SerializeField]
     private Transform focusPoint;
 
     [SerializeField] [Tooltip("Will this camera control the forward direction of another transform")]
@@ -32,6 +32,9 @@ public class ThirdPersonController : MonoBehaviour
 
     [SerializeField] [Tooltip("This camera will avoid occluding the focus point")]
     private bool avoidOcclusion;
+
+    [SerializeField]
+    private LayerMask avoidOcclusionLayers;
 
     [SerializeField] [Tooltip("The time it takes for the camera move towards its un-occluded state")]
     [Min(0)] private float avoidOcclusionSmoothingTime;
@@ -107,11 +110,15 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     private void AvoidOcclusion(ref Vector3 position) {
-        Vector3 vecToFocusPoint = position - focusPoint.position;
-        Ray ray = new Ray(focusPoint.position, vecToFocusPoint.normalized);
+        Vector3 rayOrigin = focusPoint.position;
+        Vector3 rayDirection = (position - focusPoint.position).normalized;
+        float rayLength = Vector3.Distance(position, focusPoint.position);
+
+        Debug.DrawRay(rayOrigin, rayDirection * rayLength);
+
         RaycastHit hit;
-        if(Physics.Raycast(ray, out hit, vecToFocusPoint.magnitude)) {
-            Vector3 targetPosition = hit.point - (vecToFocusPoint.normalized * avoidOcclusionBufferLength);
+        if(Physics.Raycast(rayOrigin, rayDirection, out hit, rayLength, ~avoidOcclusionLayers)) {
+            Vector3 targetPosition = hit.point - (rayDirection * avoidOcclusionBufferLength);
             position = Vector3.SmoothDamp(affectedCamera.transform.position, targetPosition, ref avoidOcclusionVelocity, avoidOcclusionSmoothingTime);
         }
     }
