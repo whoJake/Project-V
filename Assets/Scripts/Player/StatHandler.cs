@@ -14,6 +14,12 @@ public class StatHandler : MonoBehaviour
     [HideInInspector] public float bonusHealthPoints;
                       public float healthPoints { get { return baseHealthPoints + bonusHealthPoints; } }
 
+    [Tooltip("Jump Height in units")]
+    [Min(0)]          public float baseJumpHeight;
+    [HideInInspector] public float bonusJumpHeight;
+                      public float jumpHeight { get { return baseJumpHeight + bonusJumpHeight; } }
+
+
     //Interact with items
     private void OnTriggerEnter(Collider other) {
         PickupItem pickupItem;

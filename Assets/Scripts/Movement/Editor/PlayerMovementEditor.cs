@@ -12,17 +12,17 @@ public class PlayerMovementEditor : Editor
     }
 
     SerializedProperty velocityProperty;
-    SerializedProperty gravityProperty;
+    SerializedProperty timeToApexProperty;
+    SerializedProperty gravityWhilstFallingMultiplier;
     SerializedProperty terminalVelocityProperty;
-    SerializedProperty jumpHeightProperty;
     SerializedProperty groundAccelerationTimeProperty;
     SerializedProperty hitGroundEventThresholdProperty;
 
     void OnEnable() {
         velocityProperty = serializedObject.FindProperty("velocity");
-        gravityProperty = serializedObject.FindProperty("gravity");
+        timeToApexProperty = serializedObject.FindProperty("timeToApex");
+        gravityWhilstFallingMultiplier = serializedObject.FindProperty("gravityWhilstFallingMultiplier");
         terminalVelocityProperty = serializedObject.FindProperty("terminalVelocity");
-        jumpHeightProperty = serializedObject.FindProperty("jumpHeight");
         groundAccelerationTimeProperty = serializedObject.FindProperty("groundAccelerationTime");
         hitGroundEventThresholdProperty = serializedObject.FindProperty("hitGroundEventThreshold");
     }
@@ -34,9 +34,9 @@ public class PlayerMovementEditor : Editor
         EditorGUILayout.PropertyField(velocityProperty, new GUIContent("Velocity"));
         EditorGUI.EndDisabledGroup();
 
-        EditorGUILayout.PropertyField(gravityProperty, new GUIContent("Gravity"));
+        EditorGUILayout.PropertyField(timeToApexProperty, new GUIContent("Time to Apex"));
+        EditorGUILayout.PropertyField(gravityWhilstFallingMultiplier, new GUIContent("Gravity Whilst Falling Multiplier"));
         EditorGUILayout.PropertyField(terminalVelocityProperty, new GUIContent("Terminal Velocity"));
-        EditorGUILayout.PropertyField(jumpHeightProperty, new GUIContent("Jump Height"));
         EditorGUILayout.PropertyField(groundAccelerationTimeProperty, new GUIContent("Ground Acceleration Time"));
         EditorGUILayout.PropertyField(hitGroundEventThresholdProperty, new GUIContent("HitGround Event Threshold"));
 

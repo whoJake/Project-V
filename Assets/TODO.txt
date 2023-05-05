@@ -3,6 +3,7 @@ Camera
 		?Zoom settings
 		Add better orbit setup
 		Maybe implement some kind of focus point catch up when object is moving fast but camera isnt
+		Have player be made more transparent or dithered when camera is getting close to it (could apply to all objects)
 	ThirdPersonControllerEditor.cs
 		Have rect/seperator around willControlTransform bool so that it looks nicer
 Player

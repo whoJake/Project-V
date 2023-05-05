@@ -11,20 +11,27 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField]
     private Vector3 velocity;
+
+    [SerializeField] [Tooltip("Time it takes to reach the apex of jump")]
+    private float timeToApex;
+
     [SerializeField]
-    private float gravity;
+    private float gravityWhilstFallingMultiplier;
+
     [SerializeField] [Tooltip("Maximum downward velocity caused by gravity")]
     private float terminalVelocity;
-    [SerializeField]
-    private float jumpHeight;
+
     [SerializeField] [Tooltip("Time taken to accelerate to player movement speed")]
     private float groundAccelerationTime;
     [SerializeField]
     private float hitGroundEventThreshold;
 
+    private float gravity;
+    private float initialJumpVelocity;
 
-    private bool isFalling;
     private bool isJumping;
+    private bool isRising;
+    private bool isFalling;
 
     private Vector2 dampedInput;
     private Vector2 dampedInputVelocity;
@@ -32,6 +39,9 @@ public class PlayerMovement : MonoBehaviour
     //Events
     public delegate void onHitGround(Vector3 position, float downwardSpeed);
     public event onHitGround OnHitGround;
+
+    public delegate void onJump(Vector3 position, float jumpVelocity);
+    public event onJump OnJump;
 
     private void Awake() {
         statHandler = gameObject.GetComponent<StatHandler>();
@@ -51,6 +61,16 @@ public class PlayerMovement : MonoBehaviour
         velocity.z = transformDirection.z * statHandler.movementSpeed;
     }
 
+    void CalculateGravityValues() {
+        gravity = (-2 * statHandler.jumpHeight) / (Mathf.Pow(timeToApex, 2));
+        if (isFalling && !controller.isGrounded) {
+            gravity *= gravityWhilstFallingMultiplier;
+        }
+
+        //Calculation not nessisarily needed if isFalling as cant jump anyway
+        initialJumpVelocity = -gravity * timeToApex;
+    }
+
     void HandleGravity() {
         //This accounts for hitting head
         if(isJumping && controller.velocity.y == 0) {
@@ -67,7 +87,7 @@ public class PlayerMovement : MonoBehaviour
         if (controller.isGrounded) {
             velocity.y = -0.1f;
         } else {
-            velocity.y -= gravity * 9.81f * Time.deltaTime;
+            velocity.y -= -gravity * Time.deltaTime;
             if (velocity.y < -terminalVelocity) velocity.y = -terminalVelocity;
         }
     }
@@ -76,20 +96,26 @@ public class PlayerMovement : MonoBehaviour
         if (controller.isGrounded) {
             isJumping = false;
             isFalling = false;
+            isRising = false;
         }else if(velocity.y < 0) {
             isFalling = true;
+            isRising = false;
         }
 
         bool jumpKeyPressed = Input.GetAxisRaw("Jump") > 0;
-        if(controller.isGrounded && jumpKeyPressed) {
+        if(controller.isGrounded && jumpKeyPressed && !isJumping) {
             isJumping = true;
-            velocity.y = jumpHeight; //Change to calculate this based on jumpheight and jumptime
+            isRising = true;
+            velocity.y = initialJumpVelocity;
+
+            if (OnJump != null) OnJump.Invoke(transform.position, initialJumpVelocity);
         }
     }
 
     void Update()
     {
         HandleMovement();
+        CalculateGravityValues();
         HandleGravity();
         HandleJump();
 
