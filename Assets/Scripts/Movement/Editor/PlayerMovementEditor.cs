@@ -16,6 +16,7 @@ public class PlayerMovementEditor : Editor
     SerializedProperty gravityWhilstFallingMultiplier;
     SerializedProperty terminalVelocityProperty;
     SerializedProperty groundAccelerationTimeProperty;
+    SerializedProperty sprintTransitionTimeProperty;
     SerializedProperty hitGroundEventThresholdProperty;
 
     void OnEnable() {
@@ -24,6 +25,7 @@ public class PlayerMovementEditor : Editor
         gravityWhilstFallingMultiplier = serializedObject.FindProperty("gravityWhilstFallingMultiplier");
         terminalVelocityProperty = serializedObject.FindProperty("terminalVelocity");
         groundAccelerationTimeProperty = serializedObject.FindProperty("groundAccelerationTime");
+        sprintTransitionTimeProperty = serializedObject.FindProperty("sprintTransitionTime");
         hitGroundEventThresholdProperty = serializedObject.FindProperty("hitGroundEventThreshold");
     }
 
@@ -38,6 +40,7 @@ public class PlayerMovementEditor : Editor
         EditorGUILayout.PropertyField(gravityWhilstFallingMultiplier, new GUIContent("Gravity Whilst Falling Multiplier"));
         EditorGUILayout.PropertyField(terminalVelocityProperty, new GUIContent("Terminal Velocity"));
         EditorGUILayout.PropertyField(groundAccelerationTimeProperty, new GUIContent("Ground Acceleration Time"));
+        EditorGUILayout.PropertyField(sprintTransitionTimeProperty, new GUIContent("Sprint Transition Time"));
         EditorGUILayout.PropertyField(hitGroundEventThresholdProperty, new GUIContent("HitGround Event Threshold"));
 
         serializedObject.ApplyModifiedProperties();

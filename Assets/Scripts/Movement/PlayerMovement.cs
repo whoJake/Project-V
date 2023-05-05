@@ -23,8 +23,15 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] [Tooltip("Time taken to accelerate to player movement speed")]
     private float groundAccelerationTime;
+
+    [SerializeField] [Tooltip("Time to transition from walking to sprinting speed")]
+    public float sprintTransitionTime;
+
     [SerializeField]
     private float hitGroundEventThreshold;
+
+    private float moveSpeed;
+    private float sprintKeyHeldTime;
 
     private float gravity;
     private float initialJumpVelocity;
@@ -52,13 +59,46 @@ public class PlayerMovement : MonoBehaviour
         controller = gameObject.GetComponent<CharacterController>();
     }
 
+    void Update() {
+        CalculateMoveSpeed();
+        HandleMovement();
+        CalculateGravityValues();
+        HandleGravity();
+        HandleJump();
+
+        controller.Move(velocity * Time.deltaTime);
+    }
+
+    void CalculateMoveSpeed() {
+        bool sprintHeld = Input.GetAxisRaw("Sprint") > 0;
+
+        //Fix edge case
+        if (sprintTransitionTime == 0) {
+            moveSpeed = sprintHeld ? statHandler.movementSpeed * statHandler.sprintMultiplier
+                                   : statHandler.movementSpeed;
+            return;
+        }
+
+        if(sprintHeld) {
+            sprintKeyHeldTime += Time.deltaTime;
+        } else {
+            //Detrasition out of sprint
+            sprintKeyHeldTime = Mathf.Clamp(sprintKeyHeldTime, 0, sprintTransitionTime);
+            sprintKeyHeldTime -= Time.deltaTime;
+            sprintKeyHeldTime = Mathf.Clamp(sprintKeyHeldTime, 0, sprintTransitionTime);
+        }
+
+        float speedLerp = Mathf.Clamp01(Mathf.InverseLerp(0, sprintTransitionTime, sprintKeyHeldTime));
+        moveSpeed = Mathf.Lerp(statHandler.movementSpeed, statHandler.movementSpeed * statHandler.sprintMultiplier, speedLerp);
+    }
+
     void HandleMovement() {
         Vector2 inputVectorRaw = new Vector2(Input.GetAxisRaw("Vertical"), Input.GetAxisRaw("Horizontal")).normalized;
         dampedInput = Vector2.SmoothDamp(dampedInput, inputVectorRaw, ref dampedInputVelocity, groundAccelerationTime);
 
         Vector3 transformDirection = (transform.forward * dampedInput.x) + (transform.right * dampedInput.y);
-        velocity.x = transformDirection.x * statHandler.movementSpeed;
-        velocity.z = transformDirection.z * statHandler.movementSpeed;
+        velocity.x = transformDirection.x * moveSpeed;
+        velocity.z = transformDirection.z * moveSpeed;
     }
 
     void CalculateGravityValues() {
@@ -94,10 +134,12 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleJump() {
         if (controller.isGrounded) {
+            //Reset jumping trackers
             isJumping = false;
             isFalling = false;
             isRising = false;
         }else if(velocity.y < 0) {
+            //Player is falling
             isFalling = true;
             isRising = false;
         }
@@ -110,15 +152,5 @@ public class PlayerMovement : MonoBehaviour
 
             if (OnJump != null) OnJump.Invoke(transform.position, initialJumpVelocity);
         }
-    }
-
-    void Update()
-    {
-        HandleMovement();
-        CalculateGravityValues();
-        HandleGravity();
-        HandleJump();
-
-        controller.Move(velocity * Time.deltaTime);
     }
 }

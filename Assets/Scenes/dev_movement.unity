@@ -401,10 +401,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   velocity: {x: 0, y: 0, z: 0}
-  gravity: 3
+  timeToApex: 0.55
+  gravityWhilstFallingMultiplier: 1.75
   terminalVelocity: 30
-  jumpHeight: 15
   groundAccelerationTime: 0.2
+  sprintTransitionTime: 0.1
   hitGroundEventThreshold: 5
 --- !u!143 &90140311
 CharacterController:
@@ -436,10 +437,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 608a76f30570cf643bea4abf167bc796, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseMovementSpeed: 10
-  bonusMovementSpeed: 0
   baseHealthPoints: 10
   bonusHealthPoints: 0
+  baseMovementSpeed: 10
+  bonusMovementSpeed: 0
+  baseSprintMultiplier: 2
+  bonusSprintMultiplier: 0
+  baseJumpHeight: 5
+  bonusJumpHeight: 0
 --- !u!1 &112717548
 GameObject:
   m_ObjectHideFlags: 0
