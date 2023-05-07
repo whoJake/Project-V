@@ -1,9 +1,9 @@
 LIST OF TASKS
 	Basics of Player Controller
 		Movement
-		Gravity
-		Jump
-		Sprinting
+		Gravity DONE
+		Jump DONE
+		Sprinting DONE
 	Complex of Player Controller
 		Dashing
 		Item specific abilities

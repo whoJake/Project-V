@@ -8,11 +8,8 @@ Camera
 		Have rect/seperator around willControlTransform bool so that it looks nicer
 Player
 	PlayerMovement.cs
-		Add some events that are triggered by actions like Jump or HitGround
-		Think about moving gravity and jump height to StatHandler
-		Implement the jump implementation that was explained in the video
-		Move JumpHeight to StatHandler
-		JumpTime stays in PlayerMovement
+		Convert to state machine to better handle how movement is handled in each case
+		Add additional downward velocity when going down a short slope so that the player will "stick" to the floor
 		Maybe look at switching to UnityInput 2.0 as it uses input events that you subscribe to rather than reading them straight from Input class
 		Implement momentum to movement whilst in the air
 		Convert movement to adding an acceleration instead of setting velocity
@@ -65,4 +62,7 @@ Items
 				Less particles nearby = colder fire colour
 				Particle has lifetime, once it reaches end of lifetime it respawns at the bottom as a fresh particle
 World
+	MeshMaths.cs
+		Add method that can join meshInfos
+		Add method to remove shared vertices
 	
