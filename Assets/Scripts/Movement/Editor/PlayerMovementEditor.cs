@@ -7,8 +7,8 @@ using UnityEditor;
 public class PlayerMovementEditor : Editor
 {
     public override void OnInspectorGUI() {
-        //base.OnInspectorGUI();
-        CustomInspector();
+        base.OnInspectorGUI();
+        //CustomInspector();
     }
 
     SerializedProperty velocityProperty;

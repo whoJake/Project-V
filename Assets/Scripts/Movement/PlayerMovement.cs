@@ -9,9 +9,6 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController controller;
     private StatHandler statHandler;
 
-    [SerializeField]
-    private Vector3 velocity;
-
     [SerializeField] [Tooltip("Time it takes to reach the apex of jump")]
     private float timeToApex;
 
@@ -30,18 +27,34 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float hitGroundEventThreshold;
 
+
+    [SerializeField] //For display not editing
+    private Vector3 velocity;
+    private Vector2 v2_velocity { get { return new Vector2(velocity.x, velocity.z); } }
+
     private float moveSpeed;
     private float sprintKeyHeldTime;
 
     private float gravity;
     private float initialJumpVelocity;
 
+    private bool hasInput;
+    private bool isMoving;
     private bool isJumping;
     private bool isRising;
     private bool isFalling;
 
     private Vector2 dampedInput;
     private Vector2 dampedInputVelocity;
+
+    [SerializeField]
+    private float slowDownDrag;
+    [SerializeField]
+    private float airDrag;
+    [SerializeField]
+    private float dragTransitionTime;
+    private float currentDrag;
+    private float dampedDragVelocity;
 
     //Events
     public delegate void onHitGround(Vector3 position, float downwardSpeed);
@@ -62,6 +75,9 @@ public class PlayerMovement : MonoBehaviour
     void Update() {
         CalculateMoveSpeed();
         HandleMovement();
+        CalculateDrag();
+        HandleDrag();
+
         CalculateGravityValues();
         HandleGravity();
         HandleJump();
@@ -94,11 +110,46 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleMovement() {
         Vector2 inputVectorRaw = new Vector2(Input.GetAxisRaw("Vertical"), Input.GetAxisRaw("Horizontal")).normalized;
+        hasInput = inputVectorRaw.magnitude != 0;
         dampedInput = Vector2.SmoothDamp(dampedInput, inputVectorRaw, ref dampedInputVelocity, groundAccelerationTime);
 
-        Vector3 transformDirection = (transform.forward * dampedInput.x) + (transform.right * dampedInput.y);
-        velocity.x = transformDirection.x * moveSpeed;
-        velocity.z = transformDirection.z * moveSpeed;
+        Vector3 desiredMove = ((transform.forward * dampedInput.x) + (transform.right * dampedInput.y));
+        Vector2 horizontalVelocity = new Vector2(velocity.x + desiredMove.x, velocity.z + desiredMove.z);
+        horizontalVelocity = Vector2.ClampMagnitude(horizontalVelocity, moveSpeed);
+
+        velocity.x = horizontalVelocity.x;
+        velocity.z = horizontalVelocity.y;
+
+        isMoving = horizontalVelocity.magnitude >= 0.05f;
+    }
+
+    void CalculateDrag() {
+        float targetDrag;
+        if (controller.isGrounded && hasInput) {
+            targetDrag = 0.5f;
+        } else if (controller.isGrounded && !hasInput && isMoving) {
+            targetDrag = slowDownDrag;
+        } else {
+            targetDrag = airDrag;
+        }
+
+        currentDrag = Mathf.SmoothDamp(currentDrag, targetDrag, ref dampedDragVelocity, dragTransitionTime);
+
+    }
+
+    void HandleDrag() {
+        Vector2 horizontalVelocity = Vector2.ClampMagnitude(v2_velocity, moveSpeed);
+
+        float speed = horizontalVelocity.magnitude;
+
+        float dragCoefficient = 2 / (moveSpeed * moveSpeed);
+
+        float dragForce = currentDrag * Mathf.Pow(speed, 2) * dragCoefficient;
+
+        //                                                    Ensure theres no overcompensation
+        horizontalVelocity -= horizontalVelocity.normalized * Mathf.Min(speed, dragForce);
+        velocity.x = horizontalVelocity.x;
+        velocity.z = horizontalVelocity.y;
     }
 
     void CalculateGravityValues() {

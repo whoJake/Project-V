@@ -11,9 +11,10 @@ Player
 		Convert to state machine to better handle how movement is handled in each case
 		Add additional downward velocity when going down a short slope so that the player will "stick" to the floor
 		Maybe look at switching to UnityInput 2.0 as it uses input events that you subscribe to rather than reading them straight from Input class
-		Implement momentum to movement whilst in the air
-		Convert movement to adding an acceleration instead of setting velocity
 		Look for disable of bunnyhopping (might be in switching to UnityInput 2.0)
+		Tweak drag values so that it feels better
+		Update PlayerMovementEditor.cs
+		General refactor for readability, state machine will probably help this
 	StatHandler.cs
 		Is queried by mechanics in order to get statistics such as PlayerMovement.cs asking for the speed when its about to move
 		Events for StatChanged etc to get ready for implementing it into UI
@@ -65,4 +66,11 @@ World
 	MeshMaths.cs
 		Add method that can join meshInfos
 		Add method to remove shared vertices
+	How is this mesh going to be created
+	Noise needs to be made but creating this in a bit texture is expensive so it'll have to be prodedural to displace the vertices
+	Will displacing the vertices even work? Need to look at something else like marching cubes or (the one No Mans Sky uses)
+	Think how sectors will be connected (classic problem)
+	Perhaps a representation of visibility in order to better LOD these chunks
+
+	How will lighting work when there is no direct sunlight to a lot of the map, obviously big whole in middle but it might not be possible for that to theoritically light the entire area
 	
