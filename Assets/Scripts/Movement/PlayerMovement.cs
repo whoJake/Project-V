@@ -53,6 +53,7 @@ public class PlayerMovement : MonoBehaviour
     private float airDrag;
     [SerializeField]
     private float dragTransitionTime;
+    public float airMovementPenalty = 0.5f;
     private float currentDrag;
     private float dampedDragVelocity;
 
@@ -114,6 +115,7 @@ public class PlayerMovement : MonoBehaviour
         dampedInput = Vector2.SmoothDamp(dampedInput, inputVectorRaw, ref dampedInputVelocity, groundAccelerationTime);
 
         Vector3 desiredMove = ((transform.forward * dampedInput.x) + (transform.right * dampedInput.y));
+        if (!controller.isGrounded) desiredMove *= airMovementPenalty;
         Vector2 horizontalVelocity = new Vector2(velocity.x + desiredMove.x, velocity.z + desiredMove.z);
         horizontalVelocity = Vector2.ClampMagnitude(horizontalVelocity, moveSpeed);
 

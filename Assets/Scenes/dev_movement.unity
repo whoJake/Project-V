@@ -400,13 +400,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cc7fdffacdd65648adc738c83c58c28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocity: {x: 0, y: 0, z: 0}
   timeToApex: 0.55
   gravityWhilstFallingMultiplier: 1.75
   terminalVelocity: 30
   groundAccelerationTime: 0.2
   sprintTransitionTime: 0.1
   hitGroundEventThreshold: 5
+  velocity: {x: 0, y: 0, z: 0}
+  slowDownDrag: 10
+  airDrag: 0.25
+  dragTransitionTime: 0.1
 --- !u!143 &90140311
 CharacterController:
   m_ObjectHideFlags: 0
