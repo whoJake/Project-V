@@ -29,7 +29,7 @@ public class PlayerMovementEditor : Editor
 
     SerializedProperty slowDownDragProperty;
     SerializedProperty airDragProperty;
-    SerializedProperty dragTransitionProperty;
+    SerializedProperty dragTransitionTimeProperty;
 
     void OnEnable() {
         velocityProperty = serializedObject.FindProperty("velocity");
@@ -42,7 +42,7 @@ public class PlayerMovementEditor : Editor
         hitGroundEventThresholdProperty = serializedObject.FindProperty("hitGroundEventThreshold");
         slowDownDragProperty = serializedObject.FindProperty("slowDownDrag");
         airDragProperty = serializedObject.FindProperty("airDrag");
-        dragTransitionProperty = serializedObject.FindProperty("dragTransition");
+        dragTransitionTimeProperty = serializedObject.FindProperty("dragTransitionTime");
     }
 
     private void CustomInspector() {
@@ -61,7 +61,7 @@ public class PlayerMovementEditor : Editor
         EditorGUILayout.PropertyField(hitGroundEventThresholdProperty, new GUIContent("HitGround Event Threshold"));
         EditorGUILayout.PropertyField(slowDownDragProperty, new GUIContent("Slowdown Drag"));
         EditorGUILayout.PropertyField(airDragProperty, new GUIContent("Airbourne Drag"));
-        EditorGUILayout.PropertyField(dragTransitionProperty, new GUIContent("Drag Transition Time"));
+        EditorGUILayout.PropertyField(dragTransitionTimeProperty, new GUIContent("Drag Transition Time"));
 
         serializedObject.ApplyModifiedProperties();
     }
