@@ -1,2 +1,3 @@
 Clipping issues with camera when camera is close to a wall
 Camera can clip into player due to the buffer length
+OnHitGround not working properly in PlayerMovement.cs

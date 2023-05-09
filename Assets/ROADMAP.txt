@@ -1,6 +1,6 @@
 LIST OF TASKS
 	Basics of Player Controller
-		Movement
+		Movement 
 		Gravity DONE
 		Jump DONE
 		Sprinting DONE

@@ -15,6 +15,7 @@ Player
 		Tweak drag values so that it feels better
 		Update PlayerMovementEditor.cs
 		General refactor for readability, state machine will probably help this
+		Fix OnHitGround
 	StatHandler.cs
 		Is queried by mechanics in order to get statistics such as PlayerMovement.cs asking for the speed when its about to move
 		Events for StatChanged etc to get ready for implementing it into UI
