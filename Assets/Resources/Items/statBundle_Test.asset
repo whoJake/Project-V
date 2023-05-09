@@ -16,3 +16,5 @@ MonoBehaviour:
   percentMovementSpeed: 0
   flatHealthPoints: 0
   percentHealthPoints: 0.5
+  flatJumpHeight: 0
+  percentJumpHeight: 1

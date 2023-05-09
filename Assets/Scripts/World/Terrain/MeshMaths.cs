@@ -109,6 +109,7 @@ namespace MeshMaths
         //      Remove duplicate vertices from a MeshInfo whilst correctly maintaining the triangles
         //
         public static void RemoveDuplicateVertices(MeshInfo mesh) {
+            //Vertex lists can get big so using a dictionary/hashmap can help improve performance a lot
             Dictionary<Vector3, int> vertToIndex = new Dictionary<Vector3, int>();
             List<Vector3> vertices = new List<Vector3>();
             int[] triangles = new int[mesh.triangles.Length];

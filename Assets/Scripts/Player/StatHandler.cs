@@ -27,9 +27,7 @@ public class StatHandler : MonoBehaviour
 
     //Interact with items
     private void OnTriggerEnter(Collider other) {
-        PickupItem pickupItem;
-        if(other.gameObject.TryGetComponent<PickupItem>(out pickupItem)) {
-            pickupItem.OnInteract(gameObject);
-        }
+        PickupItem pickupItem = other.GetComponentInParent<PickupItem>();
+        pickupItem?.OnInteract(this.gameObject);
     }
 }

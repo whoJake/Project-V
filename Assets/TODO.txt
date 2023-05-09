@@ -13,8 +13,6 @@ Player
 		Maybe look at switching to UnityInput 2.0 as it uses input events that you subscribe to rather than reading them straight from Input class
 		Look for disable of bunnyhopping (might be in switching to UnityInput 2.0)
 		Tweak drag values so that it feels better
-		Update PlayerMovementEditor.cs
-		General refactor for readability, state machine will probably help this
 		Fix OnHitGround
 	StatHandler.cs
 		Is queried by mechanics in order to get statistics such as PlayerMovement.cs asking for the speed when its about to move
@@ -70,6 +68,8 @@ World
 	How is this mesh going to be created
 	Noise needs to be made but creating this in a bit texture is expensive so it'll have to be prodedural to displace the vertices
 	Will displacing the vertices even work? Need to look at something else like marching cubes or (the one No Mans Sky uses)
+	Make each layer seperately (anything to decrease complexity)
+	Maybe make each layer as a long line and then wrap it around the centre to create the hole
 	Think how sectors will be connected (classic problem)
 	Perhaps a representation of visibility in order to better LOD these chunks
 

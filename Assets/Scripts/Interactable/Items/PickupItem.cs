@@ -16,13 +16,12 @@ public class PickupItem : Interactable
         if (target.TryGetComponent<StatHandler>(out targetHandler)) {
             active = false;
 
-            targetHandler.bonusMovementSpeed += itemStats.flatMovementSpeed;
-            targetHandler.bonusMovementSpeed += targetHandler.movementSpeed * itemStats.percentMovementSpeed;
-
-            targetHandler.bonusHealthPoints += itemStats.flatHealthPoints;
-            targetHandler.bonusHealthPoints += targetHandler.healthPoints * itemStats.percentHealthPoints;
+            itemStats.ApplyToStatHandler(targetHandler);
 
             //Play some pickup animation
+            //Play some destroy animation
+
+            Destroy(this.gameObject);
         }
     }
 }

@@ -400,16 +400,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cc7fdffacdd65648adc738c83c58c28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeToApex: 0.55
-  gravityWhilstFallingMultiplier: 1.75
+  timeToApex: 0.5
+  gravityWhilstFallingMultiplier: 1.2
   terminalVelocity: 30
   groundAccelerationTime: 0.2
   sprintTransitionTime: 0.1
+  airbourneMovementPenalty: 0.5
   hitGroundEventThreshold: 5
-  velocity: {x: 0, y: 0, z: 0}
   slowDownDrag: 10
-  airDrag: 0.25
+  airDrag: 0.1
   dragTransitionTime: 0.1
+  velocity: {x: 0, y: 0, z: 0}
 --- !u!143 &90140311
 CharacterController:
   m_ObjectHideFlags: 0
@@ -442,11 +443,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseHealthPoints: 10
   bonusHealthPoints: 0
-  baseMovementSpeed: 10
+  baseMovementSpeed: 13
   bonusMovementSpeed: 0
-  baseSprintMultiplier: 2
+  baseSprintMultiplier: 1.5
   bonusSprintMultiplier: 0
-  baseJumpHeight: 5
+  baseJumpHeight: 7
   bonusJumpHeight: 0
 --- !u!1 &112717548
 GameObject:
