@@ -101,6 +101,9 @@ public class PlayerMovement : MonoBehaviour
         isAirbourne = !controller.isGrounded;
 
         if (controller.isGrounded) {
+            //Call OnHitGround before resetting if was falling frame before
+            if (isFalling && velocity.y <= -hitGroundEventThreshold) OnHitGround?.Invoke(transform.position, velocity.y);
+
             //Reset jumping trackers
             isJumping = false;
             isFalling = false;
@@ -234,13 +237,6 @@ public class PlayerMovement : MonoBehaviour
         //This accounts for hitting head
         if(isAirbourne && controller.velocity.y == 0) {
             velocity.y = 0;
-        }
-
-        //Hit ground event
-        if(isFalling && controller.isGrounded && 
-           velocity.y <= -hitGroundEventThreshold) {
-
-           OnHitGround?.Invoke(transform.position, velocity.y);
         }
 
         if (controller.isGrounded) {
