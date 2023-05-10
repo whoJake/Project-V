@@ -22,14 +22,12 @@ public class PlayerMovementEditor : Editor
     SerializedProperty terminalVelocityProperty;
     SerializedProperty groundAccelerationTimeProperty;
     SerializedProperty sprintTransitionTimeProperty;
-
     SerializedProperty airbourneMovementPenaltyProperty;
-
     SerializedProperty hitGroundEventThresholdProperty;
-
     SerializedProperty slowDownDragProperty;
     SerializedProperty airDragProperty;
     SerializedProperty dragTransitionTimeProperty;
+    SerializedProperty disableBunnyhoppingProperty;
 
     void OnEnable() {
         velocityProperty = serializedObject.FindProperty("velocity");
@@ -43,6 +41,7 @@ public class PlayerMovementEditor : Editor
         slowDownDragProperty = serializedObject.FindProperty("slowDownDrag");
         airDragProperty = serializedObject.FindProperty("airDrag");
         dragTransitionTimeProperty = serializedObject.FindProperty("dragTransitionTime");
+        disableBunnyhoppingProperty = serializedObject.FindProperty("disableBunnyhopping");
     }
 
     private void CustomInspector() {
@@ -62,6 +61,7 @@ public class PlayerMovementEditor : Editor
         EditorGUILayout.PropertyField(slowDownDragProperty, new GUIContent("Slowdown Drag"));
         EditorGUILayout.PropertyField(airDragProperty, new GUIContent("Airbourne Drag"));
         EditorGUILayout.PropertyField(dragTransitionTimeProperty, new GUIContent("Drag Transition Time"));
+        EditorGUILayout.PropertyField(disableBunnyhoppingProperty, new GUIContent("Disable Bunnyhopping"));
 
         serializedObject.ApplyModifiedProperties();
     }

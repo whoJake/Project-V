@@ -61,6 +61,10 @@ public class PlayerMovement : MonoBehaviour
     private bool isRising;
     private bool isFalling;
 
+    [SerializeField]
+    private bool disableBunnyhopping;
+    private bool canJump;
+
     //Events
     public delegate void onHitGround(Vector3 position, float downwardSpeed);
     public event onHitGround OnHitGround;
@@ -254,7 +258,12 @@ public class PlayerMovement : MonoBehaviour
     //
     void HandleJump() {
         bool jumpKeyPressed = Input.GetAxisRaw("Jump") > 0;
+        if (!jumpKeyPressed && !isJumping) canJump = true; //This is to effectively disables bunnyhopping
+                                                           //No cooldown to jumping so can still technically jump on first frame and only experience one frame of floor drag
+
         if(controller.isGrounded && jumpKeyPressed && !isJumping) {
+            if (disableBunnyhopping && !canJump) return;
+            canJump = false;
             isJumping = true;
             isRising = true;
             velocity.y = initialJumpVelocity;
