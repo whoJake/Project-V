@@ -4,6 +4,13 @@ Camera
 		Add better orbit setup
 		Maybe implement some kind of focus point catch up when object is moving fast but camera isnt
 		Have player be made more transparent or dithered when camera is getting close to it (could apply to all objects)
+
+		Something needs to change with this
+		Vertical ring dictates height
+		Horizontal ring dictates width
+		Rails dictates where the focus point is rather than the camera itself
+		Camera position is determined by a ray between focus point, center point then extrapolate from that against a zoom value
+
 	ThirdPersonControllerEditor.cs
 		Have rect/seperator around willControlTransform bool so that it looks nicer
 Player
@@ -11,8 +18,12 @@ Player
 		Convert to state machine to better handle how movement is handled in each case
 		Add additional downward velocity when going down a short slope so that the player will "stick" to the floor
 		Maybe look at switching to UnityInput 2.0 as it uses input events that you subscribe to rather than reading them straight from Input class
-		Look for disable of bunnyhopping (might be in switching to UnityInput 2.0)
 		Tweak drag values so that it feels better
+
+		Something needs to chance here aswell
+		Have a stored velocity parameter that stores the current velocity when the player enters a state that gives them less control (airbourne)
+		When stored velocity, velocity is decided by stored velocity + input velocity rather than just input velocity
+		Remove all this drag stuff and revert back to just regular set velocity values
 	StatHandler.cs
 		Is queried by mechanics in order to get statistics such as PlayerMovement.cs asking for the speed when its about to move
 		Events for StatChanged etc to get ready for implementing it into UI

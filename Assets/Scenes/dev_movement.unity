@@ -407,10 +407,11 @@ MonoBehaviour:
   sprintTransitionTime: 0.1
   airbourneMovementPenalty: 0.5
   hitGroundEventThreshold: 5
-  slowDownDrag: 10
-  airDrag: 0.1
-  dragTransitionTime: 0.1
+  slowDownDrag: 12
+  airDrag: 0.2
+  dragTransitionTime: 0.05
   velocity: {x: 0, y: 0, z: 0}
+  disableBunnyhopping: 0
 --- !u!143 &90140311
 CharacterController:
   m_ObjectHideFlags: 0
