@@ -24,20 +24,11 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] [Tooltip("Time to transition from walking to sprinting speed")]
     private float sprintTransitionTime;
 
-    [SerializeField] [Tooltip("Makes movement inputs less effective when the character is airbourne")]
+    [SerializeField] [Tooltip("This value is multiplied by groundAccelerationTime when airbourne in order to slowdown acceleration/deceleration when airbourne")]
     private float airbourneMovementPenalty;
 
     [SerializeField]
     private float hitGroundEventThreshold;
-
-    [SerializeField] [Tooltip("Drag/friction value for when the player is slowing down after they have stopped moving")]
-    private float slowDownDrag;
-
-    [SerializeField] [Tooltip("Drag/friction value for when the player is in mid air")]
-    private float airDrag;
-
-    [SerializeField] [Tooltip("Time it takes to smooth transition from one drag value to another")]
-    private float dragTransitionTime;
 
     [SerializeField] //For display not editing
     private Vector3 velocity;
@@ -50,9 +41,6 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector2 dampedInput;
     private Vector2 dampedInputVelocity;
-
-    private float dampedDrag;
-    private float dampedDragVelocity;
 
     private bool hasInput;
     private bool isMoving;
@@ -86,8 +74,6 @@ public class PlayerMovement : MonoBehaviour
 
         CalculateMoveSpeed();
         HandleMovement();
-        CalculateDrag();
-        HandleDrag();
 
         CalculateGravityValues();
         HandleGravity();
@@ -159,59 +145,20 @@ public class PlayerMovement : MonoBehaviour
         Vector2 inputVectorRaw = new Vector2(Input.GetAxisRaw("Vertical"), Input.GetAxisRaw("Horizontal")).normalized;
         hasInput = inputVectorRaw.magnitude != 0;
 
+        //Takes longer to accelerate/decelerate when airbourne
+        float dampTime = groundAccelerationTime;
+        if (isAirbourne) dampTime *= airbourneMovementPenalty;
+
         //Damp the input
-        dampedInput = Vector2.SmoothDamp(dampedInput, inputVectorRaw, ref dampedInputVelocity, groundAccelerationTime);
+        dampedInput = Vector2.SmoothDamp(dampedInput, inputVectorRaw, ref dampedInputVelocity, dampTime);
 
-        Vector3 desiredMove = ((transform.forward * dampedInput.x) + (transform.right * dampedInput.y));
-        if (isAirbourne) desiredMove *= airbourneMovementPenalty;
+        Vector3 desiredMove = (transform.forward * dampedInput.x) + (transform.right * dampedInput.y);
 
-        //The new calculated velocity
-        Vector2 horizontalVelocity = new Vector2(velocity.x + desiredMove.x, velocity.z + desiredMove.z);
-        horizontalVelocity = Vector2.ClampMagnitude(horizontalVelocity, moveSpeed);
+        velocity.x = desiredMove.x * moveSpeed;
+        velocity.z = desiredMove.z * moveSpeed;
 
-        velocity.x = horizontalVelocity.x;
-        velocity.z = horizontalVelocity.y;
-
-        isMoving = horizontalVelocity.magnitude >= 0.05f;
-    }
-
-    //
-    // Summery:
-    //      Calculate and dampen the drag values depending on the state of the player.
-    //      This ensures that the player slows down after halting input and also makes
-    //      movement feel air-ier whilst airbourne
-    //
-    void CalculateDrag() {
-        float targetDrag;
-        if (controller.isGrounded && hasInput) {
-            targetDrag = 0.5f;
-        } else if (controller.isGrounded && !hasInput && isMoving) {
-            targetDrag = slowDownDrag;
-        } else {
-            targetDrag = airDrag;
-        }
-
-        dampedDrag = Mathf.SmoothDamp(dampedDrag, targetDrag, ref dampedDragVelocity, dragTransitionTime);
-    }
-
-    //
-    // Summery:
-    //      Applies the previously calculated drag to the player using the standard
-    //      drag equation
-    //
-    void HandleDrag() {
         Vector2 v2_velocity = new Vector2(velocity.x, velocity.z);
-        Vector2 horizontalVelocity = Vector2.ClampMagnitude(v2_velocity, moveSpeed);
-
-        //Standard drag equation but minus values such as mass, density or surface area
-        float speed = horizontalVelocity.magnitude;
-        float dragCoefficient = 2 / (moveSpeed * moveSpeed);
-        float dragForce = dampedDrag * Mathf.Pow(speed, 2) * dragCoefficient;
-
-        //                                                    Ensure theres no overcompensation
-        horizontalVelocity -= horizontalVelocity.normalized * Mathf.Min(speed, dragForce);
-        velocity.x = horizontalVelocity.x;
-        velocity.z = horizontalVelocity.y;
+        isMoving = v2_velocity.magnitude >= 0.05f;
     }
 
     //

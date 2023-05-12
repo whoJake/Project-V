@@ -18,12 +18,7 @@ Player
 		Convert to state machine to better handle how movement is handled in each case
 		Add additional downward velocity when going down a short slope so that the player will "stick" to the floor
 		Maybe look at switching to UnityInput 2.0 as it uses input events that you subscribe to rather than reading them straight from Input class
-		Tweak drag values so that it feels better
-
-		Something needs to chance here aswell
-		Have a stored velocity parameter that stores the current velocity when the player enters a state that gives them less control (airbourne)
-		When stored velocity, velocity is decided by stored velocity + input velocity rather than just input velocity
-		Remove all this drag stuff and revert back to just regular set velocity values
+		Make sprinting only work when running forwards, perhaps toggle
 	StatHandler.cs
 		Is queried by mechanics in order to get statistics such as PlayerMovement.cs asking for the speed when its about to move
 		Events for StatChanged etc to get ready for implementing it into UI
@@ -71,6 +66,10 @@ Items
 				More particles nearby = brighter shade from colour
 				Less particles nearby = colder fire colour
 				Particle has lifetime, once it reaches end of lifetime it respawns at the bottom as a fresh particle
+			Ice
+				Pick between set of meshes for crystals
+				Each crystal mesh has a top vertices and bottom vertices group that allows them to be moved (is this what rigging is?)
+				Write shader for these ice crystals, maybe colour gradient with some normal mapping
 World
 	MeshMaths.cs
 		Add method that can join meshInfos
