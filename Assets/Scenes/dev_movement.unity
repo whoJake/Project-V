@@ -405,11 +405,8 @@ MonoBehaviour:
   terminalVelocity: 30
   groundAccelerationTime: 0.2
   sprintTransitionTime: 0.1
-  airbourneMovementPenalty: 0.5
+  airbourneMovementPenalty: 2
   hitGroundEventThreshold: 5
-  slowDownDrag: 12
-  airDrag: 0.2
-  dragTransitionTime: 0.05
   velocity: {x: 0, y: 0, z: 0}
   disableBunnyhopping: 0
 --- !u!143 &90140311
