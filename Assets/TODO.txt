@@ -71,6 +71,22 @@ Items
 				Each crystal mesh has a top vertices and bottom vertices group that allows them to be moved (is this what rigging is?)
 				Write shader for these ice crystals, maybe colour gradient with some normal mapping
 World
+	Theory
+		125 MIN RADIUS -> 250 MIN DIAMETER
+		512 MAX SIZE A.K.A NOISE TEXTURE SIZE
+		2D noise taken at this radius which is used as a +- from this radius, gives hole its shape
+
+	Chunk
+		512 total size split into 8 -> 128x128 chunks
+		128 tall?
+		10.5m nodes per chunk
+
+		uint type -> 4B
+		bool floor -> 1B
+		10.5MB uncompressed per chunk on disk
+
+		Each layer has its own noise values, lerp between them in order to keep continuity between layers
+
 	MeshMaths.cs
 		Add method that can join meshInfos
 		Add method to remove shared vertices
