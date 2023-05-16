@@ -10,6 +10,8 @@ public class MeshInfo {
 
     public Mesh AsMesh() {
         Mesh mesh = new Mesh();
+        mesh.indexFormat = vertices.Length >= 65535 ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
+
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.RecalculateBounds();

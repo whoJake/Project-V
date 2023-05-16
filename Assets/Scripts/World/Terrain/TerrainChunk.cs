@@ -6,7 +6,8 @@ using UnityEngine;
 public class TerrainChunk
 {
     private static bool computeInitialized = false;
-    private static ComputeShader computeShader;
+    private static ComputeShader computeDensityShader;
+    private static ComputeShader computeVerticesShader;
 
     private readonly Vector3 centre; //Centre point of chunk
     private readonly Vector3Int voxelDimensions; //Number of voxels per each axis
@@ -41,39 +42,99 @@ public class TerrainChunk
         //Ask noise function for a texture
         ComputeDensity(densityTexture);
 
-
         //Run texture through marching cubes compute
+        Vector3[] vertices = ComputeVertices(densityTexture);
+
         //Create triangles array
+        int[] triangles = new int[vertices.Length];
+        for (int i = 0; i < triangles.Length; i++) {
+            triangles[i] = i;
+        }
+
+        MeshInfo meshInfo = new MeshInfo(vertices, triangles);
+
         //?Remove duplicates
+        //MeshMaths.RemoveDuplicateVertices(meshInfo);
+
         //Give vertices and triangles to mesh filter and collider
+        filter.mesh = meshInfo.AsMesh();
+        
     }
 
     private void ComputeDensity(RenderTexture densityTexture) {
-        computeShader.SetTexture(0, "_DensityTexture", densityTexture);
-        computeShader.SetInt("layer_index", layerIndex);
-        computeShader.SetFloat("voxel_scale", voxelScale);
+        computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
+        computeDensityShader.SetInt("layer_index", layerIndex);
+        computeDensityShader.SetFloat("voxel_scale", voxelScale);
 
-        computeShader.SetVector("chunk_origin", origin);
+        computeDensityShader.SetVector("chunk_origin", origin);
 
-        int threadsX = Mathf.CeilToInt(textureDimensions.x / 8f);
-        int threadsY = Mathf.CeilToInt(textureDimensions.y / 8f);
-        int threadsZ = Mathf.CeilToInt(textureDimensions.z / 8f);
-        computeShader.Dispatch(0, threadsX, threadsY, threadsZ);
+        Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);
+        Debug.Log((Vector3)threads + " threads dispatched for ComputeDensity");
+        computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
+    }
+
+    private Vector3[] ComputeVertices(RenderTexture densityTexture) {
+        int maxCubes = textureDimensions.x * textureDimensions.y * textureDimensions.z;
+        int maxTris = maxCubes * 5;
+        Debug.Log("Max Cubes: " + maxCubes + "\nMax Triangles: " + maxTris);
+
+        ComputeBuffer vertexBuffer = new ComputeBuffer(maxTris , sizeof(float) * 3 * 3, ComputeBufferType.Append);
+        ComputeBuffer triangleCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+
+        vertexBuffer.SetCounterValue(0);
+        computeVerticesShader.SetTexture(0, "_DensityTexture", densityTexture);
+        computeVerticesShader.SetBuffer(0, "_TriangleBuffer", vertexBuffer);
+        computeVerticesShader.SetInts("texture_size", textureDimensions.x, textureDimensions.y, textureDimensions.z);
+        computeVerticesShader.SetFloat("voxel_scale", voxelScale);
+        computeVerticesShader.SetBool("interpolate", false);
+        computeVerticesShader.SetFloat("threshold", 0f);
+
+        Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);
+        Debug.Log((Vector3)threads + " threads dispatched for ComputeVertices");
+        computeVerticesShader.Dispatch(0, threads.x, threads.y, threads.z);
+
+        //Gets the number of times Append was called on the buffer (number of triangles added)
+        int[] triangleCount = new int[1];
+        triangleCountBuffer.SetData(triangleCount);
+        ComputeBuffer.CopyCount(vertexBuffer, triangleCountBuffer, 0);
+        triangleCountBuffer.GetData(triangleCount);
+
+        int vertexCount = triangleCount[0] * 3;
+
+        Vector3[] result = new Vector3[vertexCount];
+        vertexBuffer.GetData(result);
+
+        vertexBuffer.Release();
+        triangleCountBuffer.Release();
+
+        return result;
     }
 
     public static void InitializeCompute(TerrainSettings settings) {
         if (computeInitialized) {
-            Debug.Log("Terrain chunk noise generation compute shader has already been initialized");
+            Debug.Log("Compute shaders have already been initialized");
             return;
         }
 
-        computeShader = Resources.Load<ComputeShader>("Compute/Noise/ChunkNoiseGeneration");
+        //Compute Density
+        computeDensityShader = Resources.Load<ComputeShader>("Compute/Noise/ChunkNoiseGeneration");
         ComputeBuffer settingsBuffer = new ComputeBuffer(settings.layers.Length, TerrainLayerSettings.stride);
         settingsBuffer.SetData(settings.layersStruct);
 
-        computeShader.SetBuffer(0, "_ChunkSettings", settingsBuffer);
-        computeShader.SetInt("seed", settings.seed);
+        computeDensityShader.SetBuffer(0, "_ChunkSettings", settingsBuffer);
+        computeDensityShader.SetInt("seed", settings.seed);
+
+        //Compute Vertices
+        computeVerticesShader = Resources.Load<ComputeShader>("Compute/MCubes/MarchingCube");
 
         computeInitialized = true;
+    }
+
+    private Vector3Int CalculateThreadAmount(Vector3 size, int threadAmount) {
+        return new Vector3Int {
+            x = Mathf.CeilToInt(size.x / threadAmount),
+            y = Mathf.CeilToInt(size.y / threadAmount),
+            z = Mathf.CeilToInt(size.z / threadAmount)
+        };
     }
 }

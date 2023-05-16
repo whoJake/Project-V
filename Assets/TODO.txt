@@ -75,6 +75,8 @@ World
 		125 MIN RADIUS -> 250 MIN DIAMETER
 		512 MAX SIZE A.K.A NOISE TEXTURE SIZE
 		2D noise taken at this radius which is used as a +- from this radius, gives hole its shape
+		Nodes have a bunch of stats such as isGround, growth countdown, type all that can be used to affect it over time
+		Terrain can be transformed by certain terrain affectors, circular, ray, etc
 
 	Chunk
 		512 total size split into 8 -> 128x128 chunks

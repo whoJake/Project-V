@@ -14,9 +14,9 @@ struct LayerSettings {
 };
 
 //Const
-const StructuredBuffer<LayerSettings> _ChunkSettings;
-const int seed;
-const float voxel_scale;
+StructuredBuffer<LayerSettings> _ChunkSettings;
+int seed;
+float voxel_scale;
 
 //Variables
 RWTexture3D<float> _DensityTexture;
@@ -29,7 +29,11 @@ void Generate (uint3 id : SV_DispatchThreadID)
     uint width, height, depth;
     _DensityTexture.GetDimensions(width, height, depth);
     if (id.x >= width || id.y >= height || id.z >= depth) return;
+    uint3 texture_size = uint3(width, height, depth);
 
-    float3 samplePosition = chunk_origin + (id * voxel_scale);
-    _DensityTexture[id] = fnoise(samplePosition, _ChunkSettings[layer_index].octaves, 1, _ChunkSettings[layer_index].persistance, _ChunkSettings[layer_index].lacunarity);
+    float3 samplePosition = (chunk_origin + (id * voxel_scale)) / texture_size + float3(seed, seed, seed);
+    float rawdensity = fnoise(samplePosition, _ChunkSettings[layer_index].octaves, _ChunkSettings[layer_index].frequency, _ChunkSettings[layer_index].persistance, _ChunkSettings[layer_index].lacunarity);
+    float densityRange = fnoise_max(_ChunkSettings[layer_index].persistance, _ChunkSettings[layer_index].octaves);
+    float density = rawdensity / densityRange;
+    _DensityTexture[id.xyz] = density;
 }

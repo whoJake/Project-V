@@ -17,6 +17,6 @@ MonoBehaviour:
   bottomTransition: 0
   chasmRadius: 0
   octaves: 2
-  frequency: 2
-  persistance: 0.5
-  lacunarity: 2
+  frequency: 1
+  persistance: 0.6
+  lacunarity: 1.5

@@ -8,7 +8,7 @@ public class TerrainHandler : MonoBehaviour
 
     void Start()
     {
-        TerrainChunk chunk = new TerrainChunk(0, Vector3.zero, Vector3Int.one * 32, 0, 1, gameObject);
+        TerrainChunk chunk = new TerrainChunk(0, Vector3.zero, new Vector3Int(32, 128, 32), 0, 1, gameObject);
         TerrainChunk.InitializeCompute(settings);
         chunk.Generate();
     }

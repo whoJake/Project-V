@@ -6,7 +6,7 @@ using UnityEditor;
 [CustomEditor(typeof(TerrainLayerSettings))]
 public class TerrainLayerSettingsEditor : Editor
 {
-    bool useCustomInspector = true;
+    bool useCustomInspector;
 
     SerializedProperty depthProperty;
     SerializedProperty topMarginProperty;
