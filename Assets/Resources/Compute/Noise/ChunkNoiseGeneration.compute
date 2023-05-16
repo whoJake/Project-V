@@ -1,0 +1,35 @@
+#pragma kernel Generate
+
+#include "/Fractal.cginc"
+
+struct LayerSettings {
+    float topTransition;
+    float bottomTransition;
+    float chasmRadius;
+
+    int octaves;
+    float frequency;
+    float persistance;
+    float lacunarity;
+};
+
+//Const
+const StructuredBuffer<LayerSettings> _ChunkSettings;
+const int seed;
+const float voxel_scale;
+
+//Variables
+RWTexture3D<float> _DensityTexture;
+float3 chunk_origin;
+int layer_index;
+
+[numthreads(8,8,8)]
+void Generate (uint3 id : SV_DispatchThreadID)
+{
+    uint width, height, depth;
+    _DensityTexture.GetDimensions(width, height, depth);
+    if (id.x >= width || id.y >= height || id.z >= depth) return;
+
+    float3 samplePosition = chunk_origin + (id * voxel_scale);
+    _DensityTexture[id] = fnoise(samplePosition, _ChunkSettings[layer_index].octaves, 1, _ChunkSettings[layer_index].persistance, _ChunkSettings[layer_index].lacunarity);
+}

@@ -1,0 +1,133 @@
+#pragma kernel CalculateCube
+
+#include "../MoreMaths.compute"
+#include "/EdgeLookup.cginc"
+
+struct Triangle{
+	float3 vertexA;
+	float3 vertexB;
+	float3 vertexC;
+};
+
+RWTexture3D<float> _DensityTexture;
+AppendStructuredBuffer<Triangle> ResultTriangles;
+
+int3 chunkTextureStart;
+uint voxelsPerChunkAxis;
+
+int textureSize;
+float voxelSize;
+bool useSmoothing;
+float threshold;
+
+float SampleDensity(int3 pos){
+	return _DensityTexture[pos];
+}
+/**
+** Sample the points on either side of the edge and calculate where along that edge the threshold lands
+** Returns the float3 position that the threshold lands on the edge
+**/
+float3 SetVertexOnEdge(float3 cornerA, float3 cornerB, int3 texA, int3 texB){
+	float densityA = SampleDensity(texA);
+	float densityB = SampleDensity(texB);
+
+	float fractionAlongLine = 0.5;
+	if(useSmoothing) fractionAlongLine = invlerp(densityA, densityB, threshold);
+
+	float3 pos = lerp(cornerA, cornerB, fractionAlongLine);
+	return pos;
+}
+/**
+** Add Triangle to vertex buffer
+** All 3 vertices have to be done in one Append call otherwise they will be inserted in the wrong order due to parrallisation
+**/
+void AppendTriangle(Triangle tri){
+	ResultTriangles.Append(tri);
+}
+
+/**
+** Runs for each voxel inside the chunk that has been dispatched
+**/
+[numthreads(8, 8, 8)]
+void CalculateCube (uint3 id : SV_DispatchThreadID)
+{
+	if(id.x >= voxelsPerChunkAxis || id.y >= voxelsPerChunkAxis || id.z >= voxelsPerChunkAxis) return;
+
+	//The base position of the voxel in texture space
+	int3 voxelStartPosInTexture = chunkTextureStart + id;
+
+	//The position of all 8 corners of the voxel in texture space
+	int3 voxelCornersInTexture[8];
+	voxelCornersInTexture[0] = voxelStartPosInTexture + cornerOffsets[0];
+	voxelCornersInTexture[1] = voxelStartPosInTexture + cornerOffsets[1];
+	voxelCornersInTexture[2] = voxelStartPosInTexture + cornerOffsets[2];
+	voxelCornersInTexture[3] = voxelStartPosInTexture + cornerOffsets[3];
+	voxelCornersInTexture[4] = voxelStartPosInTexture + cornerOffsets[4];
+	voxelCornersInTexture[5] = voxelStartPosInTexture + cornerOffsets[5];
+	voxelCornersInTexture[6] = voxelStartPosInTexture + cornerOffsets[6];
+	voxelCornersInTexture[7] = voxelStartPosInTexture + cornerOffsets[7];
+
+	//Less than threshold = solid, greater than threshold = air
+	int cubeCornerState = 0;
+	for(int vi = 0; vi < 8; vi++){
+		if(SampleDensity(voxelCornersInTexture[vi]) < threshold){
+			//For each corner, puts a 1 into the cornerIndex's corresponding bit in an 8bit integer
+			//This essentially creates an 8bit integer that represents the state of the cube's corners (256 permutations)
+			cubeCornerState |= (1 << vi);
+		}
+	}
+
+	//Look up which edges have a vertex on using lookup table
+	int edgeVertices[] = triangulation[cubeCornerState];
+
+	float chunkSize = voxelSize * voxelsPerChunkAxis;
+	//Base position of the chunk in mesh space (local object space)
+	float3 chunkMeshStartPos = float3(-chunkSize / 2, -chunkSize / 2, -chunkSize / 2);
+	//Base position of the voxel in mesh space
+	float3 voxelMeshStartPos = chunkMeshStartPos + (id * voxelSize);
+
+	//Position of all 8 corners of the voxel in mesh space
+	float3 voxelCornersInMesh[8];
+	voxelCornersInMesh[0] = voxelMeshStartPos + (cornerOffsets[0] * voxelSize);
+	voxelCornersInMesh[1] = voxelMeshStartPos + (cornerOffsets[1] * voxelSize);
+	voxelCornersInMesh[2] = voxelMeshStartPos + (cornerOffsets[2] * voxelSize);
+	voxelCornersInMesh[3] = voxelMeshStartPos + (cornerOffsets[3] * voxelSize);
+	voxelCornersInMesh[4] = voxelMeshStartPos + (cornerOffsets[4] * voxelSize);
+	voxelCornersInMesh[5] = voxelMeshStartPos + (cornerOffsets[5] * voxelSize);
+	voxelCornersInMesh[6] = voxelMeshStartPos + (cornerOffsets[6] * voxelSize);
+	voxelCornersInMesh[7] = voxelMeshStartPos + (cornerOffsets[7] * voxelSize);
+
+	//For each edge index returned by the lookup table
+	for(int t = 0; t < 16; t += 3){
+		//-1 signifies no more edges in this cube configuration
+		if(edgeVertices[t] == -1) break;
+
+		//Get the vertices on either side of each edge
+		int edgeIndexA = edgeVertices[t];
+		int a0 = cornerIndexAFromEdge[edgeIndexA];
+		int a1 = cornerIndexBFromEdge[edgeIndexA];
+
+		int edgeIndexB = edgeVertices[t + 1];
+		int b0 = cornerIndexAFromEdge[edgeIndexB];
+		int b1 = cornerIndexBFromEdge[edgeIndexB];
+
+		int edgeIndexC = edgeVertices[t + 2];
+		int c0 = cornerIndexAFromEdge[edgeIndexC];
+		int c1 = cornerIndexBFromEdge[edgeIndexC];
+
+		//Calculate where the vertex lands on that edge
+		float3 vertexA = SetVertexOnEdge(voxelCornersInMesh[a0], voxelCornersInMesh[a1], voxelCornersInTexture[a0], voxelCornersInTexture[a1]);
+		float3 vertexB = SetVertexOnEdge(voxelCornersInMesh[b0], voxelCornersInMesh[b1], voxelCornersInTexture[b0], voxelCornersInTexture[b1]);
+		float3 vertexC = SetVertexOnEdge(voxelCornersInMesh[c0], voxelCornersInMesh[c1], voxelCornersInTexture[c0], voxelCornersInTexture[c1]);
+		
+		//Add the triangle
+		Triangle tri;
+		tri.vertexA = vertexA;
+		tri.vertexB = vertexB;
+		tri.vertexC = vertexC;
+
+		AppendTriangle(tri);
+	}
+	
+	
+}
