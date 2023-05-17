@@ -7,7 +7,7 @@ public class TerrainHandler : MonoBehaviour
     public TerrainSettings settings;
     private TerrainLayer[] terrainLayers;
 
-    public Vector2Int generatedArea;
+    public Vector2Int generatedArea; //Approximate area that will be generated
     public Vector3Int chunkSize;
     public int margin;
     public float voxelScale;
@@ -38,7 +38,7 @@ public class TerrainHandler : MonoBehaviour
             //Another hack for corrrecting chunk height in voxels
             int yChunksNeededForLayer = Mathf.FloorToInt(layerSettings.depth / (chunkSize.y - 1f));
 
-            layerOrigin.y -= layerSettings.depth - yChunksNeededForLayer;
+            layerOrigin.y -= (layerSettings.depth - yChunksNeededForLayer) * voxelScale;
         }
     }
 }
