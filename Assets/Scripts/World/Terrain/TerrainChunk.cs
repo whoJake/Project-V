@@ -61,6 +61,13 @@ public class TerrainChunk
         
     }
 
+    //
+    // Summery:
+    //   Computes the the values of a density texture
+    //
+    // Parameters:
+    //   densityTexture:
+    //     empty texture to put density values in
     private void ComputeDensity(RenderTexture densityTexture) {
         computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
         computeDensityShader.SetInt("layer_index", layerIndex);
@@ -73,6 +80,13 @@ public class TerrainChunk
         computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
     }
 
+    //
+    // Summery:
+    //   Computes and returns the vertices returned by marching cubes compute shader
+    //
+    // Parameters:
+    //   densityTexture:
+    //     texture sent to the marching cubes shader to evaluate
     private Vector3[] ComputeVertices(RenderTexture densityTexture) {
         int maxCubes = textureDimensions.x * textureDimensions.y * textureDimensions.z;
         int maxTris = maxCubes * 5;
@@ -111,6 +125,9 @@ public class TerrainChunk
         return result;
     }
 
+    //
+    // Summery:
+    //   Loads the resources needed to start compute
     public static void InitializeCompute(TerrainSettings settings) {
         if (computeInitialized) {
             Debug.Log("Compute shaders have already been initialized");
@@ -131,6 +148,15 @@ public class TerrainChunk
         computeInitialized = true;
     }
 
+    //
+    // Summery:
+    //   Calculates the number of threads to dispatch for a given texture size
+    //
+    // Parameters:
+    //   size:
+    //     dimensions of texture or buffer
+    //   threadAmount:
+    //     number of threads per block defined in the compute shader
     private Vector3Int CalculateThreadAmount(Vector3 size, int threadAmount) {
         return new Vector3Int {
             x = Mathf.CeilToInt(size.x / threadAmount),

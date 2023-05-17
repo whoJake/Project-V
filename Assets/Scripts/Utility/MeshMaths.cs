@@ -42,6 +42,11 @@ public static class MeshMaths {
     // Summery:
     //      Subdivide a triangle with each side having divisions more points added to it
     //
+    // Parameters:
+    //   tri:
+    //     single triangle to subdivide
+    //   divisions:
+    //     number of points along each edge of the triangle that will make up the vertices of the new subdivided triangles
     public static MeshInfo SubdivideTriangle(Triangle tri, int divisions) {
         Debug.Assert(divisions >= 1, "Cannot subdivide a triangle less than once");
 
@@ -101,6 +106,13 @@ public static class MeshMaths {
     // Summery:
     //      Subdivide and return the interpolated points between a and b
     //
+    // Parameters:
+    //   a:
+    //     start point of edge
+    //   b:
+    //     end point of edge
+    //   vertsOnNewEdge:
+    //     number of vertices to return evenly spaced along the defined edge
     public static Vector3[] SubdivideEdge(Vector3 a, Vector3 b, int vertsOnNewEdge) {
         Debug.Assert(vertsOnNewEdge >= 2, "Cannot subdivide an edge to have less than 2 vertices");
 
