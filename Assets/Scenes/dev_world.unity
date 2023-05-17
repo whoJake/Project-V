@@ -156,7 +156,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settings: {fileID: 11400000, guid: d05af63fe316d62449ebc1bb808aa08f, type: 2}
-  numChunks: {x: 4, y: 8, z: 4}
+  generatedArea: {x: 128, y: 128}
   chunkSize: {x: 16, y: 16, z: 16}
   margin: 0
   voxelScale: 1

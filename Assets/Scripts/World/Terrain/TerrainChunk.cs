@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class TerrainChunk
 {
-    private static bool computeInitialized = false;
+    private static bool shadersLoaded = false;
     private static ComputeShader computeDensityShader;
     private static ComputeShader computeVerticesShader;
 
@@ -33,14 +33,14 @@ public class TerrainChunk
         collider = owner.GetComponent<MeshCollider>();
     }
 
-    public void Generate() {
-        if (!computeInitialized) Debug.Log("Compute shader has not been initialized");
+    public void Generate(TerrainSettings settings) {
+        if (!shadersLoaded) Debug.Log("Compute shader has not been initialized");
 
         //Initialize new texture
         RenderTexture densityTexture = RTUtils.Create3D_RFloat(textureDimensions);
 
         //Ask noise function for a texture
-        ComputeDensity(densityTexture);
+        ComputeDensity(densityTexture, settings);
 
         //Run texture through marching cubes compute
         Vector3[] vertices = ComputeVertices(densityTexture);
@@ -68,7 +68,13 @@ public class TerrainChunk
     // Parameters:
     //   densityTexture:
     //     empty texture to put density values in
-    private void ComputeDensity(RenderTexture densityTexture) {
+    private void ComputeDensity(RenderTexture densityTexture, TerrainSettings settings) {
+        ComputeBuffer settingsBuffer = new ComputeBuffer(settings.layers.Length, TerrainLayerSettings.stride); //Probably move this so that settingsBuffer can be flushed
+        settingsBuffer.SetData(settings.layersStruct);
+
+        computeDensityShader.SetBuffer(0, "_ChunkSettings", settingsBuffer);
+        computeDensityShader.SetInt("seed", settings.seed);
+
         computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
         computeDensityShader.SetInt("layer_index", layerIndex);
         computeDensityShader.SetFloat("voxel_scale", voxelScale);
@@ -78,6 +84,8 @@ public class TerrainChunk
         Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);
         Debug.Log((Vector3)threads + " threads dispatched for ComputeDensity");
         computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
+
+        settingsBuffer.Release();
     }
 
     //
@@ -128,24 +136,19 @@ public class TerrainChunk
     //
     // Summery:
     //   Loads the resources needed to start compute
-    public static void InitializeCompute(TerrainSettings settings) {
-        if (computeInitialized) {
+    public static void InitializeCompute() {
+        if (shadersLoaded) {
             Debug.Log("Compute shaders have already been initialized");
             return;
         }
 
         //Compute Density
         computeDensityShader = Resources.Load<ComputeShader>("Compute/Noise/ChunkNoiseGeneration");
-        ComputeBuffer settingsBuffer = new ComputeBuffer(settings.layers.Length, TerrainLayerSettings.stride); //Probably move this so that settingsBuffer can be flushed
-        settingsBuffer.SetData(settings.layersStruct);
-
-        computeDensityShader.SetBuffer(0, "_ChunkSettings", settingsBuffer);
-        computeDensityShader.SetInt("seed", settings.seed);
 
         //Compute Vertices
         computeVerticesShader = Resources.Load<ComputeShader>("Compute/MCubes/MarchingCube");
 
-        computeInitialized = true;
+        shadersLoaded = true;
     }
 
     //

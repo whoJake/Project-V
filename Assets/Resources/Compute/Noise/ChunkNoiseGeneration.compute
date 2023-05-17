@@ -3,7 +3,7 @@
 #include "/Fractal.cginc"
 
 struct LayerSettings {
-    float depth;
+    int depth;
     float topTransition;
     float bottomTransition;
     float chasmRadius;
