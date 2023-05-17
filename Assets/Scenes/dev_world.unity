@@ -156,6 +156,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settings: {fileID: 11400000, guid: d05af63fe316d62449ebc1bb808aa08f, type: 2}
+  numChunks: {x: 16, y: 4, z: 16}
+  chunkSize: {x: 32, y: 32, z: 32}
+  margin: 0
+  voxelScale: 1
+  material: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
 --- !u!64 &579274938
 MeshCollider:
   m_ObjectHideFlags: 0

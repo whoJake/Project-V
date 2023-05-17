@@ -71,6 +71,9 @@ Items
 				Each crystal mesh has a top vertices and bottom vertices group that allows them to be moved (is this what rigging is?)
 				Write shader for these ice crystals, maybe colour gradient with some normal mapping
 World
+	General
+		Add multiple chunk gen
+
 	Theory
 		125 MIN RADIUS -> 250 MIN DIAMETER
 		512 MAX SIZE A.K.A NOISE TEXTURE SIZE

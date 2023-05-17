@@ -31,7 +31,7 @@ void Generate (uint3 id : SV_DispatchThreadID)
     if (id.x >= width || id.y >= height || id.z >= depth) return;
     uint3 texture_size = uint3(width, height, depth);
 
-    float3 samplePosition = (chunk_origin + (id * voxel_scale)) / texture_size + float3(seed, seed, seed);
+    float3 samplePosition = float3(seed*0.863, seed*0.512, seed*0.978) + (chunk_origin + (id * voxel_scale)) / texture_size;
     float rawdensity = fnoise(samplePosition, _ChunkSettings[layer_index].octaves, _ChunkSettings[layer_index].frequency, _ChunkSettings[layer_index].persistance, _ChunkSettings[layer_index].lacunarity);
     float densityRange = fnoise_max(_ChunkSettings[layer_index].persistance, _ChunkSettings[layer_index].octaves);
     float density = rawdensity / densityRange;
