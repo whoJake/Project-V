@@ -4,7 +4,6 @@
 #include "../MathUtils.cginc"
 
 struct LayerSettings {
-    int depth;
     float topTransition;
     float bottomTransition;
     float chasmRadius;
@@ -19,12 +18,14 @@ struct LayerSettings {
 StructuredBuffer<LayerSettings> _ChunkSettings;
 int seed;
 float voxel_scale;
+int margin;
 
 //Variables
 RWTexture3D<float> _DensityTexture;
 float3 layer_origin;
 float3 chunk_origin;
 int layer_index;
+float layer_depth;
 
 float SampleDensity(float3 position, LayerSettings settings) {
     float nraw = fnoise(position, settings.octaves, settings.frequency, settings.persistance, settings.lacunarity);
@@ -53,13 +54,13 @@ void Generate (uint3 id : SV_DispatchThreadID)
     float3 voxelPosition = chunk_origin + (id * voxel_scale); //World-Space position of the sample point
     float3 samplePosition = (float3(seed * 0.863, seed * 0.512, seed * 0.978) + (voxelPosition)) / texture_size; //Texture-Space position of the sample point
 
-    float depthPercent = saturate(invlerp(voxelPosition.y, layer_origin.y, layer_origin.y - curSettings.depth));
+    float depthPercent = saturate(invlerp(voxelPosition.y, layer_origin.y, layer_origin.y - layer_depth));
 
     //+1 and -1 on voxelPosition.y accounts for the fact that the layers kind of share texture points by nature since voxel vertices are placed between texture points
     //This therefore fixes the issue of having problems with layer transitions
-    float abvLerp = saturate(invlerp(voxelPosition.y + 1, layer_origin.y - curSettings.topTransition, layer_origin.y));
+    float abvLerp = saturate(invlerp(voxelPosition.y + 2 * voxel_scale, layer_origin.y - curSettings.topTransition, layer_origin.y));
     if (curSettings.topTransition == 0) abvLerp = 0;
-    float blwLerp = saturate(invlerp(voxelPosition.y - 1, layer_origin.y - curSettings.depth + curSettings.bottomTransition, layer_origin.y - curSettings.depth));
+    float blwLerp = saturate(invlerp(voxelPosition.y - 2 * voxel_scale, layer_origin.y - layer_depth + curSettings.bottomTransition, layer_origin.y - layer_depth));
     if (curSettings.bottomTransition == 0) blwLerp = 0;
 
     float abvDensity = SampleDensity(samplePosition, abvSettings);

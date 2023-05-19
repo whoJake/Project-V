@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   depth: 256
   topTransition: 0
-  bottomTransition: 128
+  bottomTransition: 64
   chasmRadius: 0
   octaves: 3
-  frequency: 0.04
+  frequency: 0.02
   persistance: 0.4
   lacunarity: 1.5

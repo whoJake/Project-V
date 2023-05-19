@@ -153,10 +153,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settings: {fileID: 11400000, guid: d05af63fe316d62449ebc1bb808aa08f, type: 2}
-  generatedArea: {x: 512, y: 512}
+  generatedArea: {x: 1024, y: 1024}
   chunkSize: {x: 16, y: 16, z: 16}
-  margin: 0
-  voxelScale: 1
+  margin: 2
+  voxelScale: 4
   material: {fileID: 2100000, guid: fa2f896bfdcefe94391a9ed857c8dc6a, type: 2}
 --- !u!4 &579274941
 Transform:

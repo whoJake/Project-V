@@ -77,9 +77,11 @@ public class TerrainChunk
         computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
         computeDensityShader.SetInt("layer_index", layer.id);
         computeDensityShader.SetFloat("voxel_scale", voxelScale);
+        computeVerticesShader.SetInt("margin", margin);
 
         computeDensityShader.SetVector("chunk_origin", origin);
         computeDensityShader.SetVector("layer_origin", layer.origin);
+        computeDensityShader.SetFloat("layer_depth", layer.generatedDepth);
 
         Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);
         Debug.Log((Vector3)threads + " threads dispatched for ComputeDensity");
@@ -98,7 +100,7 @@ public class TerrainChunk
     private Vector3[] ComputeVertices(RenderTexture densityTexture) {
         int maxCubes = textureDimensions.x * textureDimensions.y * textureDimensions.z;
         int maxTris = maxCubes * 5;
-        Debug.Log("Max Cubes: " + maxCubes + "\nMax Triangles: " + maxTris);
+        //Debug.Log("Max Cubes: " + maxCubes + "\nMax Triangles: " + maxTris);
 
         ComputeBuffer vertexBuffer = new ComputeBuffer(maxTris , sizeof(float) * 3 * 3, ComputeBufferType.Append);
         ComputeBuffer triangleCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
@@ -108,7 +110,7 @@ public class TerrainChunk
         computeVerticesShader.SetBuffer(0, "_TriangleBuffer", vertexBuffer);
         computeVerticesShader.SetInts("texture_size", textureDimensions.x, textureDimensions.y, textureDimensions.z);
         computeVerticesShader.SetFloat("voxel_scale", voxelScale);
-        computeVerticesShader.SetBool("interpolate", false);
+        computeVerticesShader.SetBool("interpolate", true);
         computeVerticesShader.SetFloat("threshold", -0.2f);
 
         Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);

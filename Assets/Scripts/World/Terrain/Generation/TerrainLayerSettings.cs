@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName =  "Terrain/Layer Settings", order = 1)]
 public class TerrainLayerSettings : ScriptableObject
 {
-    public static int stride { get { return sizeof(float) * 6 + sizeof(int) * 2; } }
+    public static int stride { get { return sizeof(float) * 6 + sizeof(int) * 1; } }
 
     [Tooltip("Depth of this layer")]
     [Min(0)] public int depth;
@@ -26,7 +26,6 @@ public class TerrainLayerSettings : ScriptableObject
 
     public TerrainLayerSettingsStruct AsStruct() {
         return new TerrainLayerSettingsStruct {
-            depth = depth,
             topTransition = topTransition,
             bottomTransition = bottomTransition,
             chasmRadius = chasmRadius,
@@ -40,7 +39,6 @@ public class TerrainLayerSettings : ScriptableObject
 }
 
 public struct TerrainLayerSettingsStruct {
-    public int depth;
     public float topTransition;
     public float bottomTransition;
     public float chasmRadius;

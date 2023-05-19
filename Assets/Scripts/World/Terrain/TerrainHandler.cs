@@ -35,10 +35,8 @@ public class TerrainHandler : MonoBehaviour
 
             //Generate layer
             nLayer.Generate(layerSettings.depth);
-            //Another hack for corrrecting chunk height in voxels
-            int yChunksNeededForLayer = Mathf.FloorToInt(layerSettings.depth / (chunkSize.y - 1f));
-
-            layerOrigin.y -= (layerSettings.depth - yChunksNeededForLayer);
+            Debug.Log(layerSettings.depth + " depth provided, " + nLayer.generatedDepth + " depth generated");
+            layerOrigin.y -= nLayer.generatedDepth + (margin * voxelScale);
         }
     }
 }
