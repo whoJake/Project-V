@@ -1,6 +1,6 @@
 #pragma kernel CalculateCube
 
-#include "../MoreMaths.compute"
+#include "../MathUtils.cginc"
 #include "/EdgeLookup.cginc"
 
 struct Triangle{
@@ -31,7 +31,7 @@ float3 SetVertexOnEdge(float3 cornerA, float3 cornerB, int3 texA, int3 texB){
 	float densityB = SampleDensity(texB);
 
 	float fractionAlongLine = 0.5;
-	if(interpolate) fractionAlongLine = invlerp(densityA, densityB, threshold);
+	if(interpolate) fractionAlongLine = invlerp(threshold, densityA, densityB);
 
 	float3 pos = lerp(cornerA, cornerB, fractionAlongLine);
 	return pos;

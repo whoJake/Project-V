@@ -1,4 +1,4 @@
-float invlerp(float from, float to, float value){
+float invlerp(float value, float from, float to){
     return (value - from) / (to - from);
 }
 
@@ -8,6 +8,13 @@ float2 setmagnitude(float2 v, float mag){
 
 float3 setmagnitude(float3 v, float mag){
     return normalize(v) * mag;
+}
+
+float remap(float val, float oldA, float oldB, float newA, float newB) {
+    float a = val - oldA;
+    float b = newB - newA;
+    float c = oldB - oldA;
+    return oldA + (a * b) / c;
 }
 
 float2 clampmagnitude(float2 v, float min, float max){

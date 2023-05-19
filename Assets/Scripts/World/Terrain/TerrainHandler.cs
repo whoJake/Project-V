@@ -38,7 +38,7 @@ public class TerrainHandler : MonoBehaviour
             //Another hack for corrrecting chunk height in voxels
             int yChunksNeededForLayer = Mathf.FloorToInt(layerSettings.depth / (chunkSize.y - 1f));
 
-            layerOrigin.y -= (layerSettings.depth - yChunksNeededForLayer) * voxelScale;
+            layerOrigin.y -= (layerSettings.depth - yChunksNeededForLayer);
         }
     }
 }

@@ -2,5 +2,6 @@ Clipping issues with camera when camera is close to a wall
 Camera can clip into player due to the buffer length
 With disabling bunnyhopping, controller.isGrounded seems to be really slow at detecting whether it is grounded or not. UnityInput 2.0 would definitely fix this issue
 Jumping seems a bit buggy when walking into/away from a sloped ceiling. Kind of cool mechanic might be worth keeping
+Camera seemed buggy and unstable when I brought it into world development scene
 
 Terrain noise scale is dependent on chunk size for some reason

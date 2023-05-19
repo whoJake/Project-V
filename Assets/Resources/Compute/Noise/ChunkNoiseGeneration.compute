@@ -1,6 +1,7 @@
 #pragma kernel Generate
 
 #include "/Fractal.cginc"
+#include "../MathUtils.cginc"
 
 struct LayerSettings {
     int depth;
@@ -21,20 +22,52 @@ float voxel_scale;
 
 //Variables
 RWTexture3D<float> _DensityTexture;
+float3 layer_origin;
 float3 chunk_origin;
 int layer_index;
+
+float SampleDensity(float3 position, LayerSettings settings) {
+    float nraw = fnoise(position, settings.octaves, settings.frequency, settings.persistance, settings.lacunarity);
+    float nrange = fnoise_max(settings.persistance, settings.octaves);
+    return nraw / nrange;
+}
 
 [numthreads(8,8,8)]
 void Generate (uint3 id : SV_DispatchThreadID)
 {
+    //Texture dimensions and return condition
     uint width, height, depth;
     _DensityTexture.GetDimensions(width, height, depth);
     if (id.x >= width || id.y >= height || id.z >= depth) return;
     uint3 texture_size = uint3(width, height, depth);
 
-    float3 samplePosition = (float3(seed*0.863, seed*0.512, seed*0.978) + (chunk_origin + (id * voxel_scale))) / texture_size;
-    float rawdensity = fnoise(samplePosition, _ChunkSettings[layer_index].octaves, _ChunkSettings[layer_index].frequency, _ChunkSettings[layer_index].persistance, _ChunkSettings[layer_index].lacunarity);
-    float densityRange = fnoise_max(_ChunkSettings[layer_index].persistance, _ChunkSettings[layer_index].octaves);
-    float density = rawdensity / densityRange;
+    //Buffer information
+    uint numLayers, stride;
+    _ChunkSettings.GetDimensions(numLayers, stride);
+
+    //Layer settings
+    LayerSettings abvSettings = _ChunkSettings[max(0, layer_index-1)];
+    LayerSettings curSettings = _ChunkSettings[layer_index];
+    LayerSettings blwSettings = _ChunkSettings[min(numLayers-1, layer_index+1)];
+
+    float3 voxelPosition = chunk_origin + (id * voxel_scale); //World-Space position of the sample point
+    float3 samplePosition = (float3(seed * 0.863, seed * 0.512, seed * 0.978) + (voxelPosition)) / texture_size; //Texture-Space position of the sample point
+
+    float depthPercent = saturate(invlerp(voxelPosition.y, layer_origin.y, layer_origin.y - curSettings.depth));
+
+    //+1 and -1 on voxelPosition.y accounts for the fact that the layers kind of share texture points by nature since voxel vertices are placed between texture points
+    //This therefore fixes the issue of having problems with layer transitions
+    float abvLerp = saturate(invlerp(voxelPosition.y + 1, layer_origin.y - curSettings.topTransition, layer_origin.y));
+    if (curSettings.topTransition == 0) abvLerp = 0;
+    float blwLerp = saturate(invlerp(voxelPosition.y - 1, layer_origin.y - curSettings.depth + curSettings.bottomTransition, layer_origin.y - curSettings.depth));
+    if (curSettings.bottomTransition == 0) blwLerp = 0;
+
+    float abvDensity = SampleDensity(samplePosition, abvSettings);
+    float curDensity = SampleDensity(samplePosition, curSettings);
+    float blwDensity = SampleDensity(samplePosition, blwSettings);
+
+    float density = lerp(lerp(curDensity, abvDensity, abvLerp),
+                         blwDensity, blwLerp);
+
     _DensityTexture[id.xyz] = density;
 }

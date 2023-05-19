@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1850c2ed4c1dcf64c83e51f3a3e0ce1e, type: 3}
   m_Name: layer4
   m_EditorClassIdentifier: 
-  depth: 64
-  topTransition: 0
+  depth: 32
+  topTransition: 8
   bottomTransition: 0
   chasmRadius: 0
-  octaves: 7
-  frequency: 0.7
-  persistance: 0.3
-  lacunarity: 1.2
+  octaves: 3
+  frequency: 1
+  persistance: 0.5
+  lacunarity: 1.75

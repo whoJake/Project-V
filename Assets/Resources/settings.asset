@@ -12,9 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d09b404c84cc39f48aa820a7665397fe, type: 3}
   m_Name: settings
   m_EditorClassIdentifier: 
-  seed: 28
+  seed: 15
   layers:
   - {fileID: 11400000, guid: 04c054e155ab2b241b7c65c27603422c, type: 2}
   - {fileID: 11400000, guid: cbaabb0a87c25bf4f84c8db5741e33ca, type: 2}
-  - {fileID: 11400000, guid: 3c886565e685d5948b2ecffe64eacb1f, type: 2}
-  - {fileID: 11400000, guid: 6435763445021b449a18ff20a3217530, type: 2}

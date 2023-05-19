@@ -9,12 +9,11 @@ public class TerrainChunk
     private static ComputeShader computeDensityShader;
     private static ComputeShader computeVerticesShader;
 
+    private readonly TerrainLayer layer;
     private readonly Vector3 centre; //Centre point of chunk
     private readonly Vector3Int voxelDimensions; //Number of voxels per each axis
     private readonly int margin;
     private readonly float voxelScale; //Size of each voxel in world space
-
-    private readonly int layerIndex;
 
     private Vector3Int textureDimensions { get { return voxelDimensions + (Vector3Int.one * margin * 2); } }
 
@@ -23,12 +22,13 @@ public class TerrainChunk
     private MeshFilter filter;
     private MeshCollider collider;
 
-    public TerrainChunk(int _layerIndex, Vector3 _centre, Vector3Int _voxelDimensions, int _margin, float _voxelScale, GameObject owner) {
-        layerIndex = _layerIndex;
+    public TerrainChunk(TerrainLayer _layer, Vector3 _centre, Vector3Int _voxelDimensions, int _margin, float _voxelScale, GameObject owner) {
+        layer = _layer;
         centre = _centre;
         voxelDimensions = _voxelDimensions;
         margin = _margin;
         voxelScale = _voxelScale;
+
         filter = owner.GetComponent<MeshFilter>();
         collider = owner.GetComponent<MeshCollider>();
     }
@@ -58,7 +58,6 @@ public class TerrainChunk
 
         //Give vertices and triangles to mesh filter and collider
         filter.mesh = meshInfo.AsMesh();
-        
     }
 
     //
@@ -76,10 +75,11 @@ public class TerrainChunk
         computeDensityShader.SetInt("seed", settings.seed);
 
         computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
-        computeDensityShader.SetInt("layer_index", layerIndex);
+        computeDensityShader.SetInt("layer_index", layer.id);
         computeDensityShader.SetFloat("voxel_scale", voxelScale);
 
         computeDensityShader.SetVector("chunk_origin", origin);
+        computeDensityShader.SetVector("layer_origin", layer.origin);
 
         Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);
         Debug.Log((Vector3)threads + " threads dispatched for ComputeDensity");
@@ -108,7 +108,7 @@ public class TerrainChunk
         computeVerticesShader.SetBuffer(0, "_TriangleBuffer", vertexBuffer);
         computeVerticesShader.SetInts("texture_size", textureDimensions.x, textureDimensions.y, textureDimensions.z);
         computeVerticesShader.SetFloat("voxel_scale", voxelScale);
-        computeVerticesShader.SetBool("interpolate", true);
+        computeVerticesShader.SetBool("interpolate", false);
         computeVerticesShader.SetFloat("threshold", -0.2f);
 
         Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);
