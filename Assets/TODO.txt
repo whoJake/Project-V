@@ -72,7 +72,6 @@ Items
 				Write shader for these ice crystals, maybe colour gradient with some normal mapping
 World
 	General
-		Add multiple chunk gen
 		When layers both have transition values for the same face between layers an error should be outputted
 		Maybe have some kind of gameplay element that seperates the layer (mist etc.) to cover up the transition and hide the uglyness
 	ChunkNoiseGeneration.compute

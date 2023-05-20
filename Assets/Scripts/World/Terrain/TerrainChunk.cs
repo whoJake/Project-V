@@ -77,7 +77,6 @@ public class TerrainChunk
         computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
         computeDensityShader.SetInt("layer_index", layer.id);
         computeDensityShader.SetFloat("voxel_scale", voxelScale);
-        computeVerticesShader.SetInt("margin", margin);
 
         computeDensityShader.SetVector("chunk_origin", origin);
         computeDensityShader.SetVector("layer_origin", layer.origin);

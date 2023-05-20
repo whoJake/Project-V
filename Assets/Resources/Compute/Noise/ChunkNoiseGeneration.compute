@@ -18,7 +18,6 @@ struct LayerSettings {
 StructuredBuffer<LayerSettings> _ChunkSettings;
 int seed;
 float voxel_scale;
-int margin;
 
 //Variables
 RWTexture3D<float> _DensityTexture;
@@ -52,7 +51,7 @@ void Generate (uint3 id : SV_DispatchThreadID)
     LayerSettings blwSettings = _ChunkSettings[min(numLayers-1, layer_index+1)];
 
     float3 voxelPosition = chunk_origin + (id * voxel_scale); //World-Space position of the sample point
-    float3 samplePosition = (float3(seed * 0.863, seed * 0.512, seed * 0.978) + (voxelPosition)) / texture_size; //Texture-Space position of the sample point
+    float3 samplePosition = (float3(seed * 0.863, seed * 0.512, seed * 0.978) + (voxelPosition)) / float3(256, 256, 256); //Texture-Space position of the sample point. /float3(256, 256, 256) is a bit arbitrary but it helps the frequency values be a bit more reasonable
 
     float depthPercent = saturate(invlerp(voxelPosition.y, layer_origin.y, layer_origin.y - layer_depth));
 
