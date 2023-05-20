@@ -31,7 +31,11 @@ float3 SetVertexOnEdge(float3 cornerA, float3 cornerB, int3 texA, int3 texB){
 	float densityB = SampleDensity(texB);
 
 	float fractionAlongLine = 0.5;
-	if(interpolate) fractionAlongLine = invlerp(threshold, densityA, densityB);
+	if (interpolate) {
+		fractionAlongLine = invlerp(threshold, densityA, densityB);
+		//float interval = 0.25;
+		//fractionAlongLine = round(fractionAlongLine / interval) * interval;
+	}
 
 	float3 pos = lerp(cornerA, cornerB, fractionAlongLine);
 	return pos;
@@ -70,7 +74,7 @@ void CalculateCube (uint3 id : SV_DispatchThreadID)
 	//Less than threshold = solid, greater than threshold = air
 	int cubeCornerState = 0;
 	for(int vi = 0; vi < 8; vi++){
-		if(SampleDensity(voxelCornersInTexture[vi]) < threshold){
+		if(SampleDensity(voxelCornersInTexture[vi]) > threshold){
 			//For each corner, puts a 1 into the cornerIndex's corresponding bit in an 8bit integer
 			//This essentially creates an 8bit integer that represents the state of the cube's corners (256 permutations)
 			cubeCornerState |= (1 << vi);

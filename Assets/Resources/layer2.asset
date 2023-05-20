@@ -15,7 +15,7 @@ MonoBehaviour:
   depth: 128
   topTransition: 0
   bottomTransition: 32
-  chasmRadius: 0
+  chasmRadius: 25
   octaves: 6
   frequency: 1
   persistance: 0.4

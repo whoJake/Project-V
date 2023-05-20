@@ -26,10 +26,22 @@ float3 chunk_origin;
 int layer_index;
 float layer_depth;
 
-float SampleDensity(float3 position, LayerSettings settings) {
-    float nraw = fnoise(position, settings.octaves, settings.frequency, settings.persistance, settings.lacunarity);
+float SampleDensity(float3 worldPos, LayerSettings settings) {
+    //Texture-Space position of the sample point. /float3(256, 256, 256) is a bit arbitrary but it helps the frequency values be a bit more reasonable
+    float3 samplePos = (float3(seed * 0.863, seed * 0.512, seed * 0.978) + (worldPos)) / float3(256, 256, 256);
+    float depthPercent = saturate(invlerp(worldPos.y, layer_origin.y, layer_origin.y - layer_depth));
+
+    //Carve out chasm
+    float2 chasmCentre = float2(layer_origin.x, layer_origin.z);
+    float dstFromChasmCentre = distance(chasmCentre, float2(worldPos.x, worldPos.z));
+    float dstFromChasm = dstFromChasmCentre - settings.chasmRadius;
+    float chasmRadiusFalloffDistance = 75;
+    float chasmMultiplier = saturate(remap(dstFromChasm, 0, chasmRadiusFalloffDistance, 0, 1));
+
+    float nraw = fnoise(samplePos, settings.octaves, settings.frequency, settings.persistance, settings.lacunarity);
     float nrange = fnoise_max(settings.persistance, settings.octaves);
-    return nraw / nrange;
+    float noise = ((nraw / nrange) + 1) / 2;
+    return noise * chasmMultiplier;
 }
 
 [numthreads(8,8,8)]
@@ -50,11 +62,9 @@ void Generate (uint3 id : SV_DispatchThreadID)
     LayerSettings curSettings = _ChunkSettings[layer_index];
     LayerSettings blwSettings = _ChunkSettings[min(numLayers-1, layer_index+1)];
 
-    float3 voxelPosition = chunk_origin + (id * voxel_scale); //World-Space position of the sample point
-    float3 samplePosition = (float3(seed * 0.863, seed * 0.512, seed * 0.978) + (voxelPosition)) / float3(256, 256, 256); //Texture-Space position of the sample point. /float3(256, 256, 256) is a bit arbitrary but it helps the frequency values be a bit more reasonable
+    float3 voxelPosition = chunk_origin + (id * voxel_scale); //World-Space position of the sample point 
 
-    float depthPercent = saturate(invlerp(voxelPosition.y, layer_origin.y, layer_origin.y - layer_depth));
-
+    //Handle top and bottom transitions
     //+1 and -1 on voxelPosition.y accounts for the fact that the layers kind of share texture points by nature since voxel vertices are placed between texture points
     //This therefore fixes the issue of having problems with layer transitions
     float abvLerp = saturate(invlerp(voxelPosition.y + 2 * voxel_scale, layer_origin.y - curSettings.topTransition, layer_origin.y));
@@ -62,9 +72,9 @@ void Generate (uint3 id : SV_DispatchThreadID)
     float blwLerp = saturate(invlerp(voxelPosition.y - 2 * voxel_scale, layer_origin.y - layer_depth + curSettings.bottomTransition, layer_origin.y - layer_depth));
     if (curSettings.bottomTransition == 0) blwLerp = 0;
 
-    float abvDensity = SampleDensity(samplePosition, abvSettings);
-    float curDensity = SampleDensity(samplePosition, curSettings);
-    float blwDensity = SampleDensity(samplePosition, blwSettings);
+    float abvDensity = SampleDensity(voxelPosition, abvSettings);
+    float curDensity = SampleDensity(voxelPosition, curSettings);
+    float blwDensity = SampleDensity(voxelPosition, blwSettings);
 
     float density = lerp(lerp(curDensity, abvDensity, abvLerp),
                          blwDensity, blwLerp);
