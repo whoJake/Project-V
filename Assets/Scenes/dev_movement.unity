@@ -5759,15 +5759,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   orbits:
+  - offset: {x: 0, y: 6, z: 0}
+    radius: 2.5
+    height: 0
   - offset: {x: 0, y: 3, z: 0}
     radius: 5
-    height: 0
+    height: 3
   - offset: {x: 0, y: 1, z: 0}
-    radius: 2.5
-    height: 2
-  - offset: {x: 0, y: -0.5, z: 0}
+    radius: 3
+    height: 5
+  - offset: {x: 0, y: -0.9, z: 0}
     radius: 1
-    height: 3.5
+    height: 7
   orbitAround: {fileID: 90140309}
   affectedCamera: {fileID: 1328012195}
   mouseSensitivity: {x: 1, y: 1}
@@ -5781,7 +5784,7 @@ MonoBehaviour:
     m_Bits: 64
   avoidOcclusionSmoothingTime: 0
   avoidOcclusionBufferLength: 0.2
-  showOrbitWireframes: 0
+  showOrbitWireframes: 1
 --- !u!4 &1430129884
 Transform:
   m_ObjectHideFlags: 0

@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1850c2ed4c1dcf64c83e51f3a3e0ce1e, type: 3}
-  m_Name: layer
+  m_Name: layer4
   m_EditorClassIdentifier: 
-  origin: {x: 0, y: -30, z: 0}
-  depth: 64
-  genDepth: 60
+  origin: {x: 0, y: -270, z: 0}
+  depth: 128
+  genDepth: 120
   topTransition: 0
   bottomTransition: 0
-  chasmRadius: 125
-  groundThickness: 32
-  groundDepth: 48
+  chasmRadius: 120
+  groundThickness: 96
+  groundDepth: 32
   octaves: 5
-  frequency: 0.95
+  frequency: 1.75
   persistance: 0.4
-  lacunarity: 1.8
+  lacunarity: 1.5

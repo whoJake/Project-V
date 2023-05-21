@@ -18,8 +18,8 @@ MonoBehaviour:
   topTransition: 0
   bottomTransition: 32
   chasmRadius: 0
-  groundThickness: 64
-  groundDepth: 16
+  groundThickness: 1
+  groundDepth: 32
   octaves: 1
   frequency: 1
   persistance: 1

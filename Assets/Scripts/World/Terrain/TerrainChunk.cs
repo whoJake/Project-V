@@ -58,7 +58,7 @@ public class TerrainChunk
 
         //Give vertices and triangles to mesh filter and collider
         filter.mesh = meshInfo.AsMesh();
-        //collider.sharedMesh = meshInfo.AsMesh();
+        collider.sharedMesh = meshInfo.AsMesh();
     }
 
     //

@@ -15,6 +15,8 @@ public class TerrainHandler : MonoBehaviour
 
     void Start()
     {
+        //Randomize seed
+        //settings.seed = Random.Range(0, 1024);
         GenerateTerrain();
     }
 

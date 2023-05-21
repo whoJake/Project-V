@@ -39,15 +39,16 @@ float SampleDensity(float3 worldPos, LayerSettings settings) {
     float2 chasmCentre = float2(settings.origin.x, settings.origin.z);
     float dstFromChasmCentre = distance(chasmCentre, float2(worldPos.x, worldPos.z));
     float dstFromChasm = dstFromChasmCentre - settings.chasmRadius;
-    float chasmRadiusFalloffDistance = 75 / 2;
+    float chasmRadiusFalloffDistance = 16;
     //0 -> 1 :: InChasm -> OutChasm
     float chasmMultiplier = saturate(remap(dstFromChasm + chasmRadiusFalloffDistance, 0, chasmRadiusFalloffDistance * 2, 0, 1));
 
     //Carve out ground
-    float groundWorldHeight = settings.origin.y + settings.groundDepth;
+    float groundWorldHeight = settings.origin.y - settings.groundDepth;
+    //<0 inside ground, >0 outside ground
     float dstFromGround = abs(worldPos.y - groundWorldHeight) - (settings.groundThickness / 2);
-    float groundFalloffDistance = 156;
-    float groundMultiplier = saturate(remap(dstFromGround, 0, groundFalloffDistance, 0, 1));
+    float groundFalloffDistance = 16;
+    float groundMultiplier = 1 - saturate(remap(dstFromGround, 0, groundFalloffDistance, 0, 1));
 
     float noise = fnoise01(samplePos, settings.octaves, settings.frequency, settings.persistance, settings.lacunarity);
     return noise * groundMultiplier * chasmMultiplier;
