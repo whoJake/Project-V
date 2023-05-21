@@ -4,9 +4,15 @@
 #include "../MathUtils.cginc"
 
 struct LayerSettings {
+    float3 origin;
+    float depth;
+
     float topTransition;
     float bottomTransition;
     float chasmRadius;
+
+    float groundThickness;
+    float groundDepth;
 
     int octaves;
     float frequency;
@@ -21,27 +27,30 @@ float voxel_scale;
 
 //Variables
 RWTexture3D<float> _DensityTexture;
-float3 layer_origin;
 float3 chunk_origin;
 int layer_index;
-float layer_depth;
 
 float SampleDensity(float3 worldPos, LayerSettings settings) {
     //Texture-Space position of the sample point. /float3(256, 256, 256) is a bit arbitrary but it helps the frequency values be a bit more reasonable
     float3 samplePos = (float3(seed * 0.863, seed * 0.512, seed * 0.978) + (worldPos)) / float3(256, 256, 256);
-    float depthPercent = saturate(invlerp(worldPos.y, layer_origin.y, layer_origin.y - layer_depth));
+    float depthPercent = saturate(invlerp(worldPos.y, settings.origin.y, settings.origin.y - settings.depth));
 
     //Carve out chasm
-    float2 chasmCentre = float2(layer_origin.x, layer_origin.z);
+    float2 chasmCentre = float2(settings.origin.x, settings.origin.z);
     float dstFromChasmCentre = distance(chasmCentre, float2(worldPos.x, worldPos.z));
     float dstFromChasm = dstFromChasmCentre - settings.chasmRadius;
-    float chasmRadiusFalloffDistance = 75;
-    float chasmMultiplier = saturate(remap(dstFromChasm, 0, chasmRadiusFalloffDistance, 0, 1));
+    float chasmRadiusFalloffDistance = 75 / 2;
+    //0 -> 1 :: InChasm -> OutChasm
+    float chasmMultiplier = saturate(remap(dstFromChasm + chasmRadiusFalloffDistance, 0, chasmRadiusFalloffDistance * 2, 0, 1));
 
-    float nraw = fnoise(samplePos, settings.octaves, settings.frequency, settings.persistance, settings.lacunarity);
-    float nrange = fnoise_max(settings.persistance, settings.octaves);
-    float noise = ((nraw / nrange) + 1) / 2;
-    return noise * chasmMultiplier;
+    //Carve out ground
+    float groundWorldHeight = settings.origin.y + settings.groundDepth;
+    float dstFromGround = abs(worldPos.y - groundWorldHeight) - (settings.groundThickness / 2);
+    float groundFalloffDistance = 156;
+    float groundMultiplier = saturate(remap(dstFromGround, 0, groundFalloffDistance, 0, 1));
+
+    float noise = fnoise01(samplePos, settings.octaves, settings.frequency, settings.persistance, settings.lacunarity);
+    return noise * groundMultiplier * chasmMultiplier;
 }
 
 [numthreads(8,8,8)]
@@ -67,9 +76,9 @@ void Generate (uint3 id : SV_DispatchThreadID)
     //Handle top and bottom transitions
     //+1 and -1 on voxelPosition.y accounts for the fact that the layers kind of share texture points by nature since voxel vertices are placed between texture points
     //This therefore fixes the issue of having problems with layer transitions
-    float abvLerp = saturate(invlerp(voxelPosition.y + 2 * voxel_scale, layer_origin.y - curSettings.topTransition, layer_origin.y));
+    float abvLerp = saturate(invlerp(voxelPosition.y + 2 * voxel_scale, curSettings.origin.y - curSettings.topTransition, curSettings.origin.y));
     if (curSettings.topTransition == 0) abvLerp = 0;
-    float blwLerp = saturate(invlerp(voxelPosition.y - 2 * voxel_scale, layer_origin.y - layer_depth + curSettings.bottomTransition, layer_origin.y - layer_depth));
+    float blwLerp = saturate(invlerp(voxelPosition.y - 2 * voxel_scale, curSettings.origin.y - curSettings.depth + curSettings.bottomTransition, curSettings.origin.y - curSettings.depth));
     if (curSettings.bottomTransition == 0) blwLerp = 0;
 
     float abvDensity = SampleDensity(voxelPosition, abvSettings);

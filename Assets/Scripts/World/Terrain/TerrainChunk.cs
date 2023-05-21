@@ -80,8 +80,6 @@ public class TerrainChunk
         computeDensityShader.SetFloat("voxel_scale", voxelScale);
 
         computeDensityShader.SetVector("chunk_origin", origin);
-        computeDensityShader.SetVector("layer_origin", layer.origin);
-        computeDensityShader.SetFloat("layer_depth", layer.generatedDepth);
 
         Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);
         Debug.Log((Vector3)threads + " threads dispatched for ComputeDensity");
@@ -110,7 +108,7 @@ public class TerrainChunk
         computeVerticesShader.SetBuffer(0, "_TriangleBuffer", vertexBuffer);
         computeVerticesShader.SetInts("texture_size", textureDimensions.x, textureDimensions.y, textureDimensions.z);
         computeVerticesShader.SetFloat("voxel_scale", voxelScale);
-        computeVerticesShader.SetBool("interpolate", false);
+        computeVerticesShader.SetBool("interpolate", true);
         computeVerticesShader.SetFloat("threshold", 0.4f);
 
         Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);

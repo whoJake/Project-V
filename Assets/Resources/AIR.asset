@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1850c2ed4c1dcf64c83e51f3a3e0ce1e, type: 3}
-  m_Name: layer3
+  m_Name: AIR
   m_EditorClassIdentifier: 
-  origin: {x: 0, y: -405, z: 0}
-  depth: 256
-  genDepth: 255
+  origin: {x: 0, y: 0, z: 0}
+  depth: 32
+  genDepth: 30
   topTransition: 0
-  bottomTransition: 0
-  chasmRadius: 50
-  groundThickness: 16
-  groundDepth: 128
-  octaves: 3
-  frequency: 1.25
-  persistance: 0.6
-  lacunarity: 1.5
+  bottomTransition: 32
+  chasmRadius: 0
+  groundThickness: 64
+  groundDepth: 16
+  octaves: 1
+  frequency: 1
+  persistance: 1
+  lacunarity: 1

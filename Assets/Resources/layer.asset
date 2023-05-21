@@ -12,11 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1850c2ed4c1dcf64c83e51f3a3e0ce1e, type: 3}
   m_Name: layer
   m_EditorClassIdentifier: 
+  origin: {x: 0, y: -30, z: 0}
   depth: 256
+  genDepth: 255
   topTransition: 0
   bottomTransition: 32
   chasmRadius: 100
-  octaves: 3
-  frequency: 0.8
+  groundThickness: 8
+  groundDepth: 128
+  octaves: 5
+  frequency: 0.85
   persistance: 0.4
-  lacunarity: 1.5
+  lacunarity: 1.8

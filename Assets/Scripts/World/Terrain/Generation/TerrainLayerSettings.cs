@@ -5,10 +5,13 @@ using UnityEngine;
 [CreateAssetMenu(menuName =  "Terrain/Layer Settings", order = 1)]
 public class TerrainLayerSettings : ScriptableObject
 {
-    public static int stride { get { return sizeof(float) * 6 + sizeof(int) * 1; } }
+    public static int stride { get { return sizeof(float) * 12 + sizeof(int) * 1; } }
+
+    [HideInInspector] public Vector3 origin;
 
     [Tooltip("Depth of this layer")]
-    [Min(0)] public int depth;
+    [Min(0)] public float depth;
+    [HideInInspector] public float genDepth;
 
     [Tooltip("Transition margin at the top")]
     [Min(0)] public float topTransition;
@@ -18,6 +21,9 @@ public class TerrainLayerSettings : ScriptableObject
 
     [Min(0)] public float chasmRadius;
 
+    public float groundThickness;
+    public float groundDepth;
+
     //Probably temp
     [Min(0)] public int octaves;
     [Min(0)] public float frequency;
@@ -26,9 +32,16 @@ public class TerrainLayerSettings : ScriptableObject
 
     public TerrainLayerSettingsStruct AsStruct() {
         return new TerrainLayerSettingsStruct {
+            origin = origin,
+            depth = genDepth,
+
             topTransition = topTransition,
             bottomTransition = bottomTransition,
             chasmRadius = chasmRadius,
+
+            groundThickness = groundThickness,
+            groundDepth = groundDepth,
+
             octaves = octaves,
             frequency = frequency,
             persistance = persistance,
@@ -39,9 +52,16 @@ public class TerrainLayerSettings : ScriptableObject
 }
 
 public struct TerrainLayerSettingsStruct {
+    public Vector3 origin;
+    public float depth;
+
     public float topTransition;
     public float bottomTransition;
     public float chasmRadius;
+
+    public float groundThickness;
+    public float groundDepth;
+
     public int octaves;
     public float frequency;
     public float persistance;

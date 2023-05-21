@@ -12,10 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1850c2ed4c1dcf64c83e51f3a3e0ce1e, type: 3}
   m_Name: layer2
   m_EditorClassIdentifier: 
+  origin: {x: 0, y: -285, z: 0}
   depth: 128
+  genDepth: 120
   topTransition: 0
   bottomTransition: 32
-  chasmRadius: 25
+  chasmRadius: 50
+  groundThickness: 64
+  groundDepth: 64
   octaves: 6
   frequency: 1
   persistance: 0.4

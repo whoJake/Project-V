@@ -31,6 +31,12 @@ float fnoise_max(float persistance, int octaves){
 	return max;
 }
 
+float fnoise01(float3 pos, int octaves, float freq, float persistance, float lacunarity) {
+	float raw = fnoise(pos, octaves, freq, persistance, lacunarity);
+	float rang = fnoise_max(persistance, octaves);
+	return ((raw / rang) + 1) / 2;
+}
+
 float3 warp_coords(float3 pos, int octaves, float frequency, float persistance, float lacunarity, float strength){
     //Arbitruary offsets
     float3 dOffset1 = float3(1.9, 0.9, 5.2);

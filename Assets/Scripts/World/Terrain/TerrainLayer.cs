@@ -9,9 +9,6 @@ public class TerrainLayer
     public readonly Vector3 origin;
     private readonly TerrainHandler handler;
 
-    //THIS MUST BE USED INSTEAD OF settings.depth
-    public float generatedDepth;
-
     public TerrainLayer(int _id, GameObject _gameObject, Vector3 _origin, TerrainHandler _handler) {
         gameObject = _gameObject;
         id = _id;
@@ -26,7 +23,7 @@ public class TerrainLayer
     // Parameters:
     //   chunkCount:
     //     number of chunks per axis to generate
-    public void Generate(int depth) {
+    public void Generate(float depth) {
         Vector3Int voxelsPerAxis = new Vector3Int(handler.chunkSize.x - 1,
                                                 handler.chunkSize.y - 1,
                                                 handler.chunkSize.z - 1);
@@ -36,7 +33,6 @@ public class TerrainLayer
                                                                  depth / voxelsPerAxis.y,
                                                                  handler.generatedArea.y / voxelsPerAxis.z) / handler.voxelScale);
 
-        generatedDepth = chunkCount.y * voxelsPerAxis.y * handler.voxelScale;
         Debug.Log(chunkCount + " chunks dispatched to generate");
 
         Vector3Int halfChunkCount = Vector3Int.FloorToInt((Vector3)chunkCount / 2f);

@@ -21,8 +21,18 @@ public class TerrainHandler : MonoBehaviour
     void GenerateTerrain() {
         terrainLayers = new TerrainLayer[settings.layers.Length];
 
-        TerrainChunk.InitializeCompute();
+        //Pre-pass for setting variables needed in settings
         Vector3 layerOrigin = Vector3.zero;
+        for (int layer = 0; layer < settings.layers.Length; layer++) {
+            TerrainLayerSettings nLayerSettings = settings.layers[layer];
+            float generatedDepth = Mathf.FloorToInt(nLayerSettings.depth / (chunkSize.y - 1)) * (chunkSize.y - 1);// * voxelScale;
+            nLayerSettings.genDepth = generatedDepth;
+            nLayerSettings.origin = layerOrigin;
+            layerOrigin.y -= generatedDepth + (margin * voxelScale);
+        }
+
+        TerrainChunk.InitializeCompute();
+        layerOrigin = Vector3.zero;
         for(int layer = 0; layer < settings.layers.Length; layer++) {
             //Make GameObject parent for layer
             GameObject parent = new GameObject("Layer: " + layer);
@@ -35,8 +45,7 @@ public class TerrainHandler : MonoBehaviour
 
             //Generate layer
             nLayer.Generate(layerSettings.depth);
-            Debug.Log(layerSettings.depth + " depth provided, " + nLayer.generatedDepth + " depth generated");
-            layerOrigin.y -= nLayer.generatedDepth + (margin * voxelScale);
+            layerOrigin.y -= layerSettings.genDepth + (margin * voxelScale);
         }
     }
 }
