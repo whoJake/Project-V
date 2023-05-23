@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName =  "Terrain/Layer Settings", order = 1)]
 public class TerrainLayerSettings : ScriptableObject
 {
-    public static int stride { get { return sizeof(float) * 14 + sizeof(int) * 1; } }
+    public static int stride { get { return sizeof(float) * 16 + sizeof(int) * 2; } }
 
     [HideInInspector] public Vector3 origin;
 
@@ -26,6 +26,10 @@ public class TerrainLayerSettings : ScriptableObject
 
     [Range(0f, 1f)] public float surfaceRoughness;
     public float surfaceFeatureDepth;
+
+    [Range(0f, 1f)] public float pillarDensity;
+    [Range(0f, 1f)] public float pillarScale;
+    public PillarIgnoreState pillarIgnoreState;
 
     //Probably temp
     [Min(0)] public int octaves;
@@ -48,11 +52,22 @@ public class TerrainLayerSettings : ScriptableObject
             surfaceRoughness = surfaceRoughness,
             surfaceFeatureDepth = surfaceFeatureDepth,
 
+            pillarDensity = pillarDensity,
+            pillarScale = pillarScale,
+            pillarIgnoreState = (int) pillarIgnoreState,
+
             octaves = octaves,
             frequency = frequency,
             persistance = persistance,
             lacunarity = lacunarity
         };
+    }
+
+    public enum PillarIgnoreState {
+        None = 0,
+        Below = -1,
+        Above = 1,
+        All = 2
     }
 
 }
@@ -70,6 +85,10 @@ public struct TerrainLayerSettingsStruct {
 
     public float surfaceRoughness;
     public float surfaceFeatureDepth;
+
+    public float pillarDensity;
+    public float pillarScale;
+    public int pillarIgnoreState;
 
     public int octaves;
     public float frequency;

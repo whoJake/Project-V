@@ -12,16 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1850c2ed4c1dcf64c83e51f3a3e0ce1e, type: 3}
   m_Name: layer3
   m_EditorClassIdentifier: 
-  origin: {x: 0, y: -150, z: 0}
+  origin: {x: 0, y: -60, z: 0}
   depth: 128
   genDepth: 120
-  topTransition: 8
+  topTransition: 16
   bottomTransition: 0
   chasmRadius: 100
-  groundThickness: 128
-  groundDepth: 96
+  groundThickness: 64
+  groundDepth: 80
   surfaceRoughness: 0.745
-  surfaceFeatureDepth: 128
+  surfaceFeatureDepth: 32
+  pillarDensity: 0.334
+  pillarScale: 0.506
+  pillarIgnoreState: 1
   octaves: 4
   frequency: 1.2
   persistance: 0.6
