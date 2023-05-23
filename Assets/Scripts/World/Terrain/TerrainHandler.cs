@@ -13,6 +13,8 @@ public class TerrainHandler : MonoBehaviour
     public float voxelScale;
     public Material material;
 
+    public bool showLayerBounds;
+
     void Start()
     {
         //Randomize seed
@@ -48,6 +50,16 @@ public class TerrainHandler : MonoBehaviour
             //Generate layer
             nLayer.Generate(layerSettings.depth);
             layerOrigin.y -= layerSettings.genDepth + (margin * voxelScale);
+
         }
     }
+
+    private void OnDrawGizmosSelected() {
+        if(terrainLayers != null && showLayerBounds) {
+            for(int layer = 0; layer < settings.layers.Length; layer++) {
+                Gizmos.DrawWireCube(settings.layers[layer].origin - new Vector3(0, settings.layers[layer].genDepth / 2f, 0), new Vector3(generatedArea.x, settings.layers[layer].genDepth, generatedArea.y));
+            }
+        }
+    }
+
 }

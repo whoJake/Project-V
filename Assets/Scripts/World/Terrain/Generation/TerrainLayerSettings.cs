@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName =  "Terrain/Layer Settings", order = 1)]
 public class TerrainLayerSettings : ScriptableObject
 {
-    public static int stride { get { return sizeof(float) * 12 + sizeof(int) * 1; } }
+    public static int stride { get { return sizeof(float) * 14 + sizeof(int) * 1; } }
 
     [HideInInspector] public Vector3 origin;
 
@@ -24,6 +24,9 @@ public class TerrainLayerSettings : ScriptableObject
     public float groundThickness;
     public float groundDepth;
 
+    [Range(0f, 1f)] public float surfaceRoughness;
+    public float surfaceFeatureDepth;
+
     //Probably temp
     [Min(0)] public int octaves;
     [Min(0)] public float frequency;
@@ -41,6 +44,9 @@ public class TerrainLayerSettings : ScriptableObject
 
             groundThickness = groundThickness,
             groundDepth = groundDepth,
+
+            surfaceRoughness = surfaceRoughness,
+            surfaceFeatureDepth = surfaceFeatureDepth,
 
             octaves = octaves,
             frequency = frequency,
@@ -61,6 +67,9 @@ public struct TerrainLayerSettingsStruct {
 
     public float groundThickness;
     public float groundDepth;
+
+    public float surfaceRoughness;
+    public float surfaceFeatureDepth;
 
     public int octaves;
     public float frequency;

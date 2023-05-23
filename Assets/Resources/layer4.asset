@@ -15,11 +15,13 @@ MonoBehaviour:
   origin: {x: 0, y: -270, z: 0}
   depth: 128
   genDepth: 120
-  topTransition: 0
+  topTransition: 8
   bottomTransition: 0
   chasmRadius: 120
-  groundThickness: 96
-  groundDepth: 32
+  groundThickness: 32
+  groundDepth: 64
+  surfaceRoughness: 0.259
+  surfaceFeatureDepth: 16
   octaves: 5
   frequency: 1.75
   persistance: 0.4

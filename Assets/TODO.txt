@@ -75,7 +75,8 @@ World
 		When layers both have transition values for the same face between layers an error should be outputted
 		Maybe have some kind of gameplay element that seperates the layer (mist etc.) to cover up the transition and hide the uglyness
 	ChunkNoiseGeneration.compute
-		Should be some kind of noise to vary the transition height so that the transition line isnt so visible
+		Should be some kind of noise to vary the transition height so that the transition line isnt so visible (maybe not possible)
+		More features, caves, connecting drips between layers
 	TerrainLayerSettingsEditor.cs
 		Update
 		Needs some kind of check for top and bottom transitions (maybe handled by TerrainSettingsEditor.cs)

@@ -109,7 +109,7 @@ public class TerrainChunk
         computeVerticesShader.SetInts("texture_size", textureDimensions.x, textureDimensions.y, textureDimensions.z);
         computeVerticesShader.SetFloat("voxel_scale", voxelScale);
         computeVerticesShader.SetBool("interpolate", true);
-        computeVerticesShader.SetFloat("threshold", 0.4f);
+        computeVerticesShader.SetFloat("threshold", 0.5f);
 
         Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);
         Debug.Log((Vector3)threads + " threads dispatched for ComputeVertices");
