@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName =  "Terrain/Layer Settings", order = 1)]
 public class TerrainLayerSettings : ScriptableObject
 {
-    public static int stride { get { return sizeof(float) * 16 + sizeof(int) * 2; } }
+    public static int stride { get { return sizeof(float) * 19 + sizeof(int) * 3; } }
 
     [HideInInspector] public Vector3 origin;
 
@@ -24,12 +24,20 @@ public class TerrainLayerSettings : ScriptableObject
     public float groundThickness;
     public float groundDepth;
 
+    public float groundHeightChangeMax;
+    [Range(0f, 1f)] public float groundHeightChangeScale;
+    public int groundHeightChangeComplexity;
+    public float groundHeightChangeDistortionStrength;
+
     [Range(0f, 1f)] public float surfaceRoughness;
     public float surfaceFeatureDepth;
 
     [Range(0f, 1f)] public float pillarDensity;
     [Range(0f, 1f)] public float pillarScale;
     public PillarIgnoreState pillarIgnoreState;
+
+    [Space]
+    [Space]
 
     //Probably temp
     [Min(0)] public int octaves;
@@ -48,6 +56,11 @@ public class TerrainLayerSettings : ScriptableObject
 
             groundThickness = groundThickness,
             groundDepth = groundDepth,
+
+            groundHeightChangeMax = groundHeightChangeMax,
+            groundHeightChangeScale = groundHeightChangeScale,
+            groundHeightChangeComplexity = groundHeightChangeComplexity,
+            groundHeightChangeDistortionStrength = groundHeightChangeDistortionStrength,
 
             surfaceRoughness = surfaceRoughness,
             surfaceFeatureDepth = surfaceFeatureDepth,
@@ -82,6 +95,11 @@ public struct TerrainLayerSettingsStruct {
 
     public float groundThickness;
     public float groundDepth;
+
+    public float groundHeightChangeMax;
+    public float groundHeightChangeScale;
+    public int groundHeightChangeComplexity;
+    public float groundHeightChangeDistortionStrength;
 
     public float surfaceRoughness;
     public float surfaceFeatureDepth;

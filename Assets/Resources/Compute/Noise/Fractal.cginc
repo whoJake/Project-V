@@ -4,7 +4,7 @@
 ** Returns value between +/- fnoise_max(persistance, octaves)
 **/
 float fnoise(float3 pos, int octaves, float _frequency, float persistance, float lacunarity){
-
+	if (octaves == 0) return 0;
 	float amplitude = 1;
 	float frequency = _frequency;
 
@@ -32,6 +32,7 @@ float fnoise_max(float persistance, int octaves){
 }
 
 float fnoise01(float3 pos, int octaves, float freq, float persistance, float lacunarity) {
+	if (octaves == 0) return 0.5;
 	float raw = fnoise(pos, octaves, freq, persistance, lacunarity);
 	float rang = fnoise_max(persistance, octaves);
 	return ((raw / rang) + 1) / 2;

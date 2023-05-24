@@ -14,6 +14,11 @@ struct LayerSettings {
     float groundThickness;
     float groundDepth;
 
+    float groundHeightChangeMax;
+    float groundHeightChangeScale;
+    int groundHeightChangeComplexity;
+    float groundHeightChangeDistortionStrength;
+
     float surfaceRoughness;
     float surfaceFeatureDepth;
 
@@ -57,8 +62,22 @@ float SampleDensity(float3 worldPos, LayerSettings settings) {
 
     //--GROUND--
     float groundCentreWorldY = settings.origin.y - settings.groundDepth;
+
+    //--HEIGHT MAP CHANGE--
+    //GOOD RANGE FOR HEIGHT CHANGE VALUES
+    //OCTAVES = user_set
+    //FREQUENCY = 0.001 - 0.005
+    //PERSISTANCE = 0.6
+    //LACUNARITY = 1.5
+    float groundHeightChangeFrequency = lerp(0.001, 0.005, 1 - settings.groundHeightChangeScale);
+
+    float3 groundCentreWorldPos = float3(worldPos.x, groundCentreWorldY, worldPos.z);
+    float3 warpedGroundCentreWorldPos = warp_coords(groundCentreWorldPos, 3, groundHeightChangeFrequency * 2, 0.4, 1.6, settings.groundHeightChangeDistortionStrength);
+    float groundHeightChange = fnoise01(warpedGroundCentreWorldPos, settings.groundHeightChangeComplexity, groundHeightChangeFrequency, 0.6, 1.5) * 2 - 1;
+
     //<0 bottom side of ground, >0 top side of ground
     float dstFromGroundCentre = worldPos.y - groundCentreWorldY;
+    if (dstFromGroundCentre > 0) dstFromGroundCentre += groundHeightChange * settings.groundHeightChangeMax; //Apply ground height change
 
     //<0 inside ground, >0 outside ground
     float dstFromGroundSurface = abs(dstFromGroundCentre) - (settings.groundThickness / 2);
@@ -81,18 +100,18 @@ float SampleDensity(float3 worldPos, LayerSettings settings) {
     //--CONNECTING STRANDS--
     float strandYScale = 0.2;
     float3 strandWorldPos = float3(worldPos.x, worldPos.y * strandYScale, worldPos.z);
-    float3 strandWarpWorldPos = warp_coords(strandWorldPos, 4, 1.5, 0.4, 1.6, 0.75);
+    float3 strandWarpWorldPos = warp_coords(strandWorldPos, 3, 1.5, 0.4, 1.6, 0.6);
     float3 strandSamplePos = WorldPosToSamplePos(strandWarpWorldPos);
     
     //GOOD RANGE FOR CONNECTING STRANDS NOISE VALUES, CAN CHANGE
     //OCTAVES = 5
     //FREQUENCY = 1 - 5 --> Density and little bit scale
-    //PERSISTANCE = 0.6
-    //LACUNARITY = 1.6
+    //PERSISTANCE = 0.5
+    //LACUNARITY = 1.7
     //THRESHOLD = 0.05 - 0.2 --> Density
     float strandNoiseFrequency = lerp(1, 5, settings.pillarDensity);
     float strandNoiseThreshold = lerp(0.05, 0.2, 1 - settings.pillarScale);
-    float strandNoise = saturate(fnoise01(strandSamplePos, 6, strandNoiseFrequency, 0.5, 1.7) - strandNoiseThreshold);
+    float strandNoise = saturate(fnoise01(strandSamplePos, 5, strandNoiseFrequency, 0.5, 1.7) - strandNoiseThreshold);
     float strandIgnoreMultiplier = 1;
     if (sign(worldPos.y - groundCentreWorldY) == sign(settings.pillarIgnoreState)) strandIgnoreMultiplier = 0;
     if (settings.pillarIgnoreState == 2) strandIgnoreMultiplier = 0;
