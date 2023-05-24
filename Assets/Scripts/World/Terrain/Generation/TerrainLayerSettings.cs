@@ -7,39 +7,46 @@ public class TerrainLayerSettings : ScriptableObject
 {
     public static int stride { get { return sizeof(float) * 19 + sizeof(int) * 3; } }
 
-    [HideInInspector] public Vector3 origin;
+    [HideInInspector] 
+    public Vector3 origin;
 
-    [Tooltip("Depth of this layer")]
+    [Tooltip("Target Depth of this layer")]
     [Min(0)] public float depth;
-    [HideInInspector] public float genDepth;
 
-    [Tooltip("Transition margin at the top")]
+    [HideInInspector] 
+    public float genDepth;
+
+    [Tooltip("Size of the transition into the above layer")]
     [Min(0)] public float topTransition;
-
-    [Tooltip("Transition margin at bottom")]
+    [Tooltip("Size of the transition into the below layer")]
     [Min(0)] public float bottomTransition;
-
+    
     [Min(0)] public float chasmRadius;
 
-    public float groundThickness;
+    [Min(0)] public float groundThickness;
+    [Tooltip("Depth of the centre of the created ground plane")]
     public float groundDepth;
 
-    public float groundHeightChangeMax;
+    [Tooltip("Maximum change in height from groundDepth that can occur")]
+    [Min(0)] public float groundHeightChangeMax;
+    [Tooltip("Size of height change noise")]
     [Range(0f, 1f)] public float groundHeightChangeScale;
-    public int groundHeightChangeComplexity;
-    public float groundHeightChangeDistortionStrength;
+    [Tooltip("Complexity of the noise used to change the height (0 = No height change)")]
+    [Min(0)] public int groundHeightChangeComplexity;
+    [Tooltip("Strength of the distortion effect applied to height change noise")]
+    [Min(0)] public float groundHeightChangeDistortionStrength;
 
     [Range(0f, 1f)] public float surfaceRoughness;
-    public float surfaceFeatureDepth;
+    [Tooltip("Maximum depth of the surface roughness features")]
+    [Min(0)] public float surfaceFeatureDepth;
 
+    [Tooltip("Density of pillar spawning")]
     [Range(0f, 1f)] public float pillarDensity;
+    [Tooltip("Size of pillars spawned (Also slightly affected by density)")]
     [Range(0f, 1f)] public float pillarScale;
+    [Tooltip("What sides of the ground will pillars not be spawned on")]
     public PillarIgnoreState pillarIgnoreState;
 
-    [Space]
-    [Space]
-
-    //Probably temp
     [Min(0)] public int octaves;
     [Min(0)] public float frequency;
     [Range(0f, 2f)] public float persistance;

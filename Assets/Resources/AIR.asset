@@ -13,13 +13,17 @@ MonoBehaviour:
   m_Name: AIR
   m_EditorClassIdentifier: 
   origin: {x: 0, y: 0, z: 0}
-  depth: 64
-  genDepth: 60
+  depth: 128
+  genDepth: 124
   topTransition: 0
-  bottomTransition: 0
+  bottomTransition: 16
   chasmRadius: 0
-  groundThickness: 1
-  groundDepth: 128
+  groundThickness: 4
+  groundDepth: -128
+  groundHeightChangeMax: 0
+  groundHeightChangeScale: 0
+  groundHeightChangeComplexity: 0
+  groundHeightChangeDistortionStrength: 0
   surfaceRoughness: 0
   surfaceFeatureDepth: 0
   pillarDensity: 0

@@ -139,7 +139,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &290531733
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -153,18 +153,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   orbits:
-  - offset: {x: 0, y: 6, z: 0}
-    radius: 2.5
-    height: 0
-  - offset: {x: 0, y: 3, z: 0}
-    radius: 5
-    height: 3
-  - offset: {x: 0, y: 1, z: 0}
+  - offset: {x: 0, y: 9, z: 0}
     radius: 3
-    height: 5
-  - offset: {x: 0, y: -0.94, z: 0}
-    radius: 1
-    height: 6.94
+    height: 0
+  - offset: {x: 0, y: 6, z: 0}
+    radius: 7
+    height: 3
+  - offset: {x: 0, y: 2, z: 0}
+    radius: 10
+    height: 7
+  - offset: {x: 0, y: -4, z: 0}
+    radius: 7
+    height: 13
+  - offset: {x: 0, y: -7, z: 0}
+    radius: 3
+    height: 16
   orbitAround: {fileID: 1638216716}
   affectedCamera: {fileID: 812795195}
   mouseSensitivity: {x: 1, y: 1}
@@ -178,7 +181,7 @@ MonoBehaviour:
     m_Bits: 64
   avoidOcclusionSmoothingTime: 0
   avoidOcclusionBufferLength: 0.3
-  showOrbitWireframes: 0
+  showOrbitWireframes: 1
 --- !u!4 &290531734
 Transform:
   m_ObjectHideFlags: 0
@@ -602,7 +605,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1638216716
 Transform:
   m_ObjectHideFlags: 0
