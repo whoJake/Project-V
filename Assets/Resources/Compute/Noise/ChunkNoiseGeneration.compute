@@ -50,7 +50,6 @@ float3 WorldPosToSamplePos(float3 worldPos) {
 float SampleDensity(float3 worldPos, LayerSettings settings) {
     //Texture-Space position of the sample point. /float3(256, 256, 256) is a bit arbitrary but it helps the frequency values be a bit more reasonable
     float3 samplePos = WorldPosToSamplePos(worldPos);
-    float depthPercent = saturate(invlerp(worldPos.y, settings.origin.y, settings.origin.y - settings.depth));
 
     //Carve out chasm
     float2 chasmCentre = float2(settings.origin.x, settings.origin.z);
@@ -69,11 +68,12 @@ float SampleDensity(float3 worldPos, LayerSettings settings) {
     //FREQUENCY = 0.001 - 0.005
     //PERSISTANCE = 0.6
     //LACUNARITY = 1.5
-    float groundHeightChangeFrequency = lerp(0.001, 0.005, 1 - settings.groundHeightChangeScale);
+    float groundHeightChangeFrequency = lerp(0.15, 1.15, 1 - settings.groundHeightChangeScale);
 
     float3 groundCentreWorldPos = float3(worldPos.x, groundCentreWorldY, worldPos.z);
-    float3 warpedGroundCentreWorldPos = warp_coords(groundCentreWorldPos, 5, groundHeightChangeFrequency / 2, 0.4, 1.6, settings.groundHeightChangeDistortionStrength);
-    float groundHeightChange = fnoise01(warpedGroundCentreWorldPos, settings.groundHeightChangeComplexity, groundHeightChangeFrequency, 0.6, 1.5) * 2 - 1;
+    float3 warpedGroundCentreWorldPos = warp_coords(groundCentreWorldPos, 5, groundHeightChangeFrequency / 6, 0.4, 1.6, settings.groundHeightChangeDistortionStrength);
+    float3 warpedGroundCentreSamplePos = WorldPosToSamplePos(warpedGroundCentreWorldPos);
+    float groundHeightChange = fnoise01(warpedGroundCentreSamplePos, settings.groundHeightChangeComplexity, groundHeightChangeFrequency, 0.6, 1.5) * 2 - 1;
 
     //<0 bottom side of ground, >0 top side of ground
     float dstFromGroundCentre = worldPos.y - groundCentreWorldY;
@@ -85,11 +85,11 @@ float SampleDensity(float3 worldPos, LayerSettings settings) {
     float groundMask = 1 - saturate(remap(dstFromGroundSurface, 0, groundFalloffDistance, 0, 1));
 
     //--SURFACE TEXTURE--
-    //==1 at surface, ==0 at groundFalloffDistance
+    //==1 at surface, ==0 at surfaceFeatureDepth
     float surfaceMask = 1 - saturate(remap(abs(dstFromGroundSurface), 0, settings.surfaceFeatureDepth, 0, 1));
 
     //GOOD RANGE FOR SURFACE NOIES VALUES, CAN CHANGE
-    //OCTAVES = 6
+    //OCTAVES = 5
     //FREQUENCY = 1.2 - 3.8
     //PERSISTANCE = 0.6
     //LACUNARITY = 1.6 - 1.7
@@ -97,10 +97,14 @@ float SampleDensity(float3 worldPos, LayerSettings settings) {
     float surfaceNoiseLacunarity = lerp(1.6, 1.7, settings.surfaceRoughness);
     float surfaceNoise = fnoise01(samplePos, 5, surfaceNoiseFrequency, 0.6, surfaceNoiseLacunarity) * 2 - 1;
 
+    //Adds high frequency noise to the inside of the ground, makes the edge of the chasm less uniform as a result
+    float3 scaledInnerGroundWorldPos = float3(samplePos.x * 1.5, samplePos.y * 0.75, samplePos.z * 1.25);
+    float innerGroundNoise = fnoise01(scaledInnerGroundWorldPos, 4, 3, 0.6, 1.5);
+
     //--CONNECTING STRANDS--
     float strandYScale = 42 / settings.depth; //perfect for 256
     float3 strandWorldPos = float3(worldPos.x, worldPos.y * strandYScale, worldPos.z);
-    float3 strandWarpWorldPos = warp_coords(strandWorldPos, 3, 1.5, 0.4, 1.6, 0.6);
+    float3 strandWarpWorldPos = warp_coords(strandWorldPos, 3, 2, 0.4, 1.6, 0.5);
     float3 strandSamplePos = WorldPosToSamplePos(strandWarpWorldPos);
     
     //GOOD RANGE FOR CONNECTING STRANDS NOISE VALUES, CAN CHANGE
@@ -123,6 +127,7 @@ float SampleDensity(float3 worldPos, LayerSettings settings) {
     float result = surfaceNoise * surfaceMask * chasmMask;
     result += groundMask * chasmMask;
     result += strandShape;
+    result += innerGroundNoise * (groundMask * (1 - surfaceMask) * (chasmMask));
     return result;
 
     //return strandShape;

@@ -29,9 +29,9 @@ public class TerrainLayer
                                                 handler.chunkSize.z - 1);
 
         //Constantly having to account for num of voxels per axis being 1 less than number of points per axis is annoying
-        Vector3Int chunkCount = Vector3Int.FloorToInt(new Vector3(handler.generatedArea.x / voxelsPerAxis.x,
-                                                                 depth / voxelsPerAxis.y,
-                                                                 handler.generatedArea.y / voxelsPerAxis.z) / handler.voxelScale);
+        Vector3Int chunkCount = new Vector3Int(Mathf.CeilToInt(handler.generatedArea.x / voxelsPerAxis.x / handler.voxelScale),
+                                               Mathf.FloorToInt(depth / voxelsPerAxis.y / handler.voxelScale),
+                                               Mathf.CeilToInt(handler.generatedArea.y / voxelsPerAxis.z / handler.voxelScale));
 
         Debug.Log(chunkCount + " chunks dispatched to generate");
 
