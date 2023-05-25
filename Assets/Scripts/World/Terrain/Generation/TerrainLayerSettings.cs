@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using static UnityEngine.GraphicsBuffer;
 
 [CreateAssetMenu(menuName =  "Terrain/Layer Settings", order = 1)]
 public class TerrainLayerSettings : ScriptableObject
@@ -53,6 +54,47 @@ public class TerrainLayerSettings : ScriptableObject
     [Min(0)] public float frequency;
     [Range(0f, 2f)] public float persistance;
     [Min(0)] public float lacunarity;
+
+    public static TerrainLayerSettings GetAllRandom() {
+        TerrainLayerSettings result = ScriptableObject.CreateInstance<TerrainLayerSettings>();
+        result.depth = Random.Range(128f, 256f);
+        result.topTransition = Random.Range(4f, 16f);
+        result.bottomTransition = 0f;
+        result.chasmRadius = Random.Range(200f, 300f);
+
+        result.groundDepth = Random.Range(32f, result.depth - 32f);
+
+        float maxGroundThickness = Mathf.Min(result.groundDepth, result.depth - result.groundDepth) * 2f;
+        result.groundThickness = Random.Range(16f, maxGroundThickness);
+
+        result.groundHeightChangeComplexity = Random.Range(0, 5);
+        result.groundHeightChangeDistortionStrength = Random.Range(0f, 2f);
+        result.groundHeightChangeScale = Random.Range(0f, 1f);
+
+        float maxGroundHeightChange = Mathf.Max(0f, Mathf.Min(result.groundDepth - (result.groundThickness / 2f), result.depth - result.groundDepth - (result.groundThickness / 2f)));
+        result.groundHeightChangeMax = Random.Range(0f, maxGroundHeightChange);
+
+        result.surfaceFeatureDepth = Random.Range(0f, result.groundThickness);
+        result.surfaceRoughness = Random.Range(0f, 0.7f);
+
+        result.pillarDensity = Random.Range(0f, 0.6f);
+        result.pillarScale = Random.Range(0f, 1f);
+
+        float pillarIgnoreStateRandom = Random.Range(0f, 1f);
+        if(pillarIgnoreStateRandom < 0.1f) {
+            result.pillarIgnoreState = PillarIgnoreState.All;
+        }else if(pillarIgnoreStateRandom < 0.4f) {
+            result.pillarIgnoreState = PillarIgnoreState.None;
+        }else if(pillarIgnoreStateRandom < 0.7f) {
+            result.pillarIgnoreState = PillarIgnoreState.Below;
+        } else {
+            result.pillarIgnoreState = PillarIgnoreState.Above;
+        }
+
+        result.pillarIgnoreState = (PillarIgnoreState) Random.Range(-1, 3);
+
+        return result;
+    }
 
     public static TerrainLayerSettings GetRandom() {
         string name = "layer" + Random.Range(1, 6);

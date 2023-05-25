@@ -58,6 +58,7 @@ public class TerrainLayer
                 }
             }
         }
+        handler.layersGenerated++;
     }
 
 

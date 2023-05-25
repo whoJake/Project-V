@@ -73,7 +73,7 @@ float SampleDensity(float3 worldPos, LayerSettings settings) {
     float3 groundCentreWorldPos = float3(worldPos.x, groundCentreWorldY, worldPos.z);
     float3 warpedGroundCentreWorldPos = warp_coords(groundCentreWorldPos, 5, groundHeightChangeFrequency / 6, 0.4, 1.6, settings.groundHeightChangeDistortionStrength);
     float3 warpedGroundCentreSamplePos = WorldPosToSamplePos(warpedGroundCentreWorldPos);
-    float groundHeightChange = fnoise01(warpedGroundCentreSamplePos, settings.groundHeightChangeComplexity, groundHeightChangeFrequency, 0.6, 1.5) * 2 - 1;
+    float groundHeightChange = fnoise01(warpedGroundCentreSamplePos, settings.groundHeightChangeComplexity, groundHeightChangeFrequency, 0.6, 1.5);
 
     //<0 bottom side of ground, >0 top side of ground
     float dstFromGroundCentre = worldPos.y - groundCentreWorldY;

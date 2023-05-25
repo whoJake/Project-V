@@ -15,9 +15,9 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 0
-  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_FogColor: {r: 0.7529412, g: 0.7529412, b: 0.7529412, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.01
+  m_FogDensity: 0.0018
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
@@ -258,13 +258,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1bdcc9f38dd89b4c89f085f59a52a75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  settings: {fileID: 11400000, guid: d05af63fe316d62449ebc1bb808aa08f, type: 2}
+  layersGenerated: 0
+  player: {fileID: 1638216718}
+  authoredSettings: {fileID: 11400000, guid: d05af63fe316d62449ebc1bb808aa08f, type: 2}
+  activeSettings: {fileID: 0}
+  authorLayers: 0
+  randomGenCount: 20
   generatedArea: {x: 1024, y: 1024}
   chunkSize: {x: 32, y: 32, z: 32}
   margin: 0
   voxelScale: 4
   material: {fileID: 2100000, guid: 4d1e4909787630147a86fc4972d45811, type: 2}
-  showLayerBounds: 0
+  showLayerBounds: 1
 --- !u!4 &579274941
 Transform:
   m_ObjectHideFlags: 0
@@ -348,7 +353,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.7529412, g: 0.7529412, b: 0.7529412, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -614,7 +619,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1638216715}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 150, y: 20, z: 0}
+  m_LocalPosition: {x: 300, y: -120, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -640,7 +645,7 @@ MonoBehaviour:
   bonusHealthPoints: 0
   baseMovementSpeed: 13
   bonusMovementSpeed: 0
-  baseSprintMultiplier: 1.5
+  baseSprintMultiplier: 2
   bonusSprintMultiplier: 0
   baseJumpHeight: 7
   bonusJumpHeight: 0
@@ -658,12 +663,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeToApex: 0.5
   gravityWhilstFallingMultiplier: 1.2
-  terminalVelocity: 30
+  terminalVelocity: 45
   groundAccelerationTime: 0.2
   sprintTransitionTime: 0.1
   airbourneMovementPenalty: 2
   hitGroundEventThreshold: 5
   velocity: {x: 0, y: 0, z: 0}
+  isActive: 0
   disableBunnyhopping: 0
 --- !u!143 &1638216719
 CharacterController:

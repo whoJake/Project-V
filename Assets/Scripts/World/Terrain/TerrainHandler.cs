@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class TerrainHandler : MonoBehaviour
 {
+    [HideInInspector]
+    public float layersGenerated = 0;
+    public PlayerMovement player;
+
     public TerrainSettings authoredSettings;
     private TerrainLayer[] terrainLayers;
 
@@ -28,12 +32,16 @@ public class TerrainHandler : MonoBehaviour
         StartCoroutine(GenerateTerrain(activeSettings));
     }
 
+    private void Update() {
+        player.isActive = layersGenerated > 1;
+    }
+
     TerrainSettings GenerateLayers(int count) {
         TerrainSettings result = ScriptableObject.CreateInstance<TerrainSettings>();
         result.layers = new TerrainLayerSettings[count + 1];
         result.layers[0] = Resources.Load<TerrainLayerSettings>("AIR");
         for(int i = 0; i < count; i++) {
-            result.layers[i + 1] = TerrainLayerSettings.GetRandom();
+            result.layers[i + 1] = TerrainLayerSettings.GetAllRandom();
         }
         return result;
     }
@@ -45,9 +53,14 @@ public class TerrainHandler : MonoBehaviour
         Vector3 layerOrigin = Vector3.zero;
         for (int layer = 0; layer < settings.layers.Length; layer++) {
             TerrainLayerSettings nLayerSettings = settings.layers[layer];
-            float generatedDepth = Mathf.FloorToInt(nLayerSettings.depth / (chunkSize.y - 1)) * (chunkSize.y - 1);// * voxelScale;
+            float voxelsPerY = chunkSize.y - 1;
+            float chunksOnY = Mathf.FloorToInt(nLayerSettings.depth / voxelsPerY / voxelScale);
+            float generatedDepth = chunksOnY * voxelsPerY * voxelScale;
+
             nLayerSettings.genDepth = generatedDepth;
+            Debug.Log("Layer " + layer + " generating to a depth of " + generatedDepth);
             nLayerSettings.origin = layerOrigin;
+
             layerOrigin.y -= generatedDepth + (margin * voxelScale);
         }
 

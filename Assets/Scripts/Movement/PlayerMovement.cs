@@ -36,6 +36,7 @@ public class PlayerMovement : MonoBehaviour
     private float moveSpeed;
     private float sprintKeyHeldTime;
 
+    public bool isActive;
     private float gravity;
     private float initialJumpVelocity;
 
@@ -70,6 +71,8 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void Update() {
+        if (!isActive) return;
+
         UpdateState();
 
         CalculateMoveSpeed();
