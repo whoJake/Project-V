@@ -9,6 +9,9 @@ public class TerrainLayer
     public readonly Vector3 origin;
     private readonly TerrainHandler handler;
 
+    private bool isGenerated = false;
+    public bool IsGenerated { get { return isGenerated; } }
+
     public TerrainLayer(int _id, GameObject _gameObject, Vector3 _origin, TerrainHandler _handler) {
         gameObject = _gameObject;
         id = _id;
@@ -58,9 +61,8 @@ public class TerrainLayer
                 }
             }
         }
-        handler.layersGenerated++;
+        isGenerated = true;
     }
-
 
     //
     // Summery:

@@ -12,23 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1850c2ed4c1dcf64c83e51f3a3e0ce1e, type: 3}
   m_Name: layer5
   m_EditorClassIdentifier: 
-  origin: {x: 0, y: -868, z: 0}
-  depth: 256
+  origin: {x: 0, y: -124, z: 0}
   genDepth: 248
+  depth: 256
   topTransition: 16
   bottomTransition: 0
   chasmRadius: 250
   groundThickness: 128
-  groundDepth: 128
-  groundHeightChangeMax: 0
-  groundHeightChangeScale: 0
-  groundHeightChangeComplexity: 0
+  groundDepth: 192
+  groundHeightChangeMax: 128
+  groundHeightChangeScale: 1
+  groundHeightChangeComplexity: 5
   groundHeightChangeDistortionStrength: 0
-  surfaceRoughness: 0.72
-  surfaceFeatureDepth: 32
+  surfaceRoughness: 0.631
+  surfaceFeatureDepth: 1
   pillarDensity: 0.053
   pillarScale: 0.453
-  pillarIgnoreState: -1
+  pillarIgnoreState: 2
   octaves: 5
   frequency: 0.6
   persistance: 0.4

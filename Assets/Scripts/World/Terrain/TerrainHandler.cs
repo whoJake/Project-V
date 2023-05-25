@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class TerrainHandler : MonoBehaviour
 {
-    [HideInInspector]
-    public float layersGenerated = 0;
     public PlayerMovement player;
 
     public TerrainSettings authoredSettings;
@@ -33,9 +31,19 @@ public class TerrainHandler : MonoBehaviour
     }
 
     private void Update() {
-        player.isActive = layersGenerated > 1;
+        if (terrainLayers?[1] != null) {
+            //Let player fall once the first layer is generated that isnt air
+            player.isActive = terrainLayers[1].IsGenerated;
+        }
     }
 
+    //
+    // Summery:
+    //   Generate randomly generated layers
+    //
+    // Parameters:
+    //   count:
+    //     number of layers to be generated
     TerrainSettings GenerateLayers(int count) {
         TerrainSettings result = ScriptableObject.CreateInstance<TerrainSettings>();
         result.layers = new TerrainLayerSettings[count + 1];
@@ -46,6 +54,7 @@ public class TerrainHandler : MonoBehaviour
         return result;
     }
 
+    //Currently an IEnumerator, not perfect as means only maximum/minimum 1 chunk can be drawn per frame and its still not waiting on it
     IEnumerator GenerateTerrain(TerrainSettings settings) {
         terrainLayers = new TerrainLayer[settings.layers.Length];
 
@@ -64,7 +73,7 @@ public class TerrainHandler : MonoBehaviour
             layerOrigin.y -= generatedDepth + (margin * voxelScale);
         }
 
-        TerrainChunk.InitializeCompute();
+        TerrainChunk.InitializeCompute(settings);
         layerOrigin = Vector3.zero;
         for(int layer = 0; layer < settings.layers.Length; layer++) {
             //Make GameObject parent for layer
@@ -80,6 +89,9 @@ public class TerrainHandler : MonoBehaviour
             yield return nLayer.Generate(layerSettings.depth);
             layerOrigin.y -= layerSettings.genDepth + (margin * voxelScale);
         }
+
+        //All layers have finished generating
+        TerrainChunk.ReleaseBuffers();
     }
 
     private void OnDrawGizmos() {

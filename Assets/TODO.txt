@@ -74,23 +74,22 @@ World
 	General
 		When layers both have transition values for the same face between layers an error should be outputted
 		Maybe have some kind of gameplay element that seperates the layer (mist etc.) to cover up the transition and hide the uglyness
+		Look into better method for fog, exponential squared fog looks terrible because of the diagonal viewing issue
+
 	ChunkNoiseGeneration.compute
-		Should be some kind of noise to vary the transition height so that the transition line isnt so visible (maybe not possible)
 		Caves
 		Some kind of ceiling feature
-		Heightmap changing
-	TerrainLayerSettingsEditor.cs
-		Update
-		Needs some kind of check for top and bottom transitions (maybe handled by TerrainSettingsEditor.cs)
+		Figure out data structure of chunks to be saved and stored
+		Add terrain affectors outside of generation (rays, points, cubes, connecting paths between layers)
 
 	Theory
-		125 MIN RADIUS -> 250 MIN DIAMETER
-		512 MAX SIZE A.K.A NOISE TEXTURE SIZE
-		2D noise taken at this radius which is used as a +- from this radius, gives hole its shape
+		256 MIN RADIUS -> 500 MIN DIAMETER
+		1024 MAX SIZE A.K.A NOISE TEXTURE SIZE
 		Nodes have a bunch of stats such as isGround, growth countdown, type all that can be used to affect it over time
 		Terrain can be transformed by certain terrain affectors, circular, ray, etc
 
 	Chunk
+		OUTDATED
 		512 total size split into 8 -> 128x128 chunks
 		128 tall?
 		10.5m nodes per chunk
@@ -103,13 +102,7 @@ World
 
 	MeshMaths.cs
 		Add method that can join meshInfos
-		Add method to remove shared vertices
-	How is this mesh going to be created
-	Noise needs to be made but creating this in a bit texture is expensive so it'll have to be prodedural to displace the vertices
-	Will displacing the vertices even work? Need to look at something else like marching cubes or (the one No Mans Sky uses)
-	Make each layer seperately (anything to decrease complexity)
-	Maybe make each layer as a long line and then wrap it around the centre to create the hole
-	Think how sectors will be connected (classic problem)
+
 	Perhaps a representation of visibility in order to better LOD these chunks
 
 	How will lighting work when there is no direct sunlight to a lot of the map, obviously big whole in middle but it might not be possible for that to theoritically light the entire area

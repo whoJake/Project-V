@@ -33,10 +33,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] //For display not editing
     private Vector3 velocity;
 
+    [SerializeField]
+    private bool endlessJump;
+
     private float moveSpeed;
     private float sprintKeyHeldTime;
 
-    public bool isActive;
     private float gravity;
     private float initialJumpVelocity;
 
@@ -53,6 +55,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private bool disableBunnyhopping;
     private bool canJump;
+
+    [HideInInspector]
+    public bool isActive;
 
     //Events
     public delegate void onHitGround(Vector3 position, float downwardSpeed);
@@ -211,7 +216,7 @@ public class PlayerMovement : MonoBehaviour
         if (!jumpKeyPressed && !isJumping) canJump = true; //This is to effectively disables bunnyhopping
                                                            //No cooldown to jumping so can still technically jump on first frame and only experience one frame of floor drag
 
-        if(controller.isGrounded && jumpKeyPressed && !isJumping) {
+        if((controller.isGrounded && jumpKeyPressed && !isJumping) || (endlessJump && jumpKeyPressed)) {
             if (disableBunnyhopping && !canJump) return;
             canJump = false;
             isJumping = true;

@@ -9,6 +9,8 @@ public class TerrainChunk
     private static ComputeShader computeDensityShader;
     private static ComputeShader computeVerticesShader;
 
+    private static ComputeBuffer layerSettingsBuffer;
+
     private readonly TerrainLayer layer;
     private readonly Vector3 centre; //Centre point of chunk
     private readonly Vector3Int voxelDimensions; //Number of voxels per each axis
@@ -69,12 +71,6 @@ public class TerrainChunk
     //   densityTexture:
     //     empty texture to put density values in
     private void ComputeDensity(RenderTexture densityTexture, TerrainSettings settings) {
-        ComputeBuffer settingsBuffer = new ComputeBuffer(settings.layers.Length, TerrainLayerSettings.stride); //Probably move this so that settingsBuffer can be flushed
-        settingsBuffer.SetData(settings.layersStruct);
-
-        computeDensityShader.SetBuffer(0, "_ChunkSettings", settingsBuffer);
-        computeDensityShader.SetInt("seed", settings.seed);
-
         computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
         computeDensityShader.SetInt("layer_index", layer.id);
         computeDensityShader.SetFloat("voxel_scale", voxelScale);
@@ -84,8 +80,6 @@ public class TerrainChunk
         Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);
         Debug.Log((Vector3)threads + " threads dispatched for ComputeDensity");
         computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
-
-        settingsBuffer.Release();
     }
 
     //
@@ -136,19 +130,29 @@ public class TerrainChunk
     //
     // Summery:
     //   Loads the resources needed to start compute
-    public static void InitializeCompute() {
+    public static void InitializeCompute(TerrainSettings settings) {
         if (shadersLoaded) {
             Debug.Log("Compute shaders have already been initialized");
             return;
         }
 
+        //Could be big so we only set it once
+        layerSettingsBuffer = new ComputeBuffer(settings.layers.Length, TerrainLayerSettings.stride);
+        layerSettingsBuffer.SetData(settings.layersStruct);
+
         //Compute Density
         computeDensityShader = Resources.Load<ComputeShader>("Compute/Noise/ChunkNoiseGeneration");
+        computeDensityShader.SetBuffer(0, "_ChunkSettings", layerSettingsBuffer);
+        computeDensityShader.SetInt("seed", settings.seed);
 
         //Compute Vertices
         computeVerticesShader = Resources.Load<ComputeShader>("Compute/MCubes/MarchingCube");
 
         shadersLoaded = true;
+    }
+
+    public static void ReleaseBuffers() {
+        layerSettingsBuffer.Release();
     }
 
     //

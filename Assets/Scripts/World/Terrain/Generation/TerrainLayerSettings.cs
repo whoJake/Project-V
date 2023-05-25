@@ -1,9 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using static UnityEngine.GraphicsBuffer;
 
 [CreateAssetMenu(menuName =  "Terrain/Layer Settings", order = 1)]
 public class TerrainLayerSettings : ScriptableObject
@@ -12,53 +8,73 @@ public class TerrainLayerSettings : ScriptableObject
 
     [HideInInspector] 
     public Vector3 origin;
-
-    [Tooltip("Target Depth of this layer")]
-    [Min(0)] public float depth;
-
-    [HideInInspector] 
+    [HideInInspector]
     public float genDepth;
 
-    [Tooltip("Size of the transition into the above layer")]
-    [Min(0)] public float topTransition;
-    [Tooltip("Size of the transition into the below layer")]
-    [Min(0)] public float bottomTransition;
-    
-    [Min(0)] public float chasmRadius;
+    [Min(0)]        [Tooltip("Target Depth of this layer")]
+    public float depth;
 
-    [Min(0)] public float groundThickness;
-    [Tooltip("Depth of the centre of the created ground plane")]
+    [Min(0)]        [Tooltip("Size of the transition into the above layer")]
+    public float topTransition;
+
+    [Min(0)]        [Tooltip("Size of the transition into the below layer")]
+    public float bottomTransition;
+    
+    [Min(0)] 
+    public float chasmRadius;
+
+    [Min(0)] 
+    public float groundThickness;
+
+                    [Tooltip("Depth of the centre of the created ground plane")]
     public float groundDepth;
 
-    [Tooltip("Maximum change in height from groundDepth that can occur")]
-    [Min(0)] public float groundHeightChangeMax;
-    [Tooltip("Size of height change noise")]
-    [Range(0f, 1f)] public float groundHeightChangeScale;
-    [Tooltip("Complexity of the noise used to change the height (0 = No height change)")]
-    [Min(0)] public int groundHeightChangeComplexity;
-    [Tooltip("Strength of the distortion effect applied to height change noise")]
-    [Min(0)] public float groundHeightChangeDistortionStrength;
+    [Min(0)]        [Tooltip("Maximum change in height from groundDepth that can occur")]
+    public float groundHeightChangeMax;
 
-    [Range(0f, 1f)] public float surfaceRoughness;
-    [Tooltip("Maximum depth of the surface roughness features")]
-    [Min(0)] public float surfaceFeatureDepth;
+    [Range(0f, 1f)] [Tooltip("Size of height change noise")]
+    public float groundHeightChangeScale;
 
-    [Tooltip("Density of pillar spawning")]
-    [Range(0f, 1f)] public float pillarDensity;
-    [Tooltip("Size of pillars spawned (Also slightly affected by density)")]
-    [Range(0f, 1f)] public float pillarScale;
-    [Tooltip("What sides of the ground will pillars not be spawned on")]
+    [Min(0)]        [Tooltip("Complexity of the noise used to change the height (0 = No height change)")]
+    public int groundHeightChangeComplexity;
+
+    [Min(0)]        [Tooltip("Strength of the distortion effect applied to height change noise")]
+    public float groundHeightChangeDistortionStrength;
+
+    [Range(0f, 1f)] 
+    public float surfaceRoughness;
+
+    [Min(0)]        [Tooltip("Maximum depth of the surface roughness features")]
+    public float surfaceFeatureDepth;
+
+    [Range(0f, 1f)] [Tooltip("Density of pillar spawning")]
+    public float pillarDensity;
+
+    [Range(0f, 1f)] [Tooltip("Size of pillars spawned (Also slightly affected by density)")]
+    public float pillarScale;
+
+                    [Tooltip("What sides of the ground will pillars not be spawned on")]
     public PillarIgnoreState pillarIgnoreState;
 
-    [Min(0)] public int octaves;
-    [Min(0)] public float frequency;
-    [Range(0f, 2f)] public float persistance;
-    [Min(0)] public float lacunarity;
 
+    //Experimental Settings
+    [Min(0)] 
+    public int octaves;
+    [Min(0)] 
+    public float frequency;
+    [Range(0f, 2f)] 
+    public float persistance;
+    [Min(0)] 
+    public float lacunarity;
+
+    //
+    // Summery:
+    //   Create and return a TerrainLayerSettings with all random settings within reasonable bounds
+    //
     public static TerrainLayerSettings GetAllRandom() {
         TerrainLayerSettings result = ScriptableObject.CreateInstance<TerrainLayerSettings>();
         result.depth = Random.Range(128f, 256f);
-        result.topTransition = Random.Range(4f, 16f);
+        result.topTransition = Random.Range(8f, 32f);
         result.bottomTransition = 0f;
         result.chasmRadius = Random.Range(200f, 300f);
 
@@ -67,21 +83,22 @@ public class TerrainLayerSettings : ScriptableObject
         float maxGroundThickness = Mathf.Min(result.groundDepth, result.depth - result.groundDepth) * 2f;
         result.groundThickness = Random.Range(16f, maxGroundThickness);
 
-        result.groundHeightChangeComplexity = Random.Range(0, 5);
-        result.groundHeightChangeDistortionStrength = Random.Range(0f, 2f);
-        result.groundHeightChangeScale = Random.Range(0f, 1f);
+        result.groundHeightChangeComplexity = Random.Range(3, 6);
+        result.groundHeightChangeDistortionStrength = Random.Range(0f, 5f);
+        result.groundHeightChangeScale = Random.Range(0.6f, 1f);
 
         float maxGroundHeightChange = Mathf.Max(0f, Mathf.Min(result.groundDepth - (result.groundThickness / 2f), result.depth - result.groundDepth - (result.groundThickness / 2f)));
-        result.groundHeightChangeMax = Random.Range(0f, maxGroundHeightChange);
+        maxGroundHeightChange = Mathf.Min(maxGroundHeightChange, result.groundThickness / 1.5f);
+        result.groundHeightChangeMax = Random.Range(0.7f, 1f) * maxGroundHeightChange;
 
         result.surfaceFeatureDepth = Random.Range(0f, result.groundThickness);
-        result.surfaceRoughness = Random.Range(0f, 0.7f);
+        result.surfaceRoughness = Random.Range(0.3f, 0.7f);
 
         result.pillarDensity = Random.Range(0f, 0.6f);
         result.pillarScale = Random.Range(0f, 1f);
 
         float pillarIgnoreStateRandom = Random.Range(0f, 1f);
-        if(pillarIgnoreStateRandom < 0.1f) {
+        if(pillarIgnoreStateRandom < 0.02f) {
             result.pillarIgnoreState = PillarIgnoreState.All;
         }else if(pillarIgnoreStateRandom < 0.4f) {
             result.pillarIgnoreState = PillarIgnoreState.None;
@@ -96,30 +113,14 @@ public class TerrainLayerSettings : ScriptableObject
         return result;
     }
 
-    public static TerrainLayerSettings GetRandom() {
-        string name = "layer" + Random.Range(1, 6);
-        TerrainLayerSettings target = Resources.Load<TerrainLayerSettings>(name);
-        TerrainLayerSettings result = ScriptableObject.CreateInstance<TerrainLayerSettings>();
-        result.depth = target.depth;
-        result.topTransition = target.topTransition;
-        result.bottomTransition = target.bottomTransition;
-        result.groundThickness = target.groundThickness;
-        result.chasmRadius = target.chasmRadius;
-        result.groundDepth = target.groundDepth;
-        result.groundHeightChangeComplexity = target.groundHeightChangeComplexity;
-        result.groundHeightChangeDistortionStrength = target.groundHeightChangeDistortionStrength;
-        result.groundHeightChangeMax = target.groundHeightChangeMax;
-        result.groundHeightChangeScale = target.groundHeightChangeScale;
-        result.surfaceFeatureDepth = target.surfaceFeatureDepth;
-        result.surfaceRoughness = target.surfaceRoughness;
-        result.pillarDensity = target.pillarDensity;
-        result.pillarIgnoreState = target.pillarIgnoreState;
-        result.pillarScale = target.pillarScale;
-
-        return result;
+    public static TerrainLayerSettings LoadNewInstance(string resourceName) {
+        return Resources.Load<TerrainLayerSettings>(resourceName);
     }
 
-
+    //
+    // Summery:
+    //   Creates and returns this object as a struct.
+    //   This is used for passing into the compute buffer the settings
     public TerrainLayerSettingsStruct AsStruct() {
         return new TerrainLayerSettingsStruct {
             origin = origin,
@@ -160,6 +161,10 @@ public class TerrainLayerSettings : ScriptableObject
 
 }
 
+//
+// Summery:
+//   Struct representation of the above class
+//   Contains only values that the compute shader uses
 public struct TerrainLayerSettingsStruct {
     public Vector3 origin;
     public float depth;

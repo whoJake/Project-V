@@ -25,6 +25,7 @@ public class PlayerMovementEditor : Editor
     SerializedProperty airbourneMovementPenaltyProperty;
     SerializedProperty hitGroundEventThresholdProperty;
     SerializedProperty disableBunnyhoppingProperty;
+    SerializedProperty endlessJumpProperty;
 
     void OnEnable() {
         velocityProperty = serializedObject.FindProperty("velocity");
@@ -36,6 +37,7 @@ public class PlayerMovementEditor : Editor
         airbourneMovementPenaltyProperty = serializedObject.FindProperty("airbourneMovementPenalty");
         hitGroundEventThresholdProperty = serializedObject.FindProperty("hitGroundEventThreshold");
         disableBunnyhoppingProperty = serializedObject.FindProperty("disableBunnyhopping");
+        endlessJumpProperty = serializedObject.FindProperty("endlessJump");
     }
 
     private void CustomInspector() {
@@ -53,6 +55,9 @@ public class PlayerMovementEditor : Editor
         EditorGUILayout.PropertyField(airbourneMovementPenaltyProperty, new GUIContent("Airbourne Movement Penalty"));
         EditorGUILayout.PropertyField(hitGroundEventThresholdProperty, new GUIContent("HitGround Event Threshold"));
         EditorGUILayout.PropertyField(disableBunnyhoppingProperty, new GUIContent("Disable Bunnyhopping"));
+        EditorGUILayout.Space();
+
+        EditorGUILayout.PropertyField(endlessJumpProperty, new GUIContent("Endless jump?"));
 
         serializedObject.ApplyModifiedProperties();
     }
