@@ -23,7 +23,7 @@ public class TerrainLayer
     // Parameters:
     //   chunkCount:
     //     number of chunks per axis to generate
-    public void Generate(float depth) {
+    public IEnumerator Generate(float depth) {
         Vector3Int voxelsPerAxis = new Vector3Int(handler.chunkSize.x - 1,
                                                 handler.chunkSize.y - 1,
                                                 handler.chunkSize.z - 1);
@@ -53,7 +53,8 @@ public class TerrainLayer
                     GameObject chunkGameObject = CreateChunkGameObject(cid.x + "," + (-cid.y) + "," + cid.z, position);
                     TerrainChunk chunk = new TerrainChunk(this, position, handler.chunkSize, handler.margin, handler.voxelScale, chunkGameObject);
                     //Probably add this to some array or list
-                    chunk.Generate(handler.settings);
+                    chunk.Generate(handler.activeSettings);
+                    yield return null;
                 }
             }
         }

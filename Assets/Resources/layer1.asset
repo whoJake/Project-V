@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1850c2ed4c1dcf64c83e51f3a3e0ce1e, type: 3}
-  m_Name: layer
+  m_Name: layer1
   m_EditorClassIdentifier: 
   origin: {x: 0, y: -124, z: 0}
   depth: 128
   genDepth: 124
   topTransition: 0
   bottomTransition: 16
-  chasmRadius: 125
+  chasmRadius: 250
   groundThickness: 16
   groundDepth: 40
   groundHeightChangeMax: 6.22

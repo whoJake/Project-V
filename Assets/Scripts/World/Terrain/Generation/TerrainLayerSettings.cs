@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 [CreateAssetMenu(menuName =  "Terrain/Layer Settings", order = 1)]
 public class TerrainLayerSettings : ScriptableObject
@@ -51,6 +53,30 @@ public class TerrainLayerSettings : ScriptableObject
     [Min(0)] public float frequency;
     [Range(0f, 2f)] public float persistance;
     [Min(0)] public float lacunarity;
+
+    public static TerrainLayerSettings GetRandom() {
+        string name = "layer" + Random.Range(1, 6);
+        TerrainLayerSettings target = Resources.Load<TerrainLayerSettings>(name);
+        TerrainLayerSettings result = ScriptableObject.CreateInstance<TerrainLayerSettings>();
+        result.depth = target.depth;
+        result.topTransition = target.topTransition;
+        result.bottomTransition = target.bottomTransition;
+        result.groundThickness = target.groundThickness;
+        result.chasmRadius = target.chasmRadius;
+        result.groundDepth = target.groundDepth;
+        result.groundHeightChangeComplexity = target.groundHeightChangeComplexity;
+        result.groundHeightChangeDistortionStrength = target.groundHeightChangeDistortionStrength;
+        result.groundHeightChangeMax = target.groundHeightChangeMax;
+        result.groundHeightChangeScale = target.groundHeightChangeScale;
+        result.surfaceFeatureDepth = target.surfaceFeatureDepth;
+        result.surfaceRoughness = target.surfaceRoughness;
+        result.pillarDensity = target.pillarDensity;
+        result.pillarIgnoreState = target.pillarIgnoreState;
+        result.pillarScale = target.pillarScale;
+
+        return result;
+    }
+
 
     public TerrainLayerSettingsStruct AsStruct() {
         return new TerrainLayerSettingsStruct {

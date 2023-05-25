@@ -123,7 +123,7 @@ float SampleDensity(float3 worldPos, LayerSettings settings) {
 
     float strandShape = strandNoise * chasmMask * (1 - groundMask) * strandIgnoreMultiplier;
 
-    float noise = fnoise01(samplePos, settings.octaves, settings.frequency, settings.persistance, settings.lacunarity);
+    //float noise = fnoise01(samplePos, settings.octaves, settings.frequency, settings.persistance, settings.lacunarity);
     float result = surfaceNoise * surfaceMask * chasmMask;
     result += groundMask * chasmMask;
     result += strandShape;
