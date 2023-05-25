@@ -72,7 +72,7 @@ float SampleDensity(float3 worldPos, LayerSettings settings) {
     float groundHeightChangeFrequency = lerp(0.001, 0.005, 1 - settings.groundHeightChangeScale);
 
     float3 groundCentreWorldPos = float3(worldPos.x, groundCentreWorldY, worldPos.z);
-    float3 warpedGroundCentreWorldPos = warp_coords(groundCentreWorldPos, 3, groundHeightChangeFrequency * 2, 0.4, 1.6, settings.groundHeightChangeDistortionStrength);
+    float3 warpedGroundCentreWorldPos = warp_coords(groundCentreWorldPos, 5, groundHeightChangeFrequency / 2, 0.4, 1.6, settings.groundHeightChangeDistortionStrength);
     float groundHeightChange = fnoise01(warpedGroundCentreWorldPos, settings.groundHeightChangeComplexity, groundHeightChangeFrequency, 0.6, 1.5) * 2 - 1;
 
     //<0 bottom side of ground, >0 top side of ground
@@ -95,10 +95,10 @@ float SampleDensity(float3 worldPos, LayerSettings settings) {
     //LACUNARITY = 1.6 - 1.7
     float surfaceNoiseFrequency = lerp(1.2, 3.8, settings.surfaceRoughness);
     float surfaceNoiseLacunarity = lerp(1.6, 1.7, settings.surfaceRoughness);
-    float surfaceNoise = fnoise01(samplePos, 6, surfaceNoiseFrequency, 0.6, surfaceNoiseLacunarity) * 2 - 1;
+    float surfaceNoise = fnoise01(samplePos, 5, surfaceNoiseFrequency, 0.6, surfaceNoiseLacunarity) * 2 - 1;
 
     //--CONNECTING STRANDS--
-    float strandYScale = 0.2;
+    float strandYScale = 42 / settings.depth; //perfect for 256
     float3 strandWorldPos = float3(worldPos.x, worldPos.y * strandYScale, worldPos.z);
     float3 strandWarpWorldPos = warp_coords(strandWorldPos, 3, 1.5, 0.4, 1.6, 0.6);
     float3 strandSamplePos = WorldPosToSamplePos(strandWarpWorldPos);

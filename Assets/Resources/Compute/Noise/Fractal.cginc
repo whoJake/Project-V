@@ -40,9 +40,9 @@ float fnoise01(float3 pos, int octaves, float freq, float persistance, float lac
 
 float3 warp_coords(float3 pos, int octaves, float frequency, float persistance, float lacunarity, float strength){
     //Arbitruary offsets
-    float3 dOffset1 = float3(1.9, 0.9, 5.2);
-    float3 dOffset2 = float3(6.1, -2.8, 3.9);
-    float3 dOffset3 = float3(-3.8, -5.1, 6.7);
+    float3 dOffset1 = float3(1.9, 0.9, 5.2) * strength;
+    float3 dOffset2 = float3(6.1, -2.8, 3.9) * strength;
+    float3 dOffset3 = float3(-3.8, -5.1, 6.7) * strength;
 
     float wx = fnoise(pos + dOffset1, octaves, frequency, persistance, lacunarity);
     float wy = fnoise(pos + dOffset2, octaves, frequency, persistance, lacunarity);
