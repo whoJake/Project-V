@@ -28,7 +28,8 @@ public class TerrainHandler : MonoBehaviour
         activeSettings = authorLayers ? authoredSettings : GenerateLayerSettings(randomGenCount);
         //Randomize seed
         activeSettings.seed = Random.Range(0, 1024);
-        StartCoroutine(GenerateTerrain(activeSettings));
+        InitializeGeneration();
+        //StartCoroutine(GenerateTerrain(activeSettings));
     }
 
     private void Update() {
@@ -45,14 +46,13 @@ public class TerrainHandler : MonoBehaviour
     }
 
     private void UpdateLayerActivity() {
-        //Find layer
+        //Find layer that player is on
         int playerLayerIndex = 0;
         for(int layer = 0; layer < terrainLayers.Length; layer++) {
-            if (terrainLayers[layer] == null) break; //Likely reached the bottom of what has been generated
-            if (terrainLayers[layer].state == ActiveState.Inactive) continue;
+            TerrainLayerSettings layerSettings = activeSettings.layers[layer];
             //player is in layer
-            if (player.transform.position.y <= terrainLayers[layer].origin.y &&
-                player.transform.position.y >= terrainLayers[layer].origin.y - activeSettings.layers[layer].genDepth) {
+            if (player.transform.position.y <= layerSettings.origin.y &&
+                player.transform.position.y >= layerSettings.origin.y - layerSettings.genDepth) {
                 playerLayerIndex = layer;
                 break;
             }
@@ -60,15 +60,22 @@ public class TerrainHandler : MonoBehaviour
 
         //Update all layers
         for(int i = 0; i < terrainLayers.Length; i++) {
-            if (terrainLayers[i] == null) break; //Likely reached the bottom of what has been generated
             int dstFromPlayer = Mathf.Abs(playerLayerIndex - i);
 
-            ActiveState changeToState;
-            if (dstFromPlayer < 2) changeToState = ActiveState.Active;
-            else if (dstFromPlayer < 7) changeToState = ActiveState.Static;
-            else changeToState = ActiveState.Inactive;
+            //Check generation step
+            ActiveState calcState;
+            if(dstFromPlayer < 2) {
+                calcState = ActiveState.Active;
+            }
+            else if(dstFromPlayer < 7) {
+                calcState = ActiveState.Static;
+            } else {
+                calcState = ActiveState.Inactive;
+            }
 
-            terrainLayers[i].state = changeToState;
+            if (terrainLayers[i] == null && calcState == ActiveState.Inactive) continue;
+            if (terrainLayers[i] == null) GenerateLayer(i, calcState);
+            else terrainLayers[i].state = calcState;
         }
     }
 
@@ -100,14 +107,13 @@ public class TerrainHandler : MonoBehaviour
         return result;
     }
 
-    //Currently an IEnumerator, not perfect as means only maximum/minimum 1 chunk can be drawn per frame and its still not waiting on it
-    IEnumerator GenerateTerrain(TerrainSettings settings) {
-        terrainLayers = new TerrainLayer[settings.layers.Length];
+    void InitializeGeneration() {
+        terrainLayers = new TerrainLayer[activeSettings.layers.Length];
 
         //Pre-pass for setting variables needed in settings
         Vector3 layerOrigin = generationStartPosition;
-        for (int layer = 0; layer < settings.layers.Length; layer++) {
-            TerrainLayerSettings nLayerSettings = settings.layers[layer];
+        for (int layer = 0; layer < activeSettings.layers.Length; layer++) {
+            TerrainLayerSettings nLayerSettings = activeSettings.layers[layer];
             float voxelsPerY = chunkSize.y - 1;
             float chunksOnY = Mathf.FloorToInt(nLayerSettings.depth / voxelsPerY / voxelScale);
             float generatedDepth = chunksOnY * voxelsPerY * voxelScale;
@@ -118,9 +124,30 @@ public class TerrainHandler : MonoBehaviour
 
             layerOrigin.y -= generatedDepth + (margin * voxelScale);
         }
+        TerrainChunk.InitializeCompute(activeSettings);
+    }
+
+    void GenerateLayer(int layerIndex, ActiveState genState) {
+        if (terrainLayers[layerIndex] != null) {
+            Debug.Log("layer already generated");
+            return;
+        }
+
+        GameObject parent = new GameObject("Layer: " + layerIndex);
+        parent.transform.parent = transform;
+
+        //Setup layer
+        TerrainLayer layer = new TerrainLayer(layerIndex, parent, activeSettings.layers[layerIndex].origin, this);
+        terrainLayers[layerIndex] = layer;
+        layer.state = genState;
+        StartCoroutine(layer.Generate(activeSettings.layers[layerIndex].depth));
+    }
+
+    //Currently an IEnumerator, not perfect as means only maximum/minimum 1 chunk can be drawn per frame and its still not waiting on it
+    IEnumerator GenerateTerrain(TerrainSettings settings) {
 
         TerrainChunk.InitializeCompute(settings);
-        layerOrigin = generationStartPosition;
+        Vector3 layerOrigin = generationStartPosition;
         for(int layer = 0; layer < settings.layers.Length; layer++) {
             //Make GameObject parent for layer
             GameObject parent = new GameObject("Layer: " + layer);
