@@ -14,7 +14,7 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
-  m_Fog: 0
+  m_Fog: 1
   m_FogColor: {r: 0.7529412, g: 0.7529412, b: 0.7529412, a: 1}
   m_FogMode: 3
   m_FogDensity: 0.0018
@@ -268,7 +268,7 @@ MonoBehaviour:
   margin: 0
   voxelScale: 4
   material: {fileID: 2100000, guid: 4d1e4909787630147a86fc4972d45811, type: 2}
-  showLayerBounds: 1
+  showLayerBounds: 0
 --- !u!4 &579274941
 Transform:
   m_ObjectHideFlags: 0
@@ -351,7 +351,7 @@ Camera:
   m_GameObject: {fileID: 812795193}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
+  m_ClearFlags: 2
   m_BackGroundColor: {r: 0.7529412, g: 0.7529412, b: 0.7529412, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -603,6 +603,7 @@ GameObject:
   - component: {fileID: 1638216719}
   - component: {fileID: 1638216718}
   - component: {fileID: 1638216717}
+  - component: {fileID: 1638216720}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -689,6 +690,23 @@ CharacterController:
   m_SkinWidth: 0.0001
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1638216720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1638216715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70ecae59b04bfa94abbab118e7323f7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mcamera: {fileID: 812795195}
+  terrainHandler: {fileID: 579274937}
+  mask:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1 &1841170164
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,41 +5,94 @@ using UnityEngine;
 
 public class TerrainChunk
 {
+    public ActiveState state;
+    private List<ChunkEditRequest> editRequests;
+    private RenderTexture densityTexture;
+
+    public enum ActiveState {
+        Inactive, //Cannot be changed and game object is disabled
+        Static, //Edits can be added to its queue but it will not update the mesh, collider mesh is not set
+        Active //Edits can be added and will be updated immediately
+    }
+
+    private readonly TerrainLayer layer;
+    private readonly Vector3 centre; //Centre point of chunk
+    private readonly Vector3Int voxelDimensions; //Number of voxels per each axis
+    private readonly int margin;
+    public readonly float voxelScale; //Size of each voxel in world space
+
+    public Vector3Int textureDimensions { get { return voxelDimensions + (Vector3Int.one * margin * 2); } }
+    public Vector3 origin { get { return centre - ((Vector3)textureDimensions * voxelScale / 2f); } }
+
     private static bool shadersLoaded = false;
     private static ComputeShader computeDensityShader;
     private static ComputeShader computeVerticesShader;
 
     private static ComputeBuffer layerSettingsBuffer;
 
-    private readonly TerrainLayer layer;
-    private readonly Vector3 centre; //Centre point of chunk
-    private readonly Vector3Int voxelDimensions; //Number of voxels per each axis
-    private readonly int margin;
-    private readonly float voxelScale; //Size of each voxel in world space
-
-    private Vector3Int textureDimensions { get { return voxelDimensions + (Vector3Int.one * margin * 2); } }
-
-    private Vector3 origin { get { return centre - ((Vector3)textureDimensions * voxelScale / 2f); } }
-
+    private GameObject target;
     private MeshFilter filter;
     private MeshCollider collider;
 
-    public TerrainChunk(TerrainLayer _layer, Vector3 _centre, Vector3Int _voxelDimensions, int _margin, float _voxelScale, GameObject owner) {
+    public TerrainChunk(TerrainLayer _layer, Vector3 _centre, Vector3Int _voxelDimensions, int _margin, float _voxelScale, GameObject _target) {
         layer = _layer;
         centre = _centre;
         voxelDimensions = _voxelDimensions;
         margin = _margin;
         voxelScale = _voxelScale;
 
-        filter = owner.GetComponent<MeshFilter>();
-        collider = owner.GetComponent<MeshCollider>();
+        target = _target;
+        filter = target.GetComponent<MeshFilter>();
+        collider = target.GetComponent<MeshCollider>();
+        state = ActiveState.Active;
+        editRequests = new List<ChunkEditRequest>();
+    }
+
+    public void Update() {
+        switch (state) {
+            case ActiveState.Inactive:
+                if (target.activeSelf != false) target.SetActive(false);
+                break;
+
+            case ActiveState.Static:
+                if (target.activeSelf != true) target.SetActive(true);
+                if (collider.sharedMesh != null) collider.sharedMesh = null;
+                break;
+
+            case ActiveState.Active:
+                if (target.activeSelf != true) target.SetActive(true);
+                collider.sharedMesh = filter.mesh;
+                if (editRequests.Count != 0) HandleEditRequests();
+                break;
+
+            default:
+                Debug.Log("Chunk active state is not set. This should never happen");
+                break;
+        }
+    }
+
+    public void MakeEditRequest(ChunkEditRequest request) {
+        if (state == ActiveState.Inactive) return;
+
+        editRequests.Add(request);
+        Debug.Log("Edit request made");
+    }
+
+    private void HandleEditRequests() {
+        for(int i = editRequests.Count - 1; i >= 0; i--) {
+            ChunkEditRequest request = editRequests[i];
+            if (!request.InProgress) request.Process(densityTexture, this);
+            editRequests.Remove(request);
+        }
+        Vector3[] resultVertices = ComputeVertices(densityTexture);
+        UpdateMesh(resultVertices);
     }
 
     public void Generate(TerrainSettings settings) {
         if (!shadersLoaded) Debug.Log("Compute shader has not been initialized");
 
         //Initialize new texture
-        RenderTexture densityTexture = RTUtils.Create3D_RFloat(textureDimensions);
+        densityTexture = RTUtils.Create3D_RFloat(textureDimensions);
 
         //Ask noise function for a texture
         ComputeDensity(densityTexture, settings);
@@ -47,6 +100,10 @@ public class TerrainChunk
         //Run texture through marching cubes compute
         Vector3[] vertices = ComputeVertices(densityTexture);
 
+        UpdateMesh(vertices);
+    }
+
+    public void UpdateMesh(Vector3[] vertices) {
         //Create triangles array
         int[] triangles = new int[vertices.Length];
         for (int i = 0; i < triangles.Length; i++) {
@@ -58,9 +115,8 @@ public class TerrainChunk
         //?Remove duplicates
         //MeshMaths.RemoveDuplicateVertices(meshInfo);
 
-        //Give vertices and triangles to mesh filter and collider
+        //Give vertices and triangles to mesh filter
         filter.mesh = meshInfo.AsMesh();
-        collider.sharedMesh = meshInfo.AsMesh();
     }
 
     //
@@ -77,7 +133,7 @@ public class TerrainChunk
 
         computeDensityShader.SetVector("chunk_origin", origin);
 
-        Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);
+        Vector3Int threads = RTUtils.CalculateThreadAmount(textureDimensions, 8);
         Debug.Log((Vector3)threads + " threads dispatched for ComputeDensity");
         computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
     }
@@ -105,7 +161,7 @@ public class TerrainChunk
         computeVerticesShader.SetBool("interpolate", true);
         computeVerticesShader.SetFloat("threshold", 0.5f);
 
-        Vector3Int threads = CalculateThreadAmount(textureDimensions, 8);
+        Vector3Int threads = RTUtils.CalculateThreadAmount(textureDimensions, 8);
         Debug.Log((Vector3)threads + " threads dispatched for ComputeVertices");
         computeVerticesShader.Dispatch(0, threads.x, threads.y, threads.z);
 
@@ -122,7 +178,7 @@ public class TerrainChunk
 
         vertexBuffer.Release();
         triangleCountBuffer.Release();
-        densityTexture.Release(); //REMOVE WHEN IMPLEMENTING NEXT STEPS
+        //densityTexture.Release(); //REMOVE WHEN IMPLEMENTING NEXT STEPS
 
         return result;
     }
@@ -155,20 +211,7 @@ public class TerrainChunk
         layerSettingsBuffer.Release();
     }
 
-    //
-    // Summery:
-    //   Calculates the number of threads to dispatch for a given texture size
-    //
-    // Parameters:
-    //   size:
-    //     dimensions of texture or buffer
-    //   threadAmount:
-    //     number of threads per block defined in the compute shader
-    private Vector3Int CalculateThreadAmount(Vector3 size, int threadAmount) {
-        return new Vector3Int {
-            x = Mathf.CeilToInt(size.x / threadAmount),
-            y = Mathf.CeilToInt(size.y / threadAmount),
-            z = Mathf.CeilToInt(size.z / threadAmount)
-        };
+    public Bounds GetBounds() {
+        return new Bounds(centre, (Vector3)textureDimensions * voxelScale);
     }
 }

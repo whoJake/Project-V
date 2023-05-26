@@ -1,0 +1,31 @@
+#pragma kernel CSMain
+
+RWTexture3D<float> _DensityTexture;
+float3 chunk_origin;
+float voxel_scale;
+
+float3 point_position;
+float point_radius;
+
+[numthreads(8,8,8)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    //Texture dimensions and return condition
+    uint width, height, depth;
+    _DensityTexture.GetDimensions(width, height, depth);
+    if (id.x >= width || id.y >= height || id.z >= depth) return;
+    uint3 texture_size = uint3(width, height, depth);
+    
+
+    float3 worldPosition = chunk_origin + (id * voxel_scale);
+    float dstFromPoint = distance(point_position, worldPosition);
+    float dstFromPointSurface = dstFromPoint - point_radius;
+
+    float change = 0;
+    if (dstFromPoint <= point_radius)
+    {
+        change = +0.5;
+    }
+
+    _DensityTexture[id.xyz] -= change;
+}

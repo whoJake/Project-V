@@ -35,6 +35,20 @@ public class TerrainHandler : MonoBehaviour
             //Let player fall once the first layer is generated that isnt air
             player.isActive = terrainLayers[1].IsGenerated;
         }
+        
+        foreach(TerrainLayer layer in terrainLayers) {
+            layer?.Update();
+        }
+    }
+
+    public void MakeEditRequest(ChunkEditRequest request) {
+        foreach(TerrainLayer layer in terrainLayers) {
+            if (layer == null) continue;
+
+            if (layer.GetBounds().Intersects(request.GetBounds())) {
+                layer.MakeEditRequest(request);
+            }
+        }
     }
 
     //

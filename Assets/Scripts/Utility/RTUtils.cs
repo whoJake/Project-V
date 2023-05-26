@@ -20,4 +20,21 @@ public static class RTUtils
         result.Create();
         return result;
     }
+
+    //
+    // Summery:
+    //   Calculates the number of threads to dispatch for a given texture size
+    //
+    // Parameters:
+    //   size:
+    //     dimensions of texture or buffer
+    //   threadAmount:
+    //     number of threads per block defined in the compute shader
+    public static Vector3Int CalculateThreadAmount(Vector3 size, int threadAmount) {
+        return new Vector3Int {
+            x = Mathf.CeilToInt(size.x / threadAmount),
+            y = Mathf.CeilToInt(size.y / threadAmount),
+            z = Mathf.CeilToInt(size.z / threadAmount)
+        };
+    }
 }
