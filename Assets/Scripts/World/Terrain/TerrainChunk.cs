@@ -9,17 +9,15 @@ public class TerrainChunk
     private List<ChunkEditRequest> editRequests;
     private RenderTexture densityTexture;
 
-    public enum ActiveState {
-        Inactive, //Cannot be changed and game object is disabled
-        Static, //Edits can be added to its queue but it will not update the mesh, collider mesh is not set
-        Active //Edits can be added and will be updated immediately
-    }
-
+    //Layer reference that chunk is a part of
     private readonly TerrainLayer layer;
-    private readonly Vector3 centre; //Centre point of chunk
-    private readonly Vector3Int voxelDimensions; //Number of voxels per each axis
+
+    //Centre point of chunk
+    private readonly Vector3 centre;
+    //Number of voxels per axis
+    private readonly Vector3Int voxelDimensions;
     private readonly int margin;
-    public readonly float voxelScale; //Size of each voxel in world space
+    public readonly float voxelScale;
 
     public Vector3Int textureDimensions { get { return voxelDimensions + (Vector3Int.one * margin * 2); } }
     public Vector3 origin { get { return centre - ((Vector3)textureDimensions * voxelScale / 2f); } }
@@ -44,7 +42,7 @@ public class TerrainChunk
         target = _target;
         filter = target.GetComponent<MeshFilter>();
         collider = target.GetComponent<MeshCollider>();
-        state = ActiveState.Active;
+        state = layer.state;
         editRequests = new List<ChunkEditRequest>();
     }
 
@@ -52,6 +50,7 @@ public class TerrainChunk
         switch (state) {
             case ActiveState.Inactive:
                 if (target.activeSelf != false) target.SetActive(false);
+                if (collider.sharedMesh != null) collider.sharedMesh = null;
                 break;
 
             case ActiveState.Static:

@@ -262,7 +262,7 @@ MonoBehaviour:
   authoredSettings: {fileID: 11400000, guid: d05af63fe316d62449ebc1bb808aa08f, type: 2}
   activeSettings: {fileID: 0}
   authorLayers: 0
-  randomGenCount: 10
+  randomGenCount: 15
   generatedArea: {x: 1024, y: 1024}
   chunkSize: {x: 32, y: 32, z: 32}
   margin: 0
@@ -669,7 +669,7 @@ MonoBehaviour:
   airbourneMovementPenalty: 2
   hitGroundEventThreshold: 5
   velocity: {x: 0, y: 0, z: 0}
-  endlessJump: 0
+  endlessJump: 1
   disableBunnyhopping: 0
   isActive: 0
 --- !u!143 &1638216719

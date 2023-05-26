@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class TerrainLayer
 {
+    public ActiveState state;
     private List<TerrainChunk> chunks;
 
     private readonly GameObject gameObject;
@@ -27,11 +28,30 @@ public class TerrainLayer
 
     public void Update() {
         foreach(TerrainChunk chunk in chunks) {
-            chunk?.Update();
+            chunk.state = state;
+        }
+
+        switch (state) {
+            case ActiveState.Inactive:
+                if (gameObject.activeSelf) gameObject.SetActive(false);
+                break;
+
+            case ActiveState.Static:
+                if (!gameObject.activeSelf) gameObject.SetActive(true);
+                break;
+
+            case ActiveState.Active:
+                if (!gameObject.activeSelf) gameObject.SetActive(true);
+                foreach(TerrainChunk chunk in chunks) {
+                    chunk?.Update();
+                }
+                break;
         }
     }
 
     public void MakeEditRequest(ChunkEditRequest request) {
+        if (state == ActiveState.Inactive) return;
+
         foreach(TerrainChunk chunk in chunks) {
             if (chunk == null) continue;
 
@@ -79,6 +99,7 @@ public class TerrainLayer
                     TerrainChunk chunk = new TerrainChunk(this, position, handler.chunkSize, handler.margin, handler.voxelScale, chunkGameObject);
                     //Probably add this to some array or list
                     chunk.Generate(handler.activeSettings);
+                    chunk.state = state;
                     chunks.Add(chunk);
                     yield return null;
                 }
