@@ -81,6 +81,7 @@ World
 		Unload layers/chunks at certain ranges
 		Add in-unity variables for chunk loading ranges
 		Somehow implement look direction into the chunk loading?
+		Let chunks load once per frame
 
 	ChunkNoiseGeneration.compute
 		Caves
