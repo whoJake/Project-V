@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TerrainLayer
@@ -63,12 +64,13 @@ public class TerrainLayer
 
     //
     // Summery:
-    //   Generates the layer with the given amount of chunks
+    //     Generates the layer with the given amount of chunks
     //   
     // Parameters:
     //   chunkCount:
     //     number of chunks per axis to generate
-    public IEnumerator Generate(float depth) {
+    //
+    public IEnumerator Generate(float depth, System.Action<int> callback) {
         voxelsPerAxis = new Vector3Int(handler.chunkSize.x - 1,
                                        handler.chunkSize.y - 1,
                                        handler.chunkSize.z - 1);
@@ -106,17 +108,33 @@ public class TerrainLayer
             }
         }
         isGenerated = true;
+        callback?.Invoke(id);
     }
 
     //
     // Summery:
-    //   Creates a game object with everything needed to act as a terrain chunk
+    //     Handles unloading the entirety of this layer
+    //     When in unloaded state, the layer will have to either regenerate from noise or load from a file
+    //
+    public void Unload() {
+        for(int i = 0; i < chunks.Count; i++) {
+            TerrainChunk chunk = chunks[i];
+            chunk.Unload();
+            chunks.Remove(chunk);
+        }
+        GameObject.Destroy(gameObject);
+    }
+
+    //
+    // Summery:
+    //     Creates a game object with everything needed to act as a terrain chunk
     //
     // Parameters:
     //   name:
     //     name of the game object
     //   position:
     //     position of the game object
+    //
     private GameObject CreateChunkGameObject(string name, Vector3 position) {
         GameObject result = new GameObject(name);
         result.transform.parent = gameObject.transform;

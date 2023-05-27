@@ -60,14 +60,17 @@ public class PlayerMovement : MonoBehaviour
     public bool isActive;
 
     //Events
-    public delegate void onHitGround(Vector3 position, float downwardSpeed);
-    public event onHitGround OnHitGround;
-
-    public delegate void onJump(Vector3 position, float jumpVelocity);
-    public event onJump OnJump;
+    public Action<Vector3, float> OnHitGround;
+    public Action<Vector3, float> OnJump;
 
     private void Awake() {
+        isActive = false;
         statHandler = gameObject.GetComponent<StatHandler>();
+        TerrainHandler.OnLayerGenerated += OnLayerGenerated;
+    }
+
+    private void OnDestroy() {
+        TerrainHandler.OnLayerGenerated -= OnLayerGenerated;
     }
 
     void Start()
@@ -92,8 +95,8 @@ public class PlayerMovement : MonoBehaviour
 
     //
     // Summery:
-    //      Updates most of the isX values to ensure the player is in the right
-    //      state to make other calculations
+    //     Updates most of the isX values to ensure the player is in the right
+    //     state to make other calculations
     //
     void UpdateState() {
         isAirbourne = !controller.isGrounded;
@@ -115,9 +118,9 @@ public class PlayerMovement : MonoBehaviour
 
     //
     // Summery:
-    //      Calculates the desired movespeed of the player by taking into account
-    //      weather they are sprinting or not and damping between those two values
-    //      if necissary
+    //     Calculates the desired movespeed of the player by taking into account
+    //     weather they are sprinting or not and damping between those two values
+    //     if necissary
     //
     void CalculateMoveSpeed() {
         bool sprintHeld = Input.GetAxisRaw("Sprint") > 0;
@@ -144,10 +147,10 @@ public class PlayerMovement : MonoBehaviour
 
     //
     // Summery:
-    //      Handles the player controlled movement by taking the raw input, damping
-    //      it to produce smoother movement transitions and then applying that movement
-    //      to the player controller.
-    //      Movement speed is also clamped in this method
+    //     Handles the player controlled movement by taking the raw input, damping
+    //     it to produce smoother movement transitions and then applying that movement
+    //     to the player controller.
+    //     Movement speed is also clamped in this method
     //
     void HandleMovement() {
         Vector2 inputVectorRaw = new Vector2(Input.GetAxisRaw("Vertical"), Input.GetAxisRaw("Horizontal")).normalized;
@@ -171,9 +174,9 @@ public class PlayerMovement : MonoBehaviour
 
     //
     // Summery:
-    //      Calculates values relating to gravity so that it can then be applied
-    //      to the player. Gravity is calculated based on the given JumpHeight
-    //      and TimeToApex instead of being a hardcoded value
+    //     Calculates values relating to gravity so that it can then be applied
+    //     to the player. Gravity is calculated based on the given JumpHeight
+    //     and TimeToApex instead of being a hardcoded value
     //
     void CalculateGravityValues() {
         //Standard jump equation derived by https://www.youtube.com/watch?v=hG9SzQxaCm8 [GDC Math for Game Programmers: Building a Better Jump] a classic
@@ -188,9 +191,9 @@ public class PlayerMovement : MonoBehaviour
 
     //
     // Summery:
-    //      Applies the previously calculated gravity to the player and
-    //      handles some edge cases to do with the player colliding with
-    //      an object whilst in mid air
+    //     Applies the previously calculated gravity to the player and
+    //     handles some edge cases to do with the player colliding with
+    //     an object whilst in mid air
     //
     void HandleGravity() {
         //This accounts for hitting head
@@ -208,8 +211,8 @@ public class PlayerMovement : MonoBehaviour
 
     //
     // Summery:
-    //      Detects and executes a jump when the player holds down the jump
-    //      key. Also sets state variables to reflect this
+    //     Detects and executes a jump when the player holds down the jump
+    //     key. Also sets state variables to reflect this
     //
     void HandleJump() {
         bool jumpKeyPressed = Input.GetAxisRaw("Jump") > 0;
@@ -226,4 +229,13 @@ public class PlayerMovement : MonoBehaviour
             OnJump?.Invoke(transform.position, initialJumpVelocity);
         }
     }
+
+    //
+    // Summery:
+    //     Will activate this controller once the first layer has fully generated
+    //
+    private void OnLayerGenerated(int index) {
+        if (index == 1) isActive = true;
+    }
+
 }

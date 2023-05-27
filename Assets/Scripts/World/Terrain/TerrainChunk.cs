@@ -133,7 +133,7 @@ public class TerrainChunk
         computeDensityShader.SetVector("chunk_origin", origin);
 
         Vector3Int threads = RTUtils.CalculateThreadAmount(textureDimensions, 8);
-        Debug.Log((Vector3)threads + " threads dispatched for ComputeDensity");
+        //Debug.Log((Vector3)threads + " threads dispatched for ComputeDensity");
         computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
     }
 
@@ -161,7 +161,7 @@ public class TerrainChunk
         computeVerticesShader.SetFloat("threshold", 0.5f);
 
         Vector3Int threads = RTUtils.CalculateThreadAmount(textureDimensions, 8);
-        Debug.Log((Vector3)threads + " threads dispatched for ComputeVertices");
+        //Debug.Log((Vector3)threads + " threads dispatched for ComputeVertices");
         computeVerticesShader.Dispatch(0, threads.x, threads.y, threads.z);
 
         //Gets the number of times Append was called on the buffer (number of triangles added)
@@ -204,6 +204,18 @@ public class TerrainChunk
         computeVerticesShader = Resources.Load<ComputeShader>("Compute/MCubes/MarchingCube");
 
         shadersLoaded = true;
+    }
+
+    // 
+    // Summery:
+    //     Handles unloading all resources related to this chunk
+    //     aswwell as releasing any associated textures or buffers
+    //
+    public void Unload() {
+        densityTexture.Release();
+        GameObject.Destroy(target);
+        //Dump current edit requests
+        //Save chunk
     }
 
     public static void ReleaseBuffers() {

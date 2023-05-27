@@ -75,6 +75,12 @@ World
 		When layers both have transition values for the same face between layers an error should be outputted
 		Maybe have some kind of gameplay element that seperates the layer (mist etc.) to cover up the transition and hide the uglyness
 		Look into better method for fog, exponential squared fog looks terrible because of the diagonal viewing issue
+		Implement dynamic loading for the chunks themselves
+
+	TerrainHandler.cs
+		Unload layers/chunks at certain ranges
+		Add in-unity variables for chunk loading ranges
+		Somehow implement look direction into the chunk loading?
 
 	ChunkNoiseGeneration.compute
 		Caves

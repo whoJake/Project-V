@@ -74,17 +74,17 @@ public class TerrainLayerSettings : ScriptableObject
     public static TerrainLayerSettings GetAllRandom() {
         TerrainLayerSettings result = ScriptableObject.CreateInstance<TerrainLayerSettings>();
         result.depth = Random.Range(128f, 256f);
-        result.topTransition = Random.Range(8f, 32f);
+        result.topTransition = Random.Range(8f, 16f);
         result.bottomTransition = 0f;
         result.chasmRadius = Random.Range(200f, 300f);
 
-        result.groundDepth = Random.Range(32f, result.depth - 32f);
+        result.groundDepth = Random.Range(48f, result.depth - 48f);
 
         float maxGroundThickness = Mathf.Min(result.groundDepth, result.depth - result.groundDepth) * 2f;
         result.groundThickness = Random.Range(32f, maxGroundThickness);
 
         result.groundHeightChangeComplexity = Random.Range(3, 6);
-        result.groundHeightChangeDistortionStrength = Random.Range(0f, 5f);
+        result.groundHeightChangeDistortionStrength = Random.Range(0f, 2f);
         result.groundHeightChangeScale = Random.Range(0.6f, 1f);
 
         float maxGroundHeightChange = Mathf.Max(0f, Mathf.Min(result.groundDepth - (result.groundThickness / 2f), result.depth - result.groundDepth - (result.groundThickness / 2f)));
@@ -98,7 +98,7 @@ public class TerrainLayerSettings : ScriptableObject
         result.pillarScale = Random.Range(0.4f, 1f);
 
         float pisRand = Random.Range(0f, 1f);
-        if(pisRand < 0.02f) {
+        if(pisRand < 0f) {
             result.pillarIgnoreState = PillarIgnoreState.All;
         }else if(pisRand < 0.2f) {
             result.pillarIgnoreState = PillarIgnoreState.None;
