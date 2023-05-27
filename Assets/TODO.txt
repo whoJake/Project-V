@@ -78,12 +78,13 @@ World
 		Implement dynamic loading for the chunks themselves
 
 	TerrainHandler.cs
-		Unload layers/chunks at certain ranges
+		Have settings be generated dynamically
 		Add in-unity variables for chunk loading ranges
 		Somehow implement look direction into the chunk loading?
 		Let chunks load once per frame
 
 	ChunkNoiseGeneration.compute
+		Only have 3 layerSettings be sent per dispatch
 		Caves
 		Some kind of ceiling feature
 		Figure out data structure of chunks to be saved and stored

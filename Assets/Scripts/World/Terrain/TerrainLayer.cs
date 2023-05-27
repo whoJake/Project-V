@@ -6,24 +6,24 @@ using UnityEngine;
 public class TerrainLayer
 {
     public ActiveState state;
-    private List<TerrainChunk> chunks;
+    private readonly List<TerrainChunk> chunks;
 
-    private readonly GameObject gameObject;
-    public readonly int id;
-    public readonly Vector3 origin;
     private readonly TerrainHandler handler;
+    public readonly int id;
+    private readonly Vector3 origin; //Layer origin is not the -/- corner but instead the top face centre of the layer
+    private readonly GameObject targetGObj;
 
-    private Vector3Int voxelsPerAxis;
     private Vector3Int chunkCount;
 
     private bool isGenerated = false;
     public bool IsGenerated { get { return isGenerated; } }
 
-    public TerrainLayer(int _id, GameObject _gameObject, Vector3 _origin, TerrainHandler _handler) {
-        gameObject = _gameObject;
+    public TerrainLayer(TerrainHandler _handler, int _id, Vector3 _origin, GameObject _targetGObj) {
+        handler = _handler;
         id = _id;
         origin = _origin;
-        handler = _handler;
+        targetGObj = _targetGObj;
+
         chunks = new List<TerrainChunk>();
     }
 
@@ -32,25 +32,34 @@ public class TerrainLayer
             chunk.state = state;
         }
 
+        bool gObjActive;
         switch (state) {
             case ActiveState.Inactive:
-                if (gameObject.activeSelf) gameObject.SetActive(false);
+                gObjActive = false;
                 break;
 
             case ActiveState.Static:
-                if (!gameObject.activeSelf) gameObject.SetActive(true);
+                gObjActive = true;
                 break;
 
             case ActiveState.Active:
-                if (!gameObject.activeSelf) gameObject.SetActive(true);
+                gObjActive = true;
+
                 foreach(TerrainChunk chunk in chunks) {
                     chunk?.Update();
                 }
                 break;
+
+            default:
+                gObjActive = false;
+                Debug.Log("Layer activeState isn't set");
+                break;
         }
+
+        targetGObj.SetActive(gObjActive);
     }
 
-    public void MakeEditRequest(ChunkEditRequest request) {
+    public void DistributeEditRequest(ChunkEditRequest request) {
         if (state == ActiveState.Inactive) return;
 
         foreach(TerrainChunk chunk in chunks) {
@@ -71,35 +80,27 @@ public class TerrainLayer
     //     number of chunks per axis to generate
     //
     public IEnumerator Generate(float depth, System.Action<int> callback) {
-        voxelsPerAxis = new Vector3Int(handler.chunkSize.x - 1,
-                                       handler.chunkSize.y - 1,
-                                       handler.chunkSize.z - 1);
-
-        //Constantly having to account for num of voxels per axis being 1 less than number of points per axis is annoying
-        chunkCount = new Vector3Int(Mathf.CeilToInt(handler.generatedArea.x / voxelsPerAxis.x / handler.voxelScale),
-                                    Mathf.FloorToInt(depth / voxelsPerAxis.y / handler.voxelScale),
-                                    Mathf.CeilToInt(handler.generatedArea.y / voxelsPerAxis.z / handler.voxelScale));
-
-        Debug.Log(chunkCount + " chunks dispatched to generate");
+        //I hate having to do this calculation here but I like the idea of putting in the depth in this function :)
+        chunkCount = new Vector3Int(Mathf.CeilToInt(handler.generatedArea.x / handler.voxelsPerAxis.x / handler.voxelScale),
+                                    Mathf.FloorToInt(depth / handler.voxelsPerAxis.y / handler.voxelScale),
+                                    Mathf.CeilToInt(handler.generatedArea.y / handler.voxelsPerAxis.z / handler.voxelScale));
 
         Vector3Int halfChunkCount = Vector3Int.FloorToInt((Vector3)chunkCount / 2f);
         for(int x = 0; x < chunkCount.x; x++) {
             for(int y = 0; y < chunkCount.y; y++) {
                 for(int z = 0; z < chunkCount.z; z++) {
-                    //Layer origin is at the top centre of the layer
-                    Vector3Int cid = new Vector3Int(-halfChunkCount.x + x,
+                    Vector3Int chunkID = new Vector3Int(-halfChunkCount.x + x,
                                                     y,
                                                     -halfChunkCount.z + z);
 
-
-                    Vector3 position = origin + new Vector3(voxelsPerAxis.x * cid.x,
-                                                          -(voxelsPerAxis.y * cid.y + (voxelsPerAxis.y / 2f)), //To account for y position being at the start not the centre
-                                                            voxelsPerAxis.z * cid.z)
+                    Vector3 position = origin + new Vector3(handler.voxelsPerAxis.x * chunkID.x,
+                                                          -(handler.voxelsPerAxis.y * chunkID.y + (handler.voxelsPerAxis.y / 2f)), //To account for y position being at the start not the centre
+                                                            handler.voxelsPerAxis.z * chunkID.z)
                                                             * handler.voxelScale;
 
-                    GameObject chunkGameObject = CreateChunkGameObject(cid.x + "," + (-cid.y) + "," + cid.z, position);
+                    GameObject chunkGameObject = CreateChunkGameObject(chunkID.x + "," + (-chunkID.y) + "," + chunkID.z, position);
                     TerrainChunk chunk = new TerrainChunk(this, position, handler.chunkSize, handler.margin, handler.voxelScale, chunkGameObject);
-                    //Probably add this to some array or list
+
                     chunk.Generate(handler.activeSettings);
                     chunk.state = state;
                     chunks.Add(chunk);
@@ -122,7 +123,7 @@ public class TerrainLayer
             chunk.Unload();
             chunks.Remove(chunk);
         }
-        GameObject.Destroy(gameObject);
+        GameObject.Destroy(targetGObj);
     }
 
     //
@@ -137,8 +138,9 @@ public class TerrainLayer
     //
     private GameObject CreateChunkGameObject(string name, Vector3 position) {
         GameObject result = new GameObject(name);
-        result.transform.parent = gameObject.transform;
+        result.transform.parent = targetGObj.transform;
         result.transform.position = position;
+
         result.AddComponent<MeshFilter>();
         result.AddComponent<MeshRenderer>().material = handler.material;
         result.AddComponent<MeshCollider>();
@@ -146,8 +148,13 @@ public class TerrainLayer
     }
 
     public Bounds GetBounds() {
-        Vector3 centre = new Vector3(origin.x, origin.y - (voxelsPerAxis.y * chunkCount.y * handler.voxelScale / 2f), origin.z); ;
-        Vector3 size = new Vector3(voxelsPerAxis.x * chunkCount.x, voxelsPerAxis.y * chunkCount.y, voxelsPerAxis.z * chunkCount.z) * handler.voxelScale;
+        Vector3 centre = new Vector3(origin.x,
+                                     origin.y - (handler.voxelsPerAxis.y * chunkCount.y * handler.voxelScale / 2f),
+                                     origin.z); ;
+
+        Vector3 size = new Vector3(handler.voxelsPerAxis.x * chunkCount.x,
+                                   handler.voxelsPerAxis.y * chunkCount.y,
+                                   handler.voxelsPerAxis.z * chunkCount.z) * handler.voxelScale;
 
         return new Bounds(centre, size);
     }

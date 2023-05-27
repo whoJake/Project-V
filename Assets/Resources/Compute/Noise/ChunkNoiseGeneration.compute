@@ -157,9 +157,9 @@ void Generate (uint3 id : SV_DispatchThreadID)
     //+1 and -1 on voxelPosition.y accounts for the fact that the layers kind of share texture points by nature since voxel vertices are placed between texture points
     //This therefore fixes the issue of having problems with layer transitions
     float abvLerp = saturate(invlerp(voxelPosition.y + 2 * voxel_scale, curSettings.origin.y - curSettings.topTransition, curSettings.origin.y));
-    if (curSettings.topTransition == 0) abvLerp = 0;
+    abvLerp *= sign(curSettings.topTransition);
     float blwLerp = saturate(invlerp(voxelPosition.y - 2 * voxel_scale, curSettings.origin.y - curSettings.depth + curSettings.bottomTransition, curSettings.origin.y - curSettings.depth));
-    if (curSettings.bottomTransition == 0) blwLerp = 0;
+    blwLerp *= sign(curSettings.bottomTransition);
 
     float abvDensity = SampleDensity(voxelPosition, abvSettings);
     float curDensity = SampleDensity(voxelPosition, curSettings);

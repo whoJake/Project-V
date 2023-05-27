@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class TerrainHandler : MonoBehaviour
 {
-    public Vector3 generationStartPosition { get { return transform.position; } }
 
     [SerializeField]
     private Camera mainCamera;
@@ -12,26 +11,37 @@ public class TerrainHandler : MonoBehaviour
     [SerializeField]
     private TerrainSettings authoredSettings;
     private TerrainLayer[] terrainLayers;
-
     public TerrainSettings activeSettings;
 
-    public bool authorLayers;
-    public int randomGenCount;
+    [SerializeField]
+    private bool authorLayers;
+    [SerializeField]
+    private int randomGenCount;
 
-    public Vector2Int generatedArea; //Approximate area that will be generated
+    public Vector2Int generatedArea; //Only an approximate area that will be generated. Should always generate slightly larger than this but problems exist !
     public Vector3Int chunkSize;
+
+    public Vector3Int voxelsPerAxis { get {
+            return new Vector3Int(chunkSize.x - 1,
+                                  chunkSize.y - 1,
+                                  chunkSize.z - 1); } }
+    private Vector3 generationStartPosition { get { return transform.position; } }
+
+    [Min(0)]
     public int margin;
+
+    [Min(0)]
     public float voxelScale;
+
     public Material material;
 
-    public bool showLayerBounds;
+    [SerializeField]
+    private bool showLayerBounds;
 
     public static System.Action<int> OnLayerGenerated;
 
-    void Start()
-    {
+    private void Start() {
         activeSettings = authorLayers ? authoredSettings : GenerateLayerSettings(randomGenCount);
-        //Randomize seed
         activeSettings.seed = Random.Range(0, 1024);
         InitializeGeneration();
     }
@@ -49,22 +59,21 @@ public class TerrainHandler : MonoBehaviour
     }
 
     private void UpdateLayerActivity() {
-        //Find layer that player is on
-        int playerLayerIndex = 0;
+        int playerCurLayerIndex = 0;
         for(int layer = 0; layer < terrainLayers.Length; layer++) {
             TerrainLayerSettings layerSettings = activeSettings.layers[layer];
-            //player is in layer
-            if (mainCamera.transform.position.y <= layerSettings.origin.y &&
-                mainCamera.transform.position.y >= layerSettings.origin.y - layerSettings.genDepth) {
-                playerLayerIndex = layer;
+            bool playerIsBetweenLayers = (mainCamera.transform.position.y <= layerSettings.origin.y) &&
+                                         (mainCamera.transform.position.y >= layerSettings.origin.y - layerSettings.genDepth);
+
+            if (playerIsBetweenLayers) {
+                playerCurLayerIndex = layer;
                 break;
             }
         }
 
-        //Update all layers
         for(int i = 0; i < terrainLayers.Length; i++) {
             //Positive dstFromPlayer is above, Negative is below
-            int dstFromPlayer = playerLayerIndex - i;
+            int dstFromPlayer = playerCurLayerIndex - i;
 
             //Check generation step
             ActiveState calcState;
@@ -89,13 +98,13 @@ public class TerrainHandler : MonoBehaviour
         }
     }
 
-    public void MakeEditRequest(ChunkEditRequest request) {
+    public void DistributeEditRequest(ChunkEditRequest request) {
         foreach(TerrainLayer layer in terrainLayers) {
             if (layer == null) continue;
             if (layer.state == ActiveState.Inactive) continue;
 
             if (layer.GetBounds().Intersects(request.GetBounds())) {
-                layer.MakeEditRequest(request);
+                layer.DistributeEditRequest(request);
             }
         }
     }
@@ -111,32 +120,31 @@ public class TerrainHandler : MonoBehaviour
         TerrainSettings result = ScriptableObject.CreateInstance<TerrainSettings>();
         result.layers = new TerrainLayerSettings[count + 1];
         result.layers[0] = Resources.Load<TerrainLayerSettings>("AIR");
+
         for(int i = 0; i < count; i++) {
             result.layers[i + 1] = TerrainLayerSettings.GetAllRandom();
         }
         return result;
     }
 
-    void InitializeGeneration() {
+    private void InitializeGeneration() {
         terrainLayers = new TerrainLayer[activeSettings.layers.Length];
 
-        //Pre-pass for setting variables needed in settings
         Vector3 layerOrigin = generationStartPosition;
         for (int layer = 0; layer < activeSettings.layers.Length; layer++) {
-            TerrainLayerSettings nLayerSettings = activeSettings.layers[layer];
-            float voxelsPerY = chunkSize.y - 1;
-            float chunksOnY = Mathf.FloorToInt(nLayerSettings.depth / voxelsPerY / voxelScale);
-            float generatedDepth = chunksOnY * voxelsPerY * voxelScale;
+            TerrainLayerSettings layerSettings = activeSettings.layers[layer];
+            float chunksOnY = Mathf.FloorToInt(layerSettings.depth / voxelsPerAxis.y / voxelScale);
+            float generatedDepth = chunksOnY * voxelsPerAxis.y * voxelScale;
 
-            nLayerSettings.genDepth = generatedDepth;
-            nLayerSettings.origin = layerOrigin;
+            layerSettings.genDepth = generatedDepth;
+            layerSettings.origin = layerOrigin;
 
             layerOrigin.y -= generatedDepth + (margin * voxelScale);
         }
         TerrainChunk.InitializeCompute(activeSettings);
     }
 
-    void GenerateLayer(int layerIndex, ActiveState genState) {
+    private void GenerateLayer(int layerIndex, ActiveState genState) {
         if (terrainLayers[layerIndex] != null) {
             Debug.Log("layer already generated");
             return;
@@ -144,12 +152,11 @@ public class TerrainHandler : MonoBehaviour
 
         GameObject parent = new GameObject("Layer: " + layerIndex);
         parent.transform.parent = transform;
-        parent.transform.SetSiblingIndex(layerIndex);
 
-        //Setup layer
-        TerrainLayer layer = new TerrainLayer(layerIndex, parent, activeSettings.layers[layerIndex].origin, this);
+        TerrainLayer layer = new TerrainLayer(this, layerIndex, activeSettings.layers[layerIndex].origin, parent);
         terrainLayers[layerIndex] = layer;
         layer.state = genState;
+
         StartCoroutine(layer.Generate(activeSettings.layers[layerIndex].depth, OnLayerGenerated));
     }
 
