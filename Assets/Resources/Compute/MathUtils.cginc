@@ -39,6 +39,20 @@ float3 clampmagnitude(float3 v, float min, float max){
     return v;
 }
 
+float dstFromLine(float3 lineStart, float3 lineEnd, float3 spot) {
+    //https://math.stackexchange.com/questions/1905533/find-perpendicular-distance-from-point-to-line-in-3d
+    float3 dir = (lineEnd - lineStart) / distance(lineStart, lineEnd);
+    float3 startToSpotVec = spot - lineStart;
+    float t = dot(startToSpotVec, dir);
+    float3 projectedSpot = lineStart + dir * t;
+    return distance(lineEnd, projectedSpot);
+}
+
+float dstFromLine2(float3 lineStart, float3 lineEnd, float3 spot) {
+    //https://math.stackexchange.com/questions/1905533/find-perpendicular-distance-from-point-to-line-in-3d
+    return length(cross(spot - lineStart, lineEnd - lineStart)) / length(lineEnd - lineStart);
+}
+
 //k range 0-1
 float smoothmin(float a, float b, float k){
     float h = clamp(0.5 + 0.5*(a-b)/k, 0, 1.0);

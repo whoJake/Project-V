@@ -28,9 +28,4 @@ public class ChunkPointEdit : ChunkEditType {
         return new Bounds(position, Vector3.one * (radius + 1) * 2);
 
     }
-
-    public override ChunkEditType Clone() {
-        return new ChunkPointEdit(position, radius, add);
-    }
-
 }

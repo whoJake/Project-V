@@ -28,5 +28,5 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         change = 0.5 * multiplier;
     }
 
-    _DensityTexture[id.xyz] -= change;
+    _DensityTexture[id.xyz] = saturate(_DensityTexture[id.xyz] - change);
 }

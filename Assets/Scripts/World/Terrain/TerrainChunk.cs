@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 
 public class TerrainChunk
@@ -9,14 +10,14 @@ public class TerrainChunk
     private List<ChunkEditRequest> editRequests;
     private RenderTexture densityTexture;
 
-    private readonly TerrainLayer layer;
+    public readonly TerrainLayer layer;
 
     private readonly Vector3 centre;
     private readonly Vector3Int voxelDimensions;
     private readonly int margin;
     public readonly float voxelScale;
 
-    private readonly GameObject targetGObj;
+    public readonly GameObject targetGObj;
     private readonly MeshFilter targetFilter;
     private readonly MeshCollider targetCollider;
 
@@ -87,8 +88,7 @@ public class TerrainChunk
             if (!request.InProgress) request.Process(densityTexture, this);
             editRequests.Remove(request);
         }
-        Vector3[] resultVertices = ComputeVertices(densityTexture);
-        UpdateMesh(resultVertices);
+        UpdateMesh();
     }
 
     public void Generate(TerrainSettings settings) {
@@ -98,11 +98,11 @@ public class TerrainChunk
 
         ComputeDensity(densityTexture, settings);
 
-        Vector3[] vertices = ComputeVertices(densityTexture);
-        UpdateMesh(vertices);
+        UpdateMesh();
     }
 
-    private void UpdateMesh(Vector3[] vertices) {
+    public void UpdateMesh() {
+        Vector3[] vertices = ComputeVertices(densityTexture);
         int[] triangles = new int[vertices.Length];
         for (int i = 0; i < triangles.Length; i++) {
             triangles[i] = i;

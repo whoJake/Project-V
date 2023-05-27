@@ -10,17 +10,16 @@ public class DeleteTerrainRay : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0)) {
-            Debug.Log("Mouse clicked");
+        if (Input.GetMouseButtonDown(1)) {
             Vector3 mousePosition = Input.mousePosition;
             Ray ray = mcamera.ScreenPointToRay(mousePosition);
             if (Physics.Raycast(ray.origin, ray.direction, out RaycastHit hit,  250, ~mask)) {
-                ChunkEditRequest request = new ChunkEditRequest(new ChunkPointEdit(hit.point, 15f, false));
+                ChunkEditRequest request = new ChunkEditRequest(new ChunkLineEdit(hit.point, ray.origin + ray.direction * 250f, 10f, 50f, 20, 0.3f, this));
                 terrainHandler.DistributeEditRequest(request);
             }
         }
-        else if (Input.GetMouseButtonDown(1)) {
-            Debug.Log("Mouse clicked");
+
+        else if (Input.GetMouseButtonDown(0)) {
             Vector3 mousePosition = Input.mousePosition;
             Ray ray = mcamera.ScreenPointToRay(mousePosition);
             if (Physics.Raycast(ray.origin, ray.direction, out RaycastHit hit, 250, ~mask)) {

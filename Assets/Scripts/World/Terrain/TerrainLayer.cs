@@ -8,7 +8,7 @@ public class TerrainLayer
     public ActiveState state;
     private readonly List<TerrainChunk> chunks;
 
-    private readonly TerrainHandler handler;
+    public readonly TerrainHandler handler;
     public readonly int id;
     private readonly Vector3 origin; //Layer origin is not the -/- corner but instead the top face centre of the layer
     private readonly GameObject targetGObj;

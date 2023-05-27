@@ -28,7 +28,7 @@ public class ChunkEditRequest
     }
 
     public ChunkEditRequest Clone() {
-        return new ChunkEditRequest(type.Clone());
+        return new ChunkEditRequest(type);
     }
 }
 
