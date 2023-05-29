@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class TerrainLayer : MonoBehaviour
 {
-    public ActiveState state;
-    private TerrainLayerSettings settings;
+    private ActiveState state;
+    public TerrainLayerSettings settings;
     private List<TerrainChunk> chunks;
 
     public TerrainHandler handler;
@@ -14,56 +14,35 @@ public class TerrainLayer : MonoBehaviour
 
     private Vector3Int chunkCount;
 
-    private bool isGenerating = false;
-    private bool isGenerated = false;
-    public bool IsGenerated { get { return isGenerated; } }
+    public bool generating;
+    public bool generated;
 
     public TerrainLayer Initialize(int _id, TerrainHandler _handler, TerrainLayerSettings _settings, ActiveState _state) {
         id = _id;
         handler = _handler;
         settings = _settings;
         state = _state;
+        generated = false;
+        generating = false;
 
         chunks = new List<TerrainChunk>();
 
         chunkCount = new Vector3Int(Mathf.CeilToInt(handler.generatedArea.x / handler.voxelsPerAxis.x / handler.voxelScale),
                                     Mathf.FloorToInt(settings.depth / handler.voxelsPerAxis.y / handler.voxelScale),
                                     Mathf.CeilToInt(handler.generatedArea.y / handler.voxelsPerAxis.z / handler.voxelScale));
-
+        StartCoroutine(Generate());
         return this;
     }
 
-    private void Update() {
-        if (!isGenerated && !isGenerating) {
-            isGenerating = true;
-            StartCoroutine(Generate());
-        }
+    public void SetState(ActiveState state) {
+        if (this.state == state) return;
 
+        this.state = state;
         foreach(TerrainChunk chunk in chunks) {
-            chunk.state = state;
+            if (!chunk) continue;
+
+            chunk.SetState(state);
         }
-
-        bool gObjActive;
-        switch (state) {
-            case ActiveState.Inactive:
-                gObjActive = false;
-                break;
-
-            case ActiveState.Static:
-                gObjActive = true;
-                break;
-
-            case ActiveState.Active:
-                gObjActive = true;
-                break;
-
-            default:
-                gObjActive = false;
-                Debug.Log("Layer activeState isn't set");
-                break;
-        }
-
-        gameObject.SetActive(gObjActive);
     }
 
     public void DistributeEditRequest(ChunkEditRequest request) {
@@ -102,15 +81,14 @@ public class TerrainLayer : MonoBehaviour
 
                     GameObject chunkGameObject = CreateChunkGameObject(chunkID.x + "," + (-chunkID.y) + "," + chunkID.z, position);
                     TerrainChunk chunk = chunkGameObject.AddComponent<TerrainChunk>().Initialize(this, position, state);
-
-                    chunk.Generate(handler.activeSettings);
                     chunks.Add(chunk);
                     yield return null;
                 }
             }
         }
-        isGenerated = true;
-        isGenerating = false;
+        generated = true;
+        generating = false;
+        SetState(state);
         TerrainHandler.OnLayerGenerated?.Invoke(id);
     }
 

@@ -14,7 +14,7 @@ public class DeleteTerrainRay : MonoBehaviour
             Vector3 mousePosition = Input.mousePosition;
             Ray ray = mcamera.ScreenPointToRay(mousePosition);
             if (Physics.Raycast(ray.origin, ray.direction, out RaycastHit hit,  250, ~mask)) {
-                ChunkEditRequest request = new ChunkEditRequest(new ChunkLineEdit(hit.point, ray.origin + ray.direction * 250f, 10f, 50f, 20, 0.3f, this));
+                ChunkEditRequest request = new ChunkEditRequest(new ChunkLineEdit(hit.point, ray.origin + ray.direction * 200f, 10f, 40f, 20, 0.75f, this));
                 terrainHandler.DistributeEditRequest(request);
             }
         }

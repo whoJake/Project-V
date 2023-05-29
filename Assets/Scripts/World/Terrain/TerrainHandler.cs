@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TerrainHandler : MonoBehaviour
@@ -10,6 +11,12 @@ public class TerrainHandler : MonoBehaviour
     private TerrainSettings authoredSettings;
     private TerrainLayer[] terrainLayers;
     public TerrainSettings activeSettings;
+
+    struct GenInfo {
+        public int id;
+        public ActiveState state;
+    }
+    private List<GenInfo> generationQueue;
 
     [SerializeField]
     private bool authorLayers;
@@ -41,14 +48,30 @@ public class TerrainHandler : MonoBehaviour
 
     public static System.Action<int> OnLayerGenerated;
 
+
     private void Start() {
+        generationQueue = new List<GenInfo>();
         activeSettings = authorLayers ? authoredSettings : GenerateLayerSettings(randomGenCount);
         activeSettings.seed = Random.Range(0, 1024);
         InitializeGeneration();
     }
 
     private void Update() {
+        //Process queue has to be done first or the generated layer will get destroyed before it can be removed from the queue :/
+        if (generationQueue.Count != 0) ProcessQueue();
+
         UpdateLayerActivity();
+    }
+
+    private void ProcessQueue() {
+        GenInfo toProcess = generationQueue[0];
+        if (terrainLayers[toProcess.id] == null) {
+            CreateLayer(toProcess.id, toProcess.state);
+        }
+        if (terrainLayers[toProcess.id].generating) return;
+        if (terrainLayers[toProcess.id].generated) {
+            generationQueue.RemoveAt(0);
+        }
     }
 
     private void OnDisable() {
@@ -68,37 +91,42 @@ public class TerrainHandler : MonoBehaviour
             }
         }
 
-        for(int i = 0; i < terrainLayers.Length; i++) {
+        for (int i = 0; i < terrainLayers.Length; i++) {
             //Positive dstFromPlayer is above, Negative is below
             int dstFromPlayer = playerCurLayerIndex - i;
+            TerrainLayer layer = terrainLayers[i];
 
             //Check generation step
             ActiveState calcState;
             dstFromPlayer = Mathf.Abs(dstFromPlayer);
-            if(dstFromPlayer < 2) {
+            if (dstFromPlayer < 2) {
                 calcState = ActiveState.Active;
-            }
-            else if(dstFromPlayer < 4) {
+            } else if (dstFromPlayer < 5) {
                 calcState = ActiveState.Static;
-            } else if(dstFromPlayer < 8) {
+            } else if (dstFromPlayer < 6) {
                 calcState = ActiveState.Inactive;
             } else {
                 //Unload
-                if(terrainLayers[i]) terrainLayers[i].Unload();
-                terrainLayers[i] = null;
-                calcState = ActiveState.Inactive;
+                if (layer && layer.generated) {
+                    Destroy(layer.gameObject);
+                }
+                continue;
             }
 
-            if (terrainLayers[i] == null && calcState == ActiveState.Inactive) continue;
-            if (terrainLayers[i] == null) CreateLayer(i, calcState);
-            else terrainLayers[i].state = calcState;
+            if (!layer) {
+                GenInfo info = new GenInfo { id = i, state = calcState };
+                if (!generationQueue.Contains(info)) {
+                    generationQueue.Add(new GenInfo { id = i, state = calcState });
+                }
+            } else {
+                terrainLayers[i].SetState(calcState);
+            }
         }
     }
 
     public void DistributeEditRequest(ChunkEditRequest request) {
         foreach(TerrainLayer layer in terrainLayers) {
             if (layer == null) continue;
-            if (layer.state == ActiveState.Inactive) continue;
 
             if (layer.GetBounds().Intersects(request.GetBounds())) {
                 layer.DistributeEditRequest(request);
@@ -141,10 +169,10 @@ public class TerrainHandler : MonoBehaviour
         TerrainChunk.InitializeCompute(activeSettings);
     }
 
-    private void CreateLayer(int layerIndex, ActiveState createState) {
+    private TerrainLayer CreateLayer(int layerIndex, ActiveState createState) {
         if (terrainLayers[layerIndex] != null) {
             Debug.Log("layer already created");
-            return;
+            return terrainLayers[layerIndex];
         }
 
         GameObject layerGObj = new GameObject("Layer: " + layerIndex);
@@ -152,6 +180,7 @@ public class TerrainHandler : MonoBehaviour
         TerrainLayer layer = layerGObj.AddComponent<TerrainLayer>().Initialize(layerIndex, this, activeSettings.layers[layerIndex], createState);
 
         terrainLayers[layerIndex] = layer;
+        return layer;
     }
 
     private void OnDrawGizmos() {

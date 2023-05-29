@@ -25,7 +25,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float change = 0;
     if (dstFromPoint <= point_radius)
     {
-        change = 0.5 * multiplier;
+        change = 0.3 * multiplier;
     }
 
     _DensityTexture[id.xyz] = saturate(_DensityTexture[id.xyz] - change);

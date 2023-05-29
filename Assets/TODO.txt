@@ -81,9 +81,10 @@ World
 		Have settings be generated dynamically
 		Add in-unity variables for chunk loading ranges
 		Somehow implement look direction into the chunk loading?
-		Let chunks load once per frame
+		Let chunks turn on their renderer once per frame
 
 	ChunkNoiseGeneration.compute
+		I think this needs a full rework
 		Only have 3 layerSettings be sent per dispatch
 		Caves
 		Some kind of ceiling feature

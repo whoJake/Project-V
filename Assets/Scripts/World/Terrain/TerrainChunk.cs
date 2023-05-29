@@ -1,9 +1,12 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class TerrainChunk : MonoBehaviour
 {
-    public ActiveState state;
+    private ActiveState state;
     private List<ChunkEditRequest> editRequests;
     private RenderTexture densityTexture;
 
@@ -16,6 +19,9 @@ public class TerrainChunk : MonoBehaviour
     private MeshCollider targetCollider;
 
     public Vector3 origin { get { return centre - ((Vector3)handler.textureDimensions * handler.voxelScale / 2f); } }
+
+    public bool generating;
+    public bool generated { get { return densityTexture != null; } }
 
     private static bool shadersLoaded = false;
     private static ComputeShader computeDensityShader;
@@ -32,41 +38,50 @@ public class TerrainChunk : MonoBehaviour
         centre = _centre;
         state = _state;
         editRequests = new List<ChunkEditRequest>();
+        Generate();
 
         return this;
     }
 
     private void Update() {
-        bool gObjActive;
+        bool rendererEnabled;
         Mesh colliderMesh;
 
         switch (state) {
             case ActiveState.Inactive:
-                gObjActive = false;
+                rendererEnabled = false;
                 colliderMesh = null;
                 break;
 
             case ActiveState.Static:
-                gObjActive = true;
+                rendererEnabled = true;
                 colliderMesh = null;
                 break;
 
             case ActiveState.Active:
-                gObjActive = true;
+                rendererEnabled = true;
                 colliderMesh = targetFilter.mesh;
                 if (editRequests.Count != 0) HandleEditRequests();
                 break;
 
             default:
                 Debug.Log("Chunk active state is not set. This should never happen");
-                gObjActive = false;
+                rendererEnabled = false;
                 colliderMesh = null;
                 break;
         }
 
-        gameObject.SetActive(gObjActive);
+        GetComponent<MeshRenderer>().enabled = rendererEnabled;
         targetCollider.sharedMesh = colliderMesh;
 
+    }
+
+    private void OnDestroy() {
+        densityTexture.Release();
+    }
+
+    public void SetState(ActiveState state) {
+        this.state = state;
     }
 
     public void MakeEditRequest(ChunkEditRequest request) {
@@ -84,12 +99,12 @@ public class TerrainChunk : MonoBehaviour
         UpdateMesh();
     }
 
-    public void Generate(TerrainSettings settings) {
+    private void Generate() {
         if (!shadersLoaded) Debug.Log("Compute shader has not been initialized");
 
+        generating = true;
         densityTexture = RTUtils.Create3D_RFloat(handler.textureDimensions);
-        ComputeDensity(densityTexture, settings);
-        UpdateMesh();
+        StartCoroutine(ComputeDensity(densityTexture));
     }
 
     public void UpdateMesh() {
@@ -110,7 +125,7 @@ public class TerrainChunk : MonoBehaviour
     // Parameters:
     //   densityTexture:
     //     empty texture to put density values in
-    private void ComputeDensity(RenderTexture densityTexture, TerrainSettings settings) {
+    private IEnumerator ComputeDensity(RenderTexture densityTexture) {
         computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
         computeDensityShader.SetInt("layer_index", layer.id);
         computeDensityShader.SetFloat("voxel_scale", handler.voxelScale);
@@ -119,6 +134,19 @@ public class TerrainChunk : MonoBehaviour
 
         Vector3Int threads = RTUtils.CalculateThreadAmount(handler.textureDimensions, 8);
         computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
+
+        //Waits for GPU to be finished with data instead of having the frame stall. This produced roughly a 10% performance benefit
+        AsyncGPUReadbackRequest request = AsyncGPUReadback.Request(densityTexture, 0);
+        while (!request.done) {
+            if (request.hasError) {
+                Debug.Log("Request had error");
+                yield break;
+            }
+            yield return null;
+        }
+        
+        UpdateMesh();
+        generating = false;
     }
 
     //

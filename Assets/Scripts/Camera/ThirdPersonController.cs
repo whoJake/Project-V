@@ -114,8 +114,6 @@ public class ThirdPersonController : MonoBehaviour
         Vector3 rayDirection = (position - focusPoint.position).normalized;
         float rayLength = Vector3.Distance(position, focusPoint.position);
 
-        Debug.DrawRay(rayOrigin, rayDirection * rayLength);
-
         RaycastHit hit;
         if(Physics.Raycast(rayOrigin, rayDirection, out hit, rayLength, ~avoidOcclusionLayers)) {
             Vector3 targetPosition = hit.point - (rayDirection * avoidOcclusionBufferLength);
