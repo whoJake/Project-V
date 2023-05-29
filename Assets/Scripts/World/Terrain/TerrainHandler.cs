@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TerrainHandler : MonoBehaviour
@@ -19,12 +17,15 @@ public class TerrainHandler : MonoBehaviour
     private int randomGenCount;
 
     public Vector2Int generatedArea; //Only an approximate area that will be generated. Should always generate slightly larger than this but problems exist !
-    public Vector3Int chunkSize;
+    [SerializeField]
+    private Vector3Int chunkSize;
 
-    public Vector3Int voxelsPerAxis { get {
-            return new Vector3Int(chunkSize.x - 1,
-                                  chunkSize.y - 1,
-                                  chunkSize.z - 1); } }
+    public Vector3Int voxelsPerAxis { get { return new Vector3Int(chunkSize.x - 1,
+                                                                  chunkSize.y - 1,
+                                                                  chunkSize.z - 1); } }
+
+    public Vector3Int textureDimensions { get { return chunkSize + (Vector3Int.one * margin * 2); } }
+
     private Vector3 generationStartPosition { get { return transform.position; } }
 
     [Min(0)]
@@ -48,10 +49,6 @@ public class TerrainHandler : MonoBehaviour
 
     private void Update() {
         UpdateLayerActivity();
-        
-        foreach(TerrainLayer layer in terrainLayers) {
-            layer?.Update();
-        }
     }
 
     private void OnDisable() {
@@ -87,13 +84,13 @@ public class TerrainHandler : MonoBehaviour
                 calcState = ActiveState.Inactive;
             } else {
                 //Unload
-                terrainLayers[i]?.Unload();
+                if(terrainLayers[i]) terrainLayers[i].Unload();
                 terrainLayers[i] = null;
                 calcState = ActiveState.Inactive;
             }
 
             if (terrainLayers[i] == null && calcState == ActiveState.Inactive) continue;
-            if (terrainLayers[i] == null) GenerateLayer(i, calcState);
+            if (terrainLayers[i] == null) CreateLayer(i, calcState);
             else terrainLayers[i].state = calcState;
         }
     }
@@ -144,20 +141,17 @@ public class TerrainHandler : MonoBehaviour
         TerrainChunk.InitializeCompute(activeSettings);
     }
 
-    private void GenerateLayer(int layerIndex, ActiveState genState) {
+    private void CreateLayer(int layerIndex, ActiveState createState) {
         if (terrainLayers[layerIndex] != null) {
-            Debug.Log("layer already generated");
+            Debug.Log("layer already created");
             return;
         }
 
-        GameObject parent = new GameObject("Layer: " + layerIndex);
-        parent.transform.parent = transform;
+        GameObject layerGObj = new GameObject("Layer: " + layerIndex);
+        layerGObj.transform.parent = transform;
+        TerrainLayer layer = layerGObj.AddComponent<TerrainLayer>().Initialize(layerIndex, this, activeSettings.layers[layerIndex], createState);
 
-        TerrainLayer layer = new TerrainLayer(this, layerIndex, activeSettings.layers[layerIndex].origin, parent);
         terrainLayers[layerIndex] = layer;
-        layer.state = genState;
-
-        StartCoroutine(layer.Generate(activeSettings.layers[layerIndex].depth, OnLayerGenerated));
     }
 
     private void OnDrawGizmos() {

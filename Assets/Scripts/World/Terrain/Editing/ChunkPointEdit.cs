@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class ChunkPointEdit : ChunkEditType {
+public class ChunkPointEdit : IChunkEdit {
     public Vector3 position;
     public float radius;
     public bool add;
@@ -11,20 +11,20 @@ public class ChunkPointEdit : ChunkEditType {
         add = _add;
     }
 
-    public override void PerformEdit(RenderTexture target, TerrainChunk chunk) {
-        editShader = Resources.Load<ComputeShader>("Compute/ChunkEditing/ChunkPointEdit");
+    public void PerformEdit(RenderTexture target, TerrainChunk chunk) {
+        ComputeShader editShader = Resources.Load<ComputeShader>("Compute/ChunkEditing/ChunkPointEdit");
         editShader.SetTexture(0, "_DensityTexture", target);
         editShader.SetVector("chunk_origin", chunk.origin);
-        editShader.SetFloat("voxel_scale", chunk.voxelScale);
+        editShader.SetFloat("voxel_scale", chunk.handler.voxelScale);
         editShader.SetVector("point_position", position);
         editShader.SetFloat("point_radius", radius);
         editShader.SetInt("multiplier", add ? -1 : 1);
 
-        Vector3Int threads = RTUtils.CalculateThreadAmount(chunk.textureDimensions, 8);
+        Vector3Int threads = RTUtils.CalculateThreadAmount(chunk.handler.textureDimensions, 8);
         editShader.Dispatch(0, threads.x, threads.y, threads.z);
     }
 
-    public override Bounds GetBounds() {
+    public Bounds GetBounds() {
         return new Bounds(position, Vector3.one * (radius + 1) * 2);
 
     }

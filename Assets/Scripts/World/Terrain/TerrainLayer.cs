@@ -1,33 +1,44 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class TerrainLayer
+public class TerrainLayer : MonoBehaviour
 {
     public ActiveState state;
-    private readonly List<TerrainChunk> chunks;
+    private TerrainLayerSettings settings;
+    private List<TerrainChunk> chunks;
 
-    public readonly TerrainHandler handler;
-    public readonly int id;
-    private readonly Vector3 origin; //Layer origin is not the -/- corner but instead the top face centre of the layer
-    private readonly GameObject targetGObj;
+    public TerrainHandler handler;
+    public int id;
+    public Vector3 origin { get { return settings.origin; } }
 
     private Vector3Int chunkCount;
 
+    private bool isGenerating = false;
     private bool isGenerated = false;
     public bool IsGenerated { get { return isGenerated; } }
 
-    public TerrainLayer(TerrainHandler _handler, int _id, Vector3 _origin, GameObject _targetGObj) {
-        handler = _handler;
+    public TerrainLayer Initialize(int _id, TerrainHandler _handler, TerrainLayerSettings _settings, ActiveState _state) {
         id = _id;
-        origin = _origin;
-        targetGObj = _targetGObj;
+        handler = _handler;
+        settings = _settings;
+        state = _state;
 
         chunks = new List<TerrainChunk>();
+
+        chunkCount = new Vector3Int(Mathf.CeilToInt(handler.generatedArea.x / handler.voxelsPerAxis.x / handler.voxelScale),
+                                    Mathf.FloorToInt(settings.depth / handler.voxelsPerAxis.y / handler.voxelScale),
+                                    Mathf.CeilToInt(handler.generatedArea.y / handler.voxelsPerAxis.z / handler.voxelScale));
+
+        return this;
     }
 
-    public void Update() {
+    private void Update() {
+        if (!isGenerated && !isGenerating) {
+            isGenerating = true;
+            StartCoroutine(Generate());
+        }
+
         foreach(TerrainChunk chunk in chunks) {
             chunk.state = state;
         }
@@ -44,10 +55,6 @@ public class TerrainLayer
 
             case ActiveState.Active:
                 gObjActive = true;
-
-                foreach(TerrainChunk chunk in chunks) {
-                    chunk?.Update();
-                }
                 break;
 
             default:
@@ -56,7 +63,7 @@ public class TerrainLayer
                 break;
         }
 
-        targetGObj.SetActive(gObjActive);
+        gameObject.SetActive(gObjActive);
     }
 
     public void DistributeEditRequest(ChunkEditRequest request) {
@@ -79,12 +86,7 @@ public class TerrainLayer
     //   chunkCount:
     //     number of chunks per axis to generate
     //
-    public IEnumerator Generate(float depth, System.Action<int> callback) {
-        //I hate having to do this calculation here but I like the idea of putting in the depth in this function :)
-        chunkCount = new Vector3Int(Mathf.CeilToInt(handler.generatedArea.x / handler.voxelsPerAxis.x / handler.voxelScale),
-                                    Mathf.FloorToInt(depth / handler.voxelsPerAxis.y / handler.voxelScale),
-                                    Mathf.CeilToInt(handler.generatedArea.y / handler.voxelsPerAxis.z / handler.voxelScale));
-
+    public IEnumerator Generate() {
         Vector3Int halfChunkCount = Vector3Int.FloorToInt((Vector3)chunkCount / 2f);
         for(int x = 0; x < chunkCount.x; x++) {
             for(int y = 0; y < chunkCount.y; y++) {
@@ -99,17 +101,17 @@ public class TerrainLayer
                                                             * handler.voxelScale;
 
                     GameObject chunkGameObject = CreateChunkGameObject(chunkID.x + "," + (-chunkID.y) + "," + chunkID.z, position);
-                    TerrainChunk chunk = new TerrainChunk(this, position, handler.chunkSize, handler.margin, handler.voxelScale, chunkGameObject);
+                    TerrainChunk chunk = chunkGameObject.AddComponent<TerrainChunk>().Initialize(this, position, state);
 
                     chunk.Generate(handler.activeSettings);
-                    chunk.state = state;
                     chunks.Add(chunk);
                     yield return null;
                 }
             }
         }
         isGenerated = true;
-        callback?.Invoke(id);
+        isGenerating = false;
+        TerrainHandler.OnLayerGenerated?.Invoke(id);
     }
 
     //
@@ -123,7 +125,7 @@ public class TerrainLayer
             chunk.Unload();
             chunks.Remove(chunk);
         }
-        GameObject.Destroy(targetGObj);
+        GameObject.Destroy(this);
     }
 
     //
@@ -138,7 +140,7 @@ public class TerrainLayer
     //
     private GameObject CreateChunkGameObject(string name, Vector3 position) {
         GameObject result = new GameObject(name);
-        result.transform.parent = targetGObj.transform;
+        result.transform.parent = transform;
         result.transform.position = position;
 
         result.AddComponent<MeshFilter>();

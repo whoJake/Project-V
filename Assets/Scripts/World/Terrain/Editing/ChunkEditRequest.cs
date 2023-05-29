@@ -6,11 +6,11 @@ using UnityEngine;
 
 public class ChunkEditRequest
 {
-    private ChunkEditType type;
+    private readonly IChunkEdit type;
     private bool inProgress;
     public bool InProgress { get { return inProgress; } }
 
-    public ChunkEditRequest(ChunkEditType _type) {
+    public ChunkEditRequest(IChunkEdit _type) {
         type = _type;
         inProgress = false;
     }

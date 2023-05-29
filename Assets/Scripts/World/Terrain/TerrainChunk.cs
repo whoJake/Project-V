@@ -1,49 +1,42 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 
-public class TerrainChunk
+public class TerrainChunk : MonoBehaviour
 {
     public ActiveState state;
     private List<ChunkEditRequest> editRequests;
     private RenderTexture densityTexture;
 
-    public readonly TerrainLayer layer;
+    public TerrainLayer layer;
+    public TerrainHandler handler { get { return layer.handler; } }
 
-    private readonly Vector3 centre;
-    private readonly Vector3Int voxelDimensions;
-    private readonly int margin;
-    public readonly float voxelScale;
+    private Vector3 centre;
 
-    public readonly GameObject targetGObj;
-    private readonly MeshFilter targetFilter;
-    private readonly MeshCollider targetCollider;
+    private MeshFilter targetFilter;
+    private MeshCollider targetCollider;
 
-    public Vector3Int textureDimensions { get { return voxelDimensions + (Vector3Int.one * margin * 2); } }
-    public Vector3 origin { get { return centre - ((Vector3)textureDimensions * voxelScale / 2f); } }
+    public Vector3 origin { get { return centre - ((Vector3)handler.textureDimensions * handler.voxelScale / 2f); } }
 
     private static bool shadersLoaded = false;
     private static ComputeShader computeDensityShader;
     private static ComputeShader computeVerticesShader;
     private static ComputeBuffer layerSettingsBuffer;
 
-    public TerrainChunk(TerrainLayer _layer, Vector3 _centre, Vector3Int _voxelDimensions, int _margin, float _voxelScale, GameObject _targetGObj) {
-        layer = _layer;
-        centre = _centre;
-        voxelDimensions = _voxelDimensions;
-        margin = _margin;
-        voxelScale = _voxelScale;
-
-        targetGObj = _targetGObj;
-        targetFilter = _targetGObj.GetComponent<MeshFilter>();
-        targetCollider = _targetGObj.GetComponent<MeshCollider>();
-        state = layer.state;
-        editRequests = new List<ChunkEditRequest>();
+    private void Awake() {
+        targetFilter = GetComponent<MeshFilter>();
+        targetCollider = GetComponent<MeshCollider>();
     }
 
-    public void Update() {
+    public TerrainChunk Initialize(TerrainLayer _layer, Vector3 _centre, ActiveState _state) {
+        layer = _layer;
+        centre = _centre;
+        state = _state;
+        editRequests = new List<ChunkEditRequest>();
+
+        return this;
+    }
+
+    private void Update() {
         bool gObjActive;
         Mesh colliderMesh;
 
@@ -71,7 +64,7 @@ public class TerrainChunk
                 break;
         }
 
-        targetGObj.SetActive(gObjActive);
+        gameObject.SetActive(gObjActive);
         targetCollider.sharedMesh = colliderMesh;
 
     }
@@ -94,10 +87,8 @@ public class TerrainChunk
     public void Generate(TerrainSettings settings) {
         if (!shadersLoaded) Debug.Log("Compute shader has not been initialized");
 
-        densityTexture = RTUtils.Create3D_RFloat(textureDimensions);
-
+        densityTexture = RTUtils.Create3D_RFloat(handler.textureDimensions);
         ComputeDensity(densityTexture, settings);
-
         UpdateMesh();
     }
 
@@ -122,11 +113,11 @@ public class TerrainChunk
     private void ComputeDensity(RenderTexture densityTexture, TerrainSettings settings) {
         computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
         computeDensityShader.SetInt("layer_index", layer.id);
-        computeDensityShader.SetFloat("voxel_scale", voxelScale);
+        computeDensityShader.SetFloat("voxel_scale", handler.voxelScale);
 
         computeDensityShader.SetVector("chunk_origin", origin);
 
-        Vector3Int threads = RTUtils.CalculateThreadAmount(textureDimensions, 8);
+        Vector3Int threads = RTUtils.CalculateThreadAmount(handler.textureDimensions, 8);
         computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
     }
 
@@ -138,7 +129,7 @@ public class TerrainChunk
     //   densityTexture:
     //     texture sent to the marching cubes shader to evaluate
     private Vector3[] ComputeVertices(RenderTexture densityTexture) {
-        int maxCubes = textureDimensions.x * textureDimensions.y * textureDimensions.z;
+        int maxCubes = handler.textureDimensions.x * handler.textureDimensions.y * handler.textureDimensions.z;
         int maxTris = maxCubes * 5;
 
         ComputeBuffer vertexBuffer = new ComputeBuffer(maxTris , sizeof(float) * 3 * 3, ComputeBufferType.Append);
@@ -147,12 +138,12 @@ public class TerrainChunk
         vertexBuffer.SetCounterValue(0);
         computeVerticesShader.SetTexture(0, "_DensityTexture", densityTexture);
         computeVerticesShader.SetBuffer(0, "_TriangleBuffer", vertexBuffer);
-        computeVerticesShader.SetInts("texture_size", textureDimensions.x, textureDimensions.y, textureDimensions.z);
-        computeVerticesShader.SetFloat("voxel_scale", voxelScale);
+        computeVerticesShader.SetInts("texture_size", handler.textureDimensions.x, handler.textureDimensions.y, handler.textureDimensions.z);
+        computeVerticesShader.SetFloat("voxel_scale", handler.voxelScale);
         computeVerticesShader.SetBool("interpolate", true);
         computeVerticesShader.SetFloat("threshold", 0.5f);
 
-        Vector3Int threads = RTUtils.CalculateThreadAmount(textureDimensions, 8);
+        Vector3Int threads = RTUtils.CalculateThreadAmount(handler.textureDimensions, 8);
         //Debug.Log((Vector3)threads + " threads dispatched for ComputeVertices");
         computeVerticesShader.Dispatch(0, threads.x, threads.y, threads.z);
 
@@ -181,13 +172,13 @@ public class TerrainChunk
     //
     public void Unload() {
         densityTexture.Release();
-        GameObject.Destroy(targetGObj);
+        Destroy(this);
         //Dump current edit requests
         //Save chunk
     }
 
     public Bounds GetBounds() {
-        return new Bounds(centre, (Vector3)textureDimensions * voxelScale);
+        return new Bounds(centre, (Vector3)handler.textureDimensions * handler.voxelScale);
     }
 
     //

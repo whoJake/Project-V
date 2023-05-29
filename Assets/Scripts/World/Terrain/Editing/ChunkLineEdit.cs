@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ChunkLineEdit : ChunkEditType {
+public class ChunkLineEdit : IChunkEdit {
     public Vector3 start;
     public Vector3 end;
     public float startRadius;
@@ -24,7 +24,7 @@ public class ChunkLineEdit : ChunkEditType {
         owner = _owner;
     }
 
-    public override void PerformEdit(RenderTexture target, TerrainChunk chunk) {
+    public void PerformEdit(RenderTexture target, TerrainChunk chunk) {
         owner.StartCoroutine(FireLine(chunk));
     }
 
@@ -42,7 +42,7 @@ public class ChunkLineEdit : ChunkEditType {
 
     }
 
-    public override Bounds GetBounds() {
+    public Bounds GetBounds() {
         Vector3 centre = start;
         Vector3 size = Vector3.one;
 
