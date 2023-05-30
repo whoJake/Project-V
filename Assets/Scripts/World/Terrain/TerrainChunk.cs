@@ -20,6 +20,7 @@ public class TerrainChunk : MonoBehaviour
 
     public Vector3 origin { get { return centre - ((Vector3)handler.textureDimensions * handler.voxelScale / 2f); } }
 
+    public bool updatingMesh;
     public bool generating;
     public bool generated { get { return densityTexture != null; } }
 
@@ -73,30 +74,6 @@ public class TerrainChunk : MonoBehaviour
 
         GetComponent<MeshRenderer>().enabled = rendererEnabled;
         targetCollider.sharedMesh = colliderMesh;
-
-    }
-
-    private void OnDestroy() {
-        densityTexture.Release();
-    }
-
-    public void SetState(ActiveState state) {
-        this.state = state;
-    }
-
-    public void MakeEditRequest(ChunkEditRequest request) {
-        if (state == ActiveState.Inactive) return;
-
-        editRequests.Add(request);
-    }
-
-    private void HandleEditRequests() {
-        for(int i = editRequests.Count - 1; i >= 0; i--) {
-            ChunkEditRequest request = editRequests[i];
-            if (!request.InProgress) request.Process(densityTexture, this);
-            editRequests.Remove(request);
-        }
-        UpdateMesh();
     }
 
     private void Generate() {
@@ -108,14 +85,60 @@ public class TerrainChunk : MonoBehaviour
     }
 
     public void UpdateMesh() {
-        Vector3[] vertices = ComputeVertices(densityTexture);
+        if (!generated) return;
+        StopAllCoroutines();
+        StartCoroutine(CalculateVerticesAndApplyToMesh());
+    }
+
+    //
+    // Summery:
+    //     Uses the current density texture to calculate the vertices using marching cubes algorithm and then applies these to the mesh
+    //
+    private IEnumerator CalculateVerticesAndApplyToMesh() {
+        updatingMesh = true;
+
+        int maxCubes = handler.textureDimensions.x * handler.textureDimensions.y * handler.textureDimensions.z;
+        int maxTris = maxCubes * 5;
+
+        ComputeBuffer vertexBuffer = new ComputeBuffer(maxTris, sizeof(float) * 3 * 3, ComputeBufferType.Append);
+        ComputeBuffer triangleCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+
+        vertexBuffer.SetCounterValue(0);
+        computeVerticesShader.SetTexture(0, "_DensityTexture", densityTexture);
+        computeVerticesShader.SetBuffer(0, "_TriangleBuffer", vertexBuffer);
+        computeVerticesShader.SetInts("texture_size", handler.textureDimensions.x, handler.textureDimensions.y, handler.textureDimensions.z);
+        computeVerticesShader.SetFloat("voxel_scale", handler.voxelScale);
+        computeVerticesShader.SetBool("interpolate", true);
+        computeVerticesShader.SetFloat("threshold", 0.5f);
+
+        Vector3Int threads = RTUtils.CalculateThreadAmount(handler.textureDimensions, 8);
+        computeVerticesShader.Dispatch(0, threads.x, threads.y, threads.z);
+
+        yield return ComputeUtils.WaitForResource(vertexBuffer);
+
+        //Gets the number of times Append was called on the buffer (number of triangles added)
+        //then uses that to read the buffer, annoying asf to deal with it like this
+        int[] triangleCount = new int[1];
+        triangleCountBuffer.SetData(triangleCount);
+        ComputeBuffer.CopyCount(vertexBuffer, triangleCountBuffer, 0);
+        triangleCountBuffer.GetData(triangleCount);
+
+        int vertexCount = triangleCount[0] * 3;
+
+        Vector3[] vertices = new Vector3[vertexCount];
+        vertexBuffer.GetData(vertices);
+
+        vertexBuffer.Release();
+        triangleCountBuffer.Release();
+
+        //Build triangle array which is actually just an array of length vertices and value as its position in the array lul
         int[] triangles = new int[vertices.Length];
         for (int i = 0; i < triangles.Length; i++) {
             triangles[i] = i;
         }
-
         MeshInfo meshInfo = new MeshInfo(vertices, triangles);
         targetFilter.mesh = meshInfo.AsMesh();
+        updatingMesh = false;
     }
 
     //
@@ -135,62 +158,33 @@ public class TerrainChunk : MonoBehaviour
         Vector3Int threads = RTUtils.CalculateThreadAmount(handler.textureDimensions, 8);
         computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
 
-        //Waits for GPU to be finished with data instead of having the frame stall. This produced roughly a 10% performance benefit
-        AsyncGPUReadbackRequest request = AsyncGPUReadback.Request(densityTexture, 0);
-        while (!request.done) {
-            if (request.hasError) {
-                Debug.Log("Request had error");
-                yield break;
-            }
-            yield return null;
-        }
-        
-        UpdateMesh();
+        yield return ComputeUtils.WaitForResource(densityTexture);
+        yield return CalculateVerticesAndApplyToMesh();
+
         generating = false;
     }
 
     //
     // Summery:
-    //   Computes and returns the vertices returned by marching cubes compute shader
+    //     Adds a chunk edit request to the queue of requests to be processed
     //
-    // Parameters:
-    //   densityTexture:
-    //     texture sent to the marching cubes shader to evaluate
-    private Vector3[] ComputeVertices(RenderTexture densityTexture) {
-        int maxCubes = handler.textureDimensions.x * handler.textureDimensions.y * handler.textureDimensions.z;
-        int maxTris = maxCubes * 5;
+    public void MakeEditRequest(ChunkEditRequest request) {
+        if (state == ActiveState.Inactive) return;
 
-        ComputeBuffer vertexBuffer = new ComputeBuffer(maxTris , sizeof(float) * 3 * 3, ComputeBufferType.Append);
-        ComputeBuffer triangleCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+        editRequests.Add(request);
+    }
 
-        vertexBuffer.SetCounterValue(0);
-        computeVerticesShader.SetTexture(0, "_DensityTexture", densityTexture);
-        computeVerticesShader.SetBuffer(0, "_TriangleBuffer", vertexBuffer);
-        computeVerticesShader.SetInts("texture_size", handler.textureDimensions.x, handler.textureDimensions.y, handler.textureDimensions.z);
-        computeVerticesShader.SetFloat("voxel_scale", handler.voxelScale);
-        computeVerticesShader.SetBool("interpolate", true);
-        computeVerticesShader.SetFloat("threshold", 0.5f);
-
-        Vector3Int threads = RTUtils.CalculateThreadAmount(handler.textureDimensions, 8);
-        //Debug.Log((Vector3)threads + " threads dispatched for ComputeVertices");
-        computeVerticesShader.Dispatch(0, threads.x, threads.y, threads.z);
-
-        //Gets the number of times Append was called on the buffer (number of triangles added)
-        //then uses that to read the buffer, annoying asf to deal with it like this
-        int[] triangleCount = new int[1];
-        triangleCountBuffer.SetData(triangleCount);
-        ComputeBuffer.CopyCount(vertexBuffer, triangleCountBuffer, 0);
-        triangleCountBuffer.GetData(triangleCount);
-
-        int vertexCount = triangleCount[0] * 3;
-
-        Vector3[] result = new Vector3[vertexCount];
-        vertexBuffer.GetData(result);
-
-        vertexBuffer.Release();
-        triangleCountBuffer.Release();
-
-        return result;
+    //
+    // Summery:
+    //     Processes all current requests at once then updates the mesh
+    //
+    private void HandleEditRequests() {
+        for (int i = editRequests.Count - 1; i >= 0; i--) {
+            ChunkEditRequest request = editRequests[i];
+            if (!request.InProgress) request.Process(densityTexture, this);
+            editRequests.Remove(request);
+        }
+        UpdateMesh();
     }
 
     // 
@@ -205,6 +199,14 @@ public class TerrainChunk : MonoBehaviour
         //Save chunk
     }
 
+    private void OnDestroy() {
+        densityTexture.Release();
+    }
+
+    public void SetState(ActiveState state) {
+        this.state = state;
+    }
+
     public Bounds GetBounds() {
         return new Bounds(centre, (Vector3)handler.textureDimensions * handler.voxelScale);
     }
@@ -212,6 +214,7 @@ public class TerrainChunk : MonoBehaviour
     //
     // Summery:
     //   Loads the resources needed to start compute
+    //
     public static void InitializeCompute(TerrainSettings settings) {
         if (shadersLoaded) {
             Debug.Log("Compute shaders have already been initialized");
@@ -232,7 +235,6 @@ public class TerrainChunk : MonoBehaviour
 
         shadersLoaded = true;
     }
-
 
     public static void ReleaseBuffers() {
         layerSettingsBuffer.Release();

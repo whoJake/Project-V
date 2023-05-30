@@ -38,10 +38,15 @@ public class TerrainLayer : MonoBehaviour
         if (this.state == state) return;
 
         this.state = state;
-        foreach(TerrainChunk chunk in chunks) {
-            if (!chunk) continue;
+        StartCoroutine(SetChunkStatePerFrame(state));
+    }
 
-            chunk.SetState(state);
+    //Makes sure that only one chunk is updated per frame
+    //Had to do this as updating like 150 meshes to be rendered in one frame caused huge lag because of PhysX rebaking of collision meshes so spreading them out helps this a bit
+    private IEnumerator SetChunkStatePerFrame(ActiveState state) {
+        for(int i = 0; i < chunks.Count; i++) {
+            chunks[i].SetState(state);
+            yield return null;
         }
     }
 
