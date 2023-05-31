@@ -82,6 +82,9 @@ World
 		Add in-unity variables for chunk loading ranges
 		Somehow implement look direction into the chunk loading?
 
+	ChunkBarrierEdit.compute
+		Add some kind of noise to the top height in order to make it look a bit better
+
 	ChunkNoiseGeneration.compute
 		I think this needs a full rework
 		Only have 3 layerSettings be sent per dispatch

@@ -1,0 +1,52 @@
+#pragma kernel CSMain
+#include "../MathUtils.cginc"
+
+RWTexture3D<float> _DensityTexture;
+float3 chunk_origin;
+float voxel_scale;
+
+float3 point_position;
+float point_radius;
+float percent_filled;
+float3 opening_direction;
+
+float ease(float x, int power) {
+    return 1 - pow(1 - x, power);
+}
+
+[numthreads(8, 8, 8)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    //Texture dimensions and return condition
+    uint width, height, depth;
+    _DensityTexture.GetDimensions(width, height, depth);
+    if (id.x >= width || id.y >= height || id.z >= depth) return;
+    uint3 texture_size = uint3(width, height, depth);
+
+
+    float3 worldPosition = chunk_origin + (id * voxel_scale);
+    float dstFromPoint = distance(point_position, worldPosition);
+    float dstFromPointSurface = dstFromPoint - point_radius;
+    float outsideMask = saturate(sign(-dstFromPointSurface));
+
+    float dstFromPoint01 = saturate(invlerp(dstFromPoint, 0, point_radius));
+    float pointWeight = ease(dstFromPoint01, 2) * 2 - 1;
+
+    float heightInSphereStart = point_position.y - point_radius;
+    float heightInSphere01 = 1 - invlerp(worldPosition.y, heightInSphereStart, heightInSphereStart + (2 * point_radius));
+    float heightWeight = saturate(remap(heightInSphere01, 0, 1 - percent_filled, 0, 1));
+
+    float3 openingPointPosition = point_position - opening_direction * point_radius * 0.75;
+    float dstFromOpeningPoint = distance(openingPointPosition, worldPosition);
+    float dstFromOpeningPoint01 = saturate(invlerp(dstFromOpeningPoint, 0, point_radius));
+    float openingPointWeight = dstFromOpeningPoint01;
+
+    float rawchange = -0.6;
+
+    float change = rawchange * pointWeight * outsideMask * heightWeight;
+    //- = add, + = remove
+    //ee1 when adding
+    change *= saturate((-sign(change)) * openingPointWeight);
+
+    _DensityTexture[id.xyz] = saturate(_DensityTexture[id.xyz] - change);
+}

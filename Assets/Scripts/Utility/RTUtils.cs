@@ -14,7 +14,7 @@ public static class RTUtils
     public static RenderTexture Create3D_RFloat(Vector3Int dimensions) {
         RenderTexture result = new RenderTexture(dimensions.x, dimensions.y, 0);
         result.dimension = UnityEngine.Rendering.TextureDimension.Tex3D;
-        result.format = RenderTextureFormat.RFloat;
+        result.format = RenderTextureFormat.R8;
         result.volumeDepth = dimensions.z;
         result.enableRandomWrite = true;
         result.Create();

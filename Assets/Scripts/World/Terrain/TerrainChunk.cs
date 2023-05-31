@@ -39,6 +39,8 @@ public class TerrainChunk : MonoBehaviour
         centre = _centre;
         state = _state;
         editRequests = new List<ChunkEditRequest>();
+
+
         Generate();
 
         return this;
@@ -86,7 +88,6 @@ public class TerrainChunk : MonoBehaviour
 
     public void UpdateMesh() {
         if (!generated) return;
-        StopAllCoroutines();
         StartCoroutine(CalculateVerticesAndApplyToMesh());
     }
 
@@ -95,13 +96,16 @@ public class TerrainChunk : MonoBehaviour
     //     Uses the current density texture to calculate the vertices using marching cubes algorithm and then applies these to the mesh
     //
     private IEnumerator CalculateVerticesAndApplyToMesh() {
-        updatingMesh = true;
+        ComputeBuffer vertexBuffer;
+        ComputeBuffer triangleCountBuffer;
 
         int maxCubes = handler.textureDimensions.x * handler.textureDimensions.y * handler.textureDimensions.z;
         int maxTris = maxCubes * 5;
 
-        ComputeBuffer vertexBuffer = new ComputeBuffer(maxTris, sizeof(float) * 3 * 3, ComputeBufferType.Append);
-        ComputeBuffer triangleCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+        vertexBuffer = new ComputeBuffer(maxTris, sizeof(float) * 3 * 3, ComputeBufferType.Append);
+        triangleCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+
+        updatingMesh = true;
 
         vertexBuffer.SetCounterValue(0);
         computeVerticesShader.SetTexture(0, "_DensityTexture", densityTexture);

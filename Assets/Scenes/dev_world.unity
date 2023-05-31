@@ -262,11 +262,11 @@ MonoBehaviour:
   authoredSettings: {fileID: 11400000, guid: d05af63fe316d62449ebc1bb808aa08f, type: 2}
   activeSettings: {fileID: 0}
   authorLayers: 0
-  randomGenCount: 100
+  randomGenCount: 25
   generatedArea: {x: 1024, y: 1024}
-  chunkSize: {x: 32, y: 16, z: 32}
+  chunkSize: {x: 32, y: 8, z: 32}
   margin: 0
-  voxelScale: 4
+  voxelScale: 6
   material: {fileID: 2100000, guid: 4d1e4909787630147a86fc4972d45811, type: 2}
   showLayerBounds: 0
 --- !u!4 &579274941

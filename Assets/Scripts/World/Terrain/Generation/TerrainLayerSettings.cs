@@ -81,18 +81,18 @@ public class TerrainLayerSettings : ScriptableObject
         result.groundDepth = Random.Range(48f, result.depth - 48f);
 
         float maxGroundThickness = Mathf.Min(result.groundDepth, result.depth - result.groundDepth) * 2f;
-        result.groundThickness = Random.Range(32f, maxGroundThickness);
+        result.groundThickness = Random.Range(16f, maxGroundThickness);
 
         result.groundHeightChangeComplexity = Random.Range(3, 6);
-        result.groundHeightChangeDistortionStrength = Random.Range(0f, 2f);
+        result.groundHeightChangeDistortionStrength = Random.Range(0f, 3f);
         result.groundHeightChangeScale = Random.Range(0.6f, 1f);
 
         float maxGroundHeightChange = Mathf.Max(0f, Mathf.Min(result.groundDepth - (result.groundThickness / 2f), result.depth - result.groundDepth - (result.groundThickness / 2f)));
         maxGroundHeightChange = Mathf.Min(maxGroundHeightChange, result.groundThickness / 1.5f);
-        result.groundHeightChangeMax = Random.Range(0.7f, 1f) * maxGroundHeightChange;
+        result.groundHeightChangeMax = Random.Range(0.3f, 0.7f) * maxGroundHeightChange;
 
         result.surfaceFeatureDepth = Random.Range(0f, result.groundThickness);
-        result.surfaceRoughness = Random.Range(0.3f, 0.7f);
+        result.surfaceRoughness = Random.Range(0.1f, 0.7f);
 
         result.pillarDensity = Random.Range(0f, 0.8f);
         result.pillarScale = Random.Range(0.4f, 1f);

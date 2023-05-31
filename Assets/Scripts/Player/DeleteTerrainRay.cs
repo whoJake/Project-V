@@ -14,7 +14,9 @@ public class DeleteTerrainRay : MonoBehaviour
             Vector3 mousePosition = Input.mousePosition;
             Ray ray = mcamera.ScreenPointToRay(mousePosition);
             if (Physics.Raycast(ray.origin, ray.direction, out RaycastHit hit,  250, ~mask)) {
-                ChunkEditRequest request = new ChunkEditRequest(new ChunkLineEdit(hit.point, ray.origin + ray.direction * 200f, 10f, 40f, 20, 0.75f, this));
+                Vector3 direction = (hit.point - transform.position);
+                Vector3 beamDir = new Vector3(direction.x, 0, direction.z).normalized;
+                ChunkEditRequest request = new ChunkEditRequest(new ChunkBeamEdit(hit.point, hit.point + beamDir * 150f, 5, 45, 12, 0.2f, this));
                 terrainHandler.DistributeEditRequest(request);
             }
         }
@@ -23,8 +25,8 @@ public class DeleteTerrainRay : MonoBehaviour
             Vector3 mousePosition = Input.mousePosition;
             Ray ray = mcamera.ScreenPointToRay(mousePosition);
             if (Physics.Raycast(ray.origin, ray.direction, out RaycastHit hit, 250, ~mask)) {
-                ChunkEditRequest request = new ChunkEditRequest(new ChunkPointEdit(hit.point, 15f, true));
-                terrainHandler.DistributeEditRequest(request);
+                //ChunkEditRequest request = new ChunkEditRequest(new ChunkBarrierEdit(hit.point, 35f, 0.5f));
+                //terrainHandler.DistributeEditRequest(request);
             }
         }
     }
