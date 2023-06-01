@@ -1,5 +1,6 @@
 #pragma kernel CSMain
 #include "../MathUtils.cginc"
+#include "../Noise/Fractal.cginc"
 
 RWTexture3D<float> _DensityTexture;
 float3 chunk_origin;
@@ -20,7 +21,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     uint3 texture_size = uint3(width, height, depth);
 
     point_radius *= 1.4; // this is to account for the easing function
-    float innerRadius = point_radius * 0.6;
+    float innerRadius = point_radius * 0.8;
 
     float3 worldPosition = chunk_origin + (id * voxel_scale);
     float dstFromPoint = distance(point_position, worldPosition);
@@ -33,9 +34,16 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float rawchange = 0.6;
 
     float boundsPointWeight = 1 - easein(dstFromBoundsPoint01, 5);
-    float innerPointWeight = easein(dstFromInnerPoint01, 5);
+    float innerPointWeight = easeout(dstFromInnerPoint01, 5) * 2 - 1;
 
-    float heightInSphereStart = point_position.y - point_radius;
+    float2 circleVec = normalize(worldPosition.xz - point_position.xz) * point_radius;
+    float3 planePosition = point_position.xyz + float3(circleVec.x, 0, circleVec.y);
+
+    float heightNoise = fnoise01(planePosition, 3, 0.02, 0.5, 1.5) * 2 - 1;
+    float variance = point_radius * percent_filled * 0.2;
+    float heightVariance = heightNoise * variance;
+
+    float heightInSphereStart = point_position.y - point_radius + heightVariance;
     float heightInSphere01 = 1 - invlerp(worldPosition.y, heightInSphereStart, heightInSphereStart + (2 * point_radius));
     float heightWeight = saturate(remap(heightInSphere01, 0, 1 - percent_filled, 0, 1));
 
@@ -45,7 +53,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float openingPointWeight = dstFromOpeningPoint01;
 
     float weight = boundsPointWeight * innerPointWeight * heightWeight * openingPointWeight;
-    float change = -rawchange * weight;
+    float change = -rawchange * weight * outsideMask;
 
     _DensityTexture[id.xyz] = saturate(_DensityTexture[id.xyz] - change);
 }

@@ -17,6 +17,6 @@ LIST OF TASKS
 		Add Rigs and bones
 	Map Generation
 	Saving/Loading Map
-	Map Editing during and between runs
+	Map Editing during and between runs DONE
 	Setup good orbits for camera
 	Collision for camera DONE

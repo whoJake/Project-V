@@ -30,7 +30,7 @@ public class ChunkBarrierEdit : IChunkEdit {
     }
 
     public Bounds GetBounds() {
-        return new Bounds(position, Vector3.one * (radius + 1) * 2);
+        return new Bounds(position, Vector3.one * ((radius * 1.5f) + 1) * 2);
 
     }
 }

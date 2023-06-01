@@ -40,7 +40,7 @@ public class ChunkBeamEdit : IChunkEdit
             yield return new WaitForSecondsRealtime(timeBetweenSteps);
         }
 
-        chunk.layer.handler.DistributeEditRequest(new ChunkEditRequest(new ChunkBarrierEdit(end, (end - start).normalized, endRadius, 0.7f)));
+        chunk.layer.handler.DistributeEditRequest(new ChunkEditRequest(new ChunkBarrierEdit(end, (end - start).normalized, endRadius, 0.6f)));
 
     }
 

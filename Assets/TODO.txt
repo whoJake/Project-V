@@ -83,7 +83,7 @@ World
 		Somehow implement look direction into the chunk loading?
 
 	ChunkBarrierEdit.compute
-		Add some kind of noise to the top height in order to make it look a bit better
+		Perform some kind of ground check to ensure that it isnt creating an impact crator that is flaoting in midair
 
 	ChunkNoiseGeneration.compute
 		I think this needs a full rework
