@@ -10,6 +10,14 @@ float3 setmagnitude(float3 v, float mag){
     return normalize(v) * mag;
 }
 
+float easeout(float x, int power) {
+    return 1 - pow(1 - x, power);
+}
+
+float easein(float x, int power) {
+    return pow(x, power);
+}
+
 float remap(float val, float oldA, float oldB, float newA, float newB) {
     float a = val - oldA;
     float b = newB - newA;

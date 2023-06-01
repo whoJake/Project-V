@@ -261,7 +261,7 @@ MonoBehaviour:
   mainCamera: {fileID: 812795195}
   authoredSettings: {fileID: 11400000, guid: d05af63fe316d62449ebc1bb808aa08f, type: 2}
   activeSettings: {fileID: 0}
-  authorLayers: 0
+  authorLayers: 1
   randomGenCount: 25
   generatedArea: {x: 1024, y: 1024}
   chunkSize: {x: 32, y: 8, z: 32}
