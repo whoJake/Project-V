@@ -169,7 +169,7 @@ public class TerrainHandler : MonoBehaviour
     TerrainSettings GenerateLayerSettings(int count) {
         TerrainSettings result = ScriptableObject.CreateInstance<TerrainSettings>();
         result.layers = new TerrainLayerSettings[count + 1];
-        result.layers[0] = Resources.Load<TerrainLayerSettings>("AIR");
+        result.layers[0] = Resources.Load<TerrainLayerSettings>("Layers/AIR");
 
         for(int i = 0; i < count; i++) {
             result.layers[i + 1] = TerrainLayerSettings.GetAllRandom();

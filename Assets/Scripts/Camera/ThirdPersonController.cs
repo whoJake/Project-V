@@ -4,75 +4,79 @@ using UnityEngine;
 
 public class ThirdPersonController : MonoBehaviour
 {
-    [SerializeField] [Tooltip("Array of Orbits used to control the movement of the 3rd person camera")]
-    private OrbitalInfo[] orbits;
+    [SerializeField]    private Camera controlCamera;
 
-    private OrbitalRail[] rings;
+    [SerializeField]    private Transform focusPoint;
+    [SerializeField]    private Vector2 verticalLookClamps;
+    [SerializeField]    private bool invertY;
 
-    [SerializeField] [Tooltip("The transform which the orbits will orbit around")]
-    private Transform orbitAround;
+    [Space]
+    [SerializeField]    private Vector2 mouseSensitivity;
+    [SerializeField]    private Transform rotationPoint;
+    [SerializeField]    private float length;
 
-    [SerializeField] [Tooltip("GameObject that will be controlled as the camera")]
-    private Camera affectedCamera;
+    [Space]
+    [SerializeField]    private bool willControlTransform;
+    [SerializeField]    private Transform controlTransform;
+    [SerializeField]    private ControlTransformType controlTransformType;
 
-    [SerializeField]
-    private Vector2 mouseSensitivity = new Vector2(1, 1);
-
-    [SerializeField]
-    private Transform focusPoint;
-
-    [SerializeField] [Tooltip("Will this camera control the forward direction of another transform")]
-    private bool willControlTransformDirection;
-
-    [SerializeField] [Tooltip("Will control the forward direction of this transform")]
-    private Transform controlTransform;
-
-    [SerializeField] [Tooltip("Determines which parts of the rotation will be controlled by the camera")]
-    private ControlTransformType controlTransformType = ControlTransformType.NoVerticalControl;
-
-    [SerializeField] [Tooltip("This camera will avoid occluding the focus point")]
-    private bool avoidOcclusion;
-
-    [SerializeField]
-    private LayerMask avoidOcclusionLayers;
-
-    [SerializeField] [Tooltip("The time it takes for the camera move towards its un-occluded state")]
-    [Min(0)] private float avoidOcclusionSmoothingTime;
-
-    [SerializeField] [Tooltip("Buffer length between detected occlusion location and the new location of the camera")]
-    [Min(0)] private float avoidOcclusionBufferLength;
-
-    private Vector3 avoidOcclusionVelocity;
-
-    [SerializeField] [Tooltip("Display the wireframes of setup orbits in the editor")]
-    private bool showOrbitWireframes = false;
+    [Space]
+    [SerializeField]    private bool shouldAvoidOcclusion;
+    [SerializeField]    private float avoidBuffer;
+    [SerializeField]    private float avoidSmoothingTime;
 
 
-    private float currentAngle;
-    private float currentHeight;
+    private float currentLookX;
+    private float currentLookY = Mathf.PI / 2f;
 
-    private void Update() {
-        UpdateRings();
-        ReadInput();
+    private float avoidSmoothingVelocity;
+    private float currentLength;
 
-        Vector3 updatedCameraPosition = CalculateCameraPosition();
-        if (avoidOcclusion) AvoidOcclusion(ref updatedCameraPosition);
-        affectedCamera.transform.position = updatedCameraPosition;
 
-        FocusOnTransform();
-        if (willControlTransformDirection) ControlTransformDirection();
+    private void Start() {
+        Cursor.lockState = CursorLockMode.Locked;
+        currentLength = length;
+        if (!controlCamera)
+            controlCamera = Camera.main;
     }
 
-    private void FocusOnTransform() {
-        if(focusPoint == null) {
-            Debug.Log("Focus Transform is not set");
-            return;
+    private void LateUpdate() {
+        ReadInputs();
+
+        UpdateLookDirection();
+        UpdatePosition();
+
+        if(willControlTransform) HandleTransformDirection();
+
+        if (shouldAvoidOcclusion)
+            AvoidOcclusion();
+        else
+            currentLength = length;
+    }
+
+    private void ReadInputs() {
+        if (Application.isFocused && Cursor.lockState == CursorLockMode.Locked) {
+            float tau = 2 * Mathf.PI;
+
+            Vector2 lookInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y") * (invertY ? -1 : 1));
+            lookInput *= mouseSensitivity * 0.05f;
+
+            currentLookY = Mathf.Clamp(currentLookY - lookInput.y, verticalLookClamps.x * Mathf.Deg2Rad, Mathf.PI - verticalLookClamps.y * Mathf.Deg2Rad);
+            currentLookX = Mathf.Repeat(currentLookX + lookInput.x, tau);
         }
-        affectedCamera.transform.LookAt(focusPoint.position);
     }
 
-    private void ControlTransformDirection() {
-        Vector3 vecFromCamera = (controlTransform.position - affectedCamera.transform.position).normalized;
+    private void UpdateLookDirection() {
+        controlCamera.transform.eulerAngles = new Vector3(currentLookY * Mathf.Rad2Deg - 90f,
+                                                          currentLookX * Mathf.Rad2Deg, 0);
+    }
+
+    private void UpdatePosition() {
+        controlCamera.transform.position = rotationPoint.position - controlCamera.transform.forward * currentLength;
+    }
+
+    private void HandleTransformDirection() {
+        Vector3 vecFromCamera = (focusPoint.position - controlCamera.transform.position).normalized;
 
         switch (controlTransformType) {
             case ControlTransformType.FullControl:
@@ -88,93 +92,20 @@ public class ThirdPersonController : MonoBehaviour
         }
     }
 
-    private Vector3 CalculateCameraPosition() {
-        //Brings height between 0->Difference between first and last orbit
-        float scaledHeight = currentHeight * orbits[^1].height;
-        for(int i = 0; i < orbits.Length; i++) {
+    private void AvoidOcclusion() {
+        Vector3 camToRotate = controlCamera.transform.position - rotationPoint.position;
+        Ray occlusionRay = new Ray(rotationPoint.position, camToRotate);
+        bool occluded = Physics.Raycast(occlusionRay, out RaycastHit hitInfo, length, ~LayerMask.GetMask("Player"));
 
-            //Most likely camera is on bottom or top rail
-            if (orbits[i].height == scaledHeight) {
-                return rings[i].Evaluate(currentAngle);
-            }else if (orbits[i].height > scaledHeight) {
-                //Find lerp
-                float diff = orbits[i].height - orbits[i-1].height;
-                float start = orbits[i-1].height;
-                float lerp = (scaledHeight - start) / diff;
+        float nLength = length;
+        if (occluded)
+            nLength = Vector3.Distance(hitInfo.point, rotationPoint.position) - avoidBuffer;
 
-                return Vector3.Lerp(rings[i - 1].Evaluate(currentAngle), rings[i].Evaluate(currentAngle), lerp);
-            }
-        }
-        Debug.Log("Error in Camera Position Evalutation");
-        return Vector3.one; //Shouldn't reach here
-    }
-
-    private void AvoidOcclusion(ref Vector3 position) {
-        Vector3 rayOrigin = focusPoint.position;
-        Vector3 rayDirection = (position - focusPoint.position).normalized;
-        float rayLength = Vector3.Distance(position, focusPoint.position);
-
-        RaycastHit hit;
-        if(Physics.Raycast(rayOrigin, rayDirection, out hit, rayLength, ~avoidOcclusionLayers)) {
-            Vector3 targetPosition = hit.point - (rayDirection * avoidOcclusionBufferLength);
-            position = Vector3.SmoothDamp(affectedCamera.transform.position, targetPosition, ref avoidOcclusionVelocity, avoidOcclusionSmoothingTime);
-        }
-    }
-
-    private void ReadInput() {
-        if (Application.isFocused) Cursor.lockState = CursorLockMode.Locked;
-        else {
-            Cursor.lockState = CursorLockMode.None;
-            return;
-        }
-
-        Vector2 lookInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
-        lookInput *= mouseSensitivity * 0.01f;
-
-        currentAngle = Mathf.Repeat(currentAngle + lookInput.x, 1);
-        currentHeight = Mathf.Clamp01(currentHeight + lookInput.y);
-    }
-
-    private void UpdateRings() {
-        rings = new OrbitalRail[orbits.Length];
-        float height = 0;
-        for(int i = 0; i < orbits.Length; i++) {
-            rings[i] = new OrbitalRail(orbitAround.TransformPoint(orbits[i].offset), orbits[i].radius, orbitAround.transform.up);
-            orbits[i].height = height;
-            if (i == orbits.Length - 1) continue;
-            height += orbits[i].offset.y - orbits[i + 1].offset.y;
-        }
-    }
-
-    [System.Serializable]
-    public class OrbitalInfo {
-        [Tooltip("Offset relative to transform that is being orbitted around")]
-        public Vector3 offset;
-
-        [Tooltip("Radius of orbit")]
-        [Min(0)] public float radius;
-
-        [HideInInspector] 
-        public float height; //Height starts at 0 at the top
-
-        public OrbitalInfo(Vector3 offset, float radius) {
-            this.offset = offset;
-            this.radius = radius;
-        }
+        currentLength = Mathf.SmoothDamp(currentLength, nLength, ref avoidSmoothingVelocity, avoidSmoothingTime);
     }
 
     public enum ControlTransformType {
         FullControl,
         NoVerticalControl
-    }
-
-    private void OnDrawGizmosSelected() {
-        if (showOrbitWireframes) {
-            UpdateRings();
-            Gizmos.color = Color.blue;
-            foreach (OrbitalRail r in rings) {
-                r.DrawGizmos(50);
-            }
-        }
     }
 }

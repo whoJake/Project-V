@@ -6,62 +6,74 @@ using UnityEditor;
 [CustomEditor(typeof(ThirdPersonController))]
 public class ThirdPersonControllerEditor : Editor
 {
+    private bool usingCustomInspector;
+
     public override void OnInspectorGUI() {
-        //base.OnInspectorGUI();
-        CustomInspector();
+        usingCustomInspector = EditorGUILayout.Toggle("Use Custom Inspector?", usingCustomInspector);
+        EditorGUILayout.Space();
+
+        if (usingCustomInspector)
+            CustomInspector();
+        else
+            base.OnInspectorGUI();
     }
 
-    SerializedProperty orbitsProperty;
-    SerializedProperty orbitAroundProperty;
-    SerializedProperty affectedCameraProperty;
-    SerializedProperty mouseSensitivityProperty;
+    SerializedProperty controlCameraProperty;
     SerializedProperty focusPointProperty;
-    SerializedProperty willControlTransformDirectionProperty;
+    SerializedProperty verticalLookClampsProperty;
+    SerializedProperty invertYProperty;
+    SerializedProperty mouseSensitivityProperty;
+    SerializedProperty rotationPointProperty;
+    SerializedProperty lengthProperty;
+    SerializedProperty willControlTransformProperty;
     SerializedProperty controlTransformProperty;
     SerializedProperty controlTransformTypeProperty;
-    SerializedProperty avoidOcclusionProperty;
-    SerializedProperty avoidOcclusionLayersProperty;
-    SerializedProperty avoidOcclusionSmoothingTimeProperty;
-    SerializedProperty avoidOcclusionBufferLengthProperty;
-    SerializedProperty showOrbitWireframesProperty;
+    SerializedProperty shouldAvoidOcclusionProperty;
+    SerializedProperty avoidBufferProperty;
+    SerializedProperty avoidSmoothingTimeProperty;
 
     void OnEnable() {
-        orbitsProperty = serializedObject.FindProperty("orbits");
-        orbitAroundProperty = serializedObject.FindProperty("orbitAround");
-        affectedCameraProperty = serializedObject.FindProperty("affectedCamera");
-        mouseSensitivityProperty = serializedObject.FindProperty("mouseSensitivity");
+        controlCameraProperty = serializedObject.FindProperty("controlCamera");
         focusPointProperty = serializedObject.FindProperty("focusPoint");
-        willControlTransformDirectionProperty = serializedObject.FindProperty("willControlTransformDirection");
+        verticalLookClampsProperty = serializedObject.FindProperty("verticalLookClamps");
+        invertYProperty = serializedObject.FindProperty("invertY");
+        mouseSensitivityProperty = serializedObject.FindProperty("mouseSensitivity");
+        rotationPointProperty = serializedObject.FindProperty("rotationPoint");
+        lengthProperty = serializedObject.FindProperty("length");
+        willControlTransformProperty = serializedObject.FindProperty("willControlTransform");
         controlTransformProperty = serializedObject.FindProperty("controlTransform");
         controlTransformTypeProperty = serializedObject.FindProperty("controlTransformType");
-        avoidOcclusionProperty = serializedObject.FindProperty("avoidOcclusion");
-        avoidOcclusionLayersProperty = serializedObject.FindProperty("avoidOcclusionLayers");
-        avoidOcclusionSmoothingTimeProperty = serializedObject.FindProperty("avoidOcclusionSmoothingTime");
-        avoidOcclusionBufferLengthProperty = serializedObject.FindProperty("avoidOcclusionBufferLength");
-        showOrbitWireframesProperty = serializedObject.FindProperty("showOrbitWireframes");
+        shouldAvoidOcclusionProperty = serializedObject.FindProperty("shouldAvoidOcclusion");
+        avoidBufferProperty = serializedObject.FindProperty("avoidBuffer");
+        avoidSmoothingTimeProperty = serializedObject.FindProperty("avoidSmoothingTime");
     }
 
     private void CustomInspector() {
         serializedObject.Update();
 
-        EditorGUILayout.PropertyField(orbitsProperty, new GUIContent("Orbits"));
-        EditorGUILayout.PropertyField(orbitAroundProperty, new GUIContent("Orbit Around Transform"));
-        EditorGUILayout.PropertyField(affectedCameraProperty, new GUIContent("Affected Camera"));
-        EditorGUILayout.PropertyField(mouseSensitivityProperty, new GUIContent("Mouse Sensitivity"));
+        EditorGUILayout.PropertyField(controlCameraProperty, new GUIContent("Control Camera"));
         EditorGUILayout.PropertyField(focusPointProperty, new GUIContent("Focus Point"));
-        EditorGUILayout.PropertyField(willControlTransformDirectionProperty, new GUIContent("Control Transform Direction"));
-        if (willControlTransformDirectionProperty.boolValue) {
-            EditorGUILayout.PropertyField(controlTransformProperty, new GUIContent("Control Transform"));
-            EditorGUILayout.PropertyField(controlTransformTypeProperty, new GUIContent("Control Transform Type"));
-        }
-        EditorGUILayout.PropertyField(avoidOcclusionProperty, new GUIContent("Avoid Occlusion"));
-        if (avoidOcclusionProperty.boolValue) {
-            EditorGUILayout.PropertyField(avoidOcclusionLayersProperty, new GUIContent("Occlusion Blacklisted Layers"));
-            EditorGUILayout.PropertyField(avoidOcclusionSmoothingTimeProperty, new GUIContent("Smoothing Time"));
-            EditorGUILayout.PropertyField(avoidOcclusionBufferLengthProperty, new GUIContent("Buffer Length"));
+        EditorGUILayout.PropertyField(verticalLookClampsProperty, new GUIContent("Vertical Look Clamps"));
+        EditorGUILayout.PropertyField(invertYProperty, new GUIContent("Invert Y?"));
+        EditorGUILayout.PropertyField(mouseSensitivityProperty, new GUIContent("X/Y Mouse Sensitivity"));
+        EditorGUILayout.PropertyField(rotationPointProperty, new GUIContent("Point of Rotation"));
+        EditorGUILayout.PropertyField(lengthProperty, new GUIContent("Camera Distance"));
+
+        EditorGUILayout.PropertyField(willControlTransformProperty, new GUIContent("Will Control Transform Direction?"));
+        if (willControlTransformProperty.boolValue) {
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(controlTransformProperty, new GUIContent("Transform"));
+            EditorGUILayout.PropertyField(controlTransformTypeProperty, new GUIContent("Control Type"));
+            EditorGUI.indentLevel--;
         }
 
-        EditorGUILayout.PropertyField(showOrbitWireframesProperty, new GUIContent("Show Orbit Wireframes"));
+        EditorGUILayout.PropertyField(shouldAvoidOcclusionProperty, new GUIContent("Should Avoid Occlusion?"));
+        if (shouldAvoidOcclusionProperty.boolValue) {
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(avoidBufferProperty, new GUIContent("Buffer Length"));
+            EditorGUILayout.PropertyField(avoidSmoothingTimeProperty, new GUIContent("Smoothing Time"));
+            EditorGUI.indentLevel--;
+        }
 
         serializedObject.ApplyModifiedProperties();
     }

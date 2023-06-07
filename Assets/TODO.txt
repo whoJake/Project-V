@@ -1,15 +1,9 @@
 Camera
 	ThirdPersonController.cs
-		?Zoom settings
-		Add better orbit setup
 		Maybe implement some kind of focus point catch up when object is moving fast but camera isnt
 		Have player be made more transparent or dithered when camera is getting close to it (could apply to all objects)
-
-		Something needs to change with this
-		Vertical ring dictates height
-		Horizontal ring dictates width
-		Rails dictates where the focus point is rather than the camera itself
-		Camera position is determined by a ray between focus point, center point then extrapolate from that against a zoom value
+		Occlusion avoidance is instant on occlusion but smoothed on the way back out
+		Remap vertical look direction so that it never gets close to the floor as this is the main cause of clipping
 
 	ThirdPersonControllerEditor.cs
 		Have rect/seperator around willControlTransform bool so that it looks nicer

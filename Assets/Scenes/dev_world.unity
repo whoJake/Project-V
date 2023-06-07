@@ -132,7 +132,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 290531734}
-  - component: {fileID: 290531733}
+  - component: {fileID: 290531735}
   m_Layer: 0
   m_Name: ThirdPersonCamera
   m_TagString: Untagged
@@ -140,48 +140,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &290531733
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290531732}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b651d4458b370c04dacc17657f5f4eec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  orbits:
-  - offset: {x: 0, y: 9, z: 0}
-    radius: 3
-    height: 0
-  - offset: {x: 0, y: 6, z: 0}
-    radius: 7
-    height: 3
-  - offset: {x: 0, y: 2, z: 0}
-    radius: 10
-    height: 7
-  - offset: {x: 0, y: -4, z: 0}
-    radius: 7
-    height: 13
-  - offset: {x: 0, y: -7, z: 0}
-    radius: 3
-    height: 16
-  orbitAround: {fileID: 1638216716}
-  affectedCamera: {fileID: 812795195}
-  mouseSensitivity: {x: 1, y: 1}
-  focusPoint: {fileID: 339226494}
-  willControlTransformDirection: 1
-  controlTransform: {fileID: 1638216716}
-  controlTransformType: 1
-  avoidOcclusion: 1
-  avoidOcclusionLayers:
-    serializedVersion: 2
-    m_Bits: 64
-  avoidOcclusionSmoothingTime: 0
-  avoidOcclusionBufferLength: 0.3
-  showOrbitWireframes: 1
 --- !u!4 &290531734
 Transform:
   m_ObjectHideFlags: 0
@@ -197,6 +155,33 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &290531735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290531732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78d043958ad25f44d8db7b1a5c8bef16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  focusPoint: {fileID: 1348413851}
+  rotationPoint: {fileID: 339226494}
+  verticalLookClamps: {x: 20, y: 20}
+  mouseSensitivity: {x: 1, y: 1}
+  length: 6
+  currentLookX: 0
+  currentLookY: 1.5707964
+  willControlTransform: 1
+  controlTransform: {fileID: 1638216716}
+  invertY: 0
+  avoidOcclusion: 1
+  avoidBuffer: 0.3
+  avoidSmoothingTime: 0
+  controlTransformType: 1
+  controlCamera: {fileID: 0}
 --- !u!1 &339226493
 GameObject:
   m_ObjectHideFlags: 0
@@ -591,6 +576,37 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &1348413850
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1348413851}
+  m_Layer: 6
+  m_Name: Focus
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1348413851
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1348413850}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 4}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1638216716}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1638216715
 GameObject:
   m_ObjectHideFlags: 0
@@ -626,6 +642,7 @@ Transform:
   - {fileID: 339226494}
   - {fileID: 654384700}
   - {fileID: 1870902882}
+  - {fileID: 1348413851}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}

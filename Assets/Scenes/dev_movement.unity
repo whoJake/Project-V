@@ -5180,7 +5180,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.1
   far clip plane: 3000
   field of view: 100
   orthographic: 0
@@ -5741,7 +5741,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1430129884}
-  - component: {fileID: 1430129883}
   - component: {fileID: 1430129885}
   m_Layer: 0
   m_Name: ThirdPersonCamera
@@ -5750,45 +5749,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1430129883
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1430129882}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b651d4458b370c04dacc17657f5f4eec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  orbits:
-  - offset: {x: 0, y: 6, z: 0}
-    radius: 2.5
-    height: 0
-  - offset: {x: 0, y: 3, z: 0}
-    radius: 5
-    height: 3
-  - offset: {x: 0, y: 1, z: 0}
-    radius: 3
-    height: 5
-  - offset: {x: 0, y: -0.9, z: 0}
-    radius: 1
-    height: 6.9
-  orbitAround: {fileID: 90140309}
-  affectedCamera: {fileID: 1328012195}
-  mouseSensitivity: {x: 1, y: 1}
-  focusPoint: {fileID: 504503119}
-  willControlTransformDirection: 1
-  controlTransform: {fileID: 90140309}
-  controlTransformType: 1
-  avoidOcclusion: 1
-  avoidOcclusionLayers:
-    serializedVersion: 2
-    m_Bits: 64
-  avoidOcclusionSmoothingTime: 0
-  avoidOcclusionBufferLength: 0.2
-  showOrbitWireframes: 1
 --- !u!4 &1430129884
 Transform:
   m_ObjectHideFlags: 0
@@ -5816,17 +5776,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78d043958ad25f44d8db7b1a5c8bef16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  focusPoint: {fileID: 1809599369}
-  rotationPoint: {fileID: 504503119}
-  verticalLookClamps: {x: 30, y: 30}
-  mouseSensitivity: {x: 1, y: 1}
-  length: 4
-  currentLookX: 0
-  currentLookY: 0
-  controlTransform: {fileID: 90140309}
-  invertY: 0
-  controlTransformType: 1
   controlCamera: {fileID: 0}
+  focusPoint: {fileID: 1809599369}
+  verticalLookClamps: {x: 30, y: 30}
+  invertY: 0
+  mouseSensitivity: {x: 1, y: 1}
+  rotationPoint: {fileID: 504503119}
+  length: 6
+  willControlTransform: 1
+  controlTransform: {fileID: 90140309}
+  controlTransformType: 1
+  shouldAvoidOcclusion: 1
+  avoidBuffer: 0.3
+  avoidSmoothingTime: 0.05
 --- !u!1 &1435268115
 GameObject:
   m_ObjectHideFlags: 0
