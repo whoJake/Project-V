@@ -68,6 +68,18 @@ public class TerrainHandler : MonoBehaviour
     }
 
     private void UpdateLayerActivity() {
+        if (!mainCamera) {
+            for(int i = 0; i < activeSettings.layers.Length; i++) {
+                if (!loadedLayers.ContainsKey(i)) {
+                    LayerGenRequest info = new LayerGenRequest { id = i, state = ActiveState.Active };
+                    if (!generationQueue.Contains(info)) {
+                        generationQueue.Add(info);
+                    }
+                }
+            }
+            return;
+        }
+
         int playerCurLayerIndex = 0;
         for(int layer = 0; layer < activeSettings.layers.Length; layer++) {
             TerrainLayerSettings layerSettings = activeSettings.layers[layer];
@@ -107,7 +119,7 @@ public class TerrainHandler : MonoBehaviour
             if (!loadedLayers.ContainsKey(i)) {
                 LayerGenRequest info = new LayerGenRequest { id = i, state = calcState };
                 if (!generationQueue.Contains(info)) {
-                    generationQueue.Add(new LayerGenRequest { id = i, state = calcState });
+                    generationQueue.Add(info);
                 }
             } else {
                 loadedLayers[i].SetState(calcState);

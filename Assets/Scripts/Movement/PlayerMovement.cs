@@ -57,7 +57,6 @@ public class PlayerMovement : MonoBehaviour
     private bool disableBunnyhopping;
     private bool canJump;
 
-    [HideInInspector]
     public bool isActive;
 
     //Events
@@ -65,7 +64,6 @@ public class PlayerMovement : MonoBehaviour
     public Action<Vector3, float> OnJump;
 
     private void Awake() {
-        isActive = false;
         statHandler = gameObject.GetComponent<StatHandler>();
         TerrainHandler.OnLayerGenerated += OnLayerGenerated;
     }
