@@ -5778,7 +5778,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controlCamera: {fileID: 0}
   focusPoint: {fileID: 1809599369}
-  verticalLookClamps: {x: 30, y: 30}
+  verticalLookClamps: {x: 60, y: 20}
   invertY: 0
   mouseSensitivity: {x: 1, y: 1}
   rotationPoint: {fileID: 504503119}

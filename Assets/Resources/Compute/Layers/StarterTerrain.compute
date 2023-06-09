@@ -1,0 +1,27 @@
+#pragma kernel Generate
+
+RWTexture3D<float> _Target;
+
+int    _Seed;
+
+float3 _ChunkOrigin;
+float3 _ChunkSize;
+float  _VoxelScale;
+
+float3 _LayerOrigin;
+float3 _LayerSize;
+
+
+[numthreads(8,8,8)]
+void Generate (uint3 id : SV_DispatchThreadID)
+{
+    uint w, h, d;
+    _Target.GetDimensions(w, h, d);
+    if (id.x >= w || id.y >= h || id.z >= d) return;
+    uint3 texture_size = uint3(w, h, d);
+
+    float3 world_position = _ChunkOrigin + (id * _VoxelScale);
+    float3 inlayer_position = world_position - _LayerOrigin;
+
+    _Target[id] = id.x % 2;
+}

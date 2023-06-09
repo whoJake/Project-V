@@ -153,14 +153,18 @@ public class TerrainChunk : MonoBehaviour
     //   densityTexture:
     //     empty texture to put density values in
     private IEnumerator ComputeDensity(RenderTexture densityTexture) {
-        computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
-        computeDensityShader.SetInt("layer_index", layer.id);
-        computeDensityShader.SetFloat("voxel_scale", handler.voxelScale);
+        
+        //computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
+        //computeDensityShader.SetInt("layer_index", layer.id);
+        //computeDensityShader.SetFloat("voxel_scale", handler.voxelScale);
 
-        computeDensityShader.SetVector("chunk_origin", origin);
+        //computeDensityShader.SetVector("chunk_origin", origin);
+        
+        StarterTerrain t = new StarterTerrain();
+        t.Generate(ref densityTexture, this);
 
         Vector3Int threads = RTUtils.CalculateThreadAmount(handler.textureDimensions, 8);
-        computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
+        //computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
 
         yield return ComputeUtils.WaitForResource(densityTexture);
         yield return CalculateVerticesAndApplyToMesh();
