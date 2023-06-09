@@ -153,7 +153,10 @@ public class TerrainHandler : MonoBehaviour
 
         GameObject layerGObj = new GameObject("Layer: " + layerIndex);
         layerGObj.transform.parent = transform;
-        TerrainLayer layer = layerGObj.AddComponent<TerrainLayer>().Initialize(layerIndex, this, activeSettings.layers[layerIndex], createState);
+        StarterTerrain st = new StarterTerrain();
+        st.numOfPlatforms = 20;
+
+        TerrainLayer layer = layerGObj.AddComponent<TerrainLayer>().Initialize(layerIndex, this, activeSettings.layers[layerIndex], createState, st);
 
         loadedLayers.Add(layerIndex, layer);
         return layer;

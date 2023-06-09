@@ -1,6 +1,7 @@
 #pragma kernel Generate
 
 RWTexture3D<float> _Target;
+StructuredBuffer<float3> _PlatformBuffer;
 
 int    _Seed;
 
@@ -23,5 +24,18 @@ void Generate (uint3 id : SV_DispatchThreadID)
     float3 world_position = _ChunkOrigin + (id * _VoxelScale);
     float3 inlayer_position = world_position - _LayerOrigin;
 
-    _Target[id] = id.x % 2;
+    uint platform_count, filler;
+    _PlatformBuffer.GetDimensions(platform_count, filler);
+
+    float near_platform = 0;
+    for(uint i = 0; i < platform_count; i++){
+        float3 platform_position = _PlatformBuffer[i];
+
+        float dst_from_platform = distance(world_position, platform_position);
+        if(dst_from_platform < 15.0){
+            near_platform = saturate(near_platform + 1.0);
+        }
+    }
+
+    _Target[id] = near_platform;
 }

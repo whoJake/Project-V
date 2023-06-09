@@ -17,7 +17,9 @@ public class TerrainLayer : MonoBehaviour
     public bool generating;
     public bool generated;
 
-    public TerrainLayer Initialize(int _id, TerrainHandler _handler, TerrainLayerSettings _settings, ActiveState _state) {
+    private StarterTerrain st;
+
+    public TerrainLayer Initialize(int _id, TerrainHandler _handler, TerrainLayerSettings _settings, ActiveState _state, StarterTerrain st) {
         id = _id;
         handler = _handler;
         settings = _settings;
@@ -30,6 +32,8 @@ public class TerrainLayer : MonoBehaviour
         chunkCount = new Vector3Int(Mathf.CeilToInt(handler.generatedArea.x / handler.voxelsPerAxis.x / handler.voxelScale),
                                     Mathf.FloorToInt(settings.depth / handler.voxelsPerAxis.y / handler.voxelScale),
                                     Mathf.CeilToInt(handler.generatedArea.y / handler.voxelsPerAxis.z / handler.voxelScale));
+        this.st = st;
+
         StartCoroutine(Generate());
         return this;
     }
@@ -85,7 +89,7 @@ public class TerrainLayer : MonoBehaviour
                                                             * handler.voxelScale;
 
                     GameObject chunkGameObject = CreateChunkGameObject(chunkID.x + "," + (-chunkID.y) + "," + chunkID.z, position);
-                    TerrainChunk chunk = chunkGameObject.AddComponent<TerrainChunk>().Initialize(this, position, state);
+                    TerrainChunk chunk = chunkGameObject.AddComponent<TerrainChunk>().Initialize(this, position, state, st);
                     chunks.Add(chunk);
                     yield return null;
                 }
@@ -93,6 +97,7 @@ public class TerrainLayer : MonoBehaviour
         }
         generated = true;
         generating = false;
+        st.ReleaseBuffers();
         SetState(state);
         TerrainHandler.OnLayerGenerated?.Invoke(id);
     }

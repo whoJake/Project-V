@@ -29,18 +29,20 @@ public class TerrainChunk : MonoBehaviour
     private static ComputeShader computeVerticesShader;
     private static ComputeBuffer layerSettingsBuffer;
 
+    private StarterTerrain st;
+
     private void Awake() {
         targetFilter = GetComponent<MeshFilter>();
         targetCollider = GetComponent<MeshCollider>();
     }
 
-    public TerrainChunk Initialize(TerrainLayer _layer, Vector3 _centre, ActiveState _state) {
+    public TerrainChunk Initialize(TerrainLayer _layer, Vector3 _centre, ActiveState _state, StarterTerrain st) {
         layer = _layer;
         centre = _centre;
         state = _state;
         editRequests = new List<ChunkEditRequest>();
 
-
+        this.st = st;
         Generate();
 
         return this;
@@ -160,8 +162,7 @@ public class TerrainChunk : MonoBehaviour
 
         //computeDensityShader.SetVector("chunk_origin", origin);
         
-        StarterTerrain t = new StarterTerrain();
-        t.Generate(ref densityTexture, this);
+        st.Generate(ref densityTexture, this);
 
         Vector3Int threads = RTUtils.CalculateThreadAmount(handler.textureDimensions, 8);
         //computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);

@@ -19,4 +19,18 @@ public static class MathUtils
         }
         return result;
     }
+
+    public static Vector3[] RandomPointsInBounds(int samples, Bounds bounds) {
+        Vector3[] result = new Vector3[samples];
+        Vector3 size = bounds.size;
+
+        for(int i = 0; i < samples; i++){ 
+            float ranX = Random.Range(0f, 1f);
+            float ranY = Random.Range(0f, 1f);
+            float ranZ = Random.Range(0f, 1f);
+
+            result[i] = bounds.min + new Vector3(size.x * ranX, size.y * ranY, size.z * ranZ);
+        }
+        return result;
+    }
 }
