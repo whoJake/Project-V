@@ -675,7 +675,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mcamera: {fileID: 812795195}
-  terrainHandler: {fileID: 0}
+  terrainHandler: {fileID: 1617017913}
   mask:
     serializedVersion: 2
     m_Bits: 64

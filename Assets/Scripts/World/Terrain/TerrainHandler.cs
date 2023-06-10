@@ -116,7 +116,7 @@ public class TerrainHandler : MonoBehaviour
             layerOrigin = loadedLayers[layerIndex - 1].origin + Vector3.down * loadedLayers[layerIndex - 1].generator.GetDepth(0);
         }
 
-        TerrainLayer layer = layerGObj.AddComponent<TerrainLayer>().Initialize(layerIndex, layerOrigin, this, settings.layers[layerIndex].Clone(), createState);
+        TerrainLayer layer = layerGObj.AddComponent<TerrainLayer>().Initialize(layerIndex, layerOrigin, this, Instantiate(settings.layers[layerIndex]), createState);
 
         loadedLayers.Add(layerIndex, layer);
         return layer;

@@ -8,6 +8,7 @@ public class StarterTerrain : TerrainLayerGenerator
     private ComputeShader shader;
 
     public float platformDensity;
+    public Vector2 platformRadiusRange;
     public int numOfPlatforms;
     public Vector2 depthRange;
 
@@ -20,10 +21,17 @@ public class StarterTerrain : TerrainLayerGenerator
         shader = Resources.Load<ComputeShader>("Compute/Layers/StarterTerrain");
     }
 
-    private void InitializeLayer(TerrainLayer layer) {
+    private void InitializeLayer(TerrainLayer layer, int seed) {
         Debug.Log("Initializing Starter Terrain Generator");
-        CreatePlatformBuffer(layer);
+
+        CreatePlatformBuffer(layer, seed);
         shader.SetBuffer(0, "_PlatformBuffer", platformBuffer);
+        shader.SetVector("_PlatformRadiusRange", platformRadiusRange);
+
+        shader.SetVector("_LayerOrigin", layer.origin);
+        shader.SetVector("_LayerSize", layer.GetBounds().size);
+
+        shader.SetFloat("_VoxelScale", layer.handler.voxelScale);
         layerInitialized = true;
     }
 
@@ -31,10 +39,10 @@ public class StarterTerrain : TerrainLayerGenerator
         platformBuffer.Release();
     }
 
-    public void CreatePlatformBuffer(TerrainLayer layer) {
+    public void CreatePlatformBuffer(TerrainLayer layer, int seed) {
         platformBuffer = new ComputeBuffer(numOfPlatforms, 12);
         Bounds bounds = layer.GetBounds();
-        bounds.Expand(-30f);
+        bounds.Expand(-100f);
 
         Vector3[] platformPositions = MathUtils.RandomPointsInBounds(numOfPlatforms, bounds);
 
@@ -42,17 +50,12 @@ public class StarterTerrain : TerrainLayerGenerator
     }
 
     public override void Generate(ref RenderTexture target, TerrainChunk chunk, int seed) {
-        if (!layerInitialized) InitializeLayer(chunk.layer);
+        if (!layerInitialized) InitializeLayer(chunk.layer, seed);
 
         shader.SetTexture(0, "_Target", target);
         shader.SetFloat("_Seed", seed);
         shader.SetVector("_ChunkOrigin", chunk.origin);
         shader.SetVector("_ChunkSize", chunk.GetBounds().size);
-
-        shader.SetVector("_LayerOrigin", chunk.layer.origin);
-        shader.SetVector("_LayerSize", chunk.layer.GetBounds().size);
-
-        shader.SetFloat("_VoxelScale", chunk.handler.voxelScale);
 
         Vector3Int threads = RTUtils.CalculateThreadAmount(chunk.handler.textureDimensions, 8);
         shader.Dispatch(0, threads.x, threads.y, threads.z);
@@ -66,13 +69,4 @@ public class StarterTerrain : TerrainLayerGenerator
 
         return depth;
     }
-
-    public override TerrainLayerGenerator Clone() {
-        StarterTerrain result = CreateInstance<StarterTerrain>();
-        result.platformDensity = platformDensity;
-        result.numOfPlatforms = numOfPlatforms;
-        result.depthRange = depthRange;
-        return result;
-    }
-
 }

@@ -71,7 +71,7 @@ void CalculateCube (uint3 id : SV_DispatchThreadID)
 	voxelCornersInTexture[6] = voxelStartPosInTexture + cornerOffsets[6];
 	voxelCornersInTexture[7] = voxelStartPosInTexture + cornerOffsets[7];
 
-	//Less than threshold = solid, greater than threshold = air
+	//More than threshold = solid, less than threshold = air
 	int cubeCornerState = 0;
 	for(int vi = 0; vi < 8; vi++){
 		if(SampleDensity(voxelCornersInTexture[vi]) > threshold){

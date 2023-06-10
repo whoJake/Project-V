@@ -7,5 +7,4 @@ public abstract class TerrainLayerGenerator : ScriptableObject {
     public abstract void Generate(ref RenderTexture target, TerrainChunk chunk, int seed);
     public abstract float GetDepth(float chunkHeight);
     public abstract void ReleaseBuffers();
-    public abstract TerrainLayerGenerator Clone();
 }

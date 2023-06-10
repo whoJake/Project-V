@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Starter
   m_EditorClassIdentifier: 
   platformDensity: 0
+  platformRadiusRange: {x: 50, y: 100}
   numOfPlatforms: 25
   depthRange: {x: 100, y: 300}

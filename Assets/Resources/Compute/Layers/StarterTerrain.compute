@@ -1,7 +1,10 @@
 #pragma kernel Generate
+#include "../Noise/Fractal.cginc"
 
 RWTexture3D<float> _Target;
+
 StructuredBuffer<float3> _PlatformBuffer;
+float2 _PlatformRadiusRange;
 
 int    _Seed;
 
@@ -13,6 +16,26 @@ float3 _LayerOrigin;
 float3 _LayerSize;
 
 
+float GetPlatformValue(float3 world_position){
+    uint platform_count, filler;
+    _PlatformBuffer.GetDimensions( platform_count, filler );
+
+    float platform_shape = 0;
+    for( uint i = 0; i < platform_count; i++ ){
+        float3 platform_position = _PlatformBuffer[i];
+        float platform_radius = lerp( _PlatformRadiusRange.x, _PlatformRadiusRange.y, snoise01( platform_position ) );
+
+        float dst_from_platform = distance( world_position, platform_position );
+        float above_below = sign( platform_position.y - world_position.y );
+        float side_multiplier = saturate( above_below + 1 );
+
+        float platform_shape_noise = 1 - fnoise01( world_position, 5, 0.02, 0.6, 1.5 );
+        platform_shape += saturate( -( dst_from_platform - platform_radius ) / platform_radius ) * side_multiplier * platform_shape_noise;
+    }
+
+    return platform_shape;
+}
+
 [numthreads(8,8,8)]
 void Generate (uint3 id : SV_DispatchThreadID)
 {
@@ -21,24 +44,10 @@ void Generate (uint3 id : SV_DispatchThreadID)
     if (id.x >= w || id.y >= h || id.z >= d) return;
     uint3 texture_size = uint3(w, h, d);
 
-    float3 world_position = _ChunkOrigin + (id * _VoxelScale);
+    float3 world_position = _ChunkOrigin + ( id * _VoxelScale );
     float3 inlayer_position = world_position - _LayerOrigin;
 
-    uint platform_count, filler;
-    _PlatformBuffer.GetDimensions(platform_count, filler);
+    float platform = GetPlatformValue( world_position );
 
-    float near_platform = 0;
-    for(uint i = 0; i < platform_count; i++){
-        float3 platform_position = _PlatformBuffer[i];
-
-        float dst_from_platform = distance(world_position, platform_position);
-        if(dst_from_platform < 15.0){
-            near_platform = saturate(near_platform + 1.0);
-        }
-    }
-
-    float dst_from_chasm = distance(_LayerOrigin.xz, world_position.xz);
-    float dst_from_edge = (dst_from_chasm - 25.0) / 25.0;
-
-    _Target[id] = dst_from_edge;
+    _Target[id] = saturate( platform );
 }

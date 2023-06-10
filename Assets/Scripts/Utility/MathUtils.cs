@@ -20,6 +20,11 @@ public static class MathUtils
         return result;
     }
 
+    public static Vector3[] RandomPointsInBounds(int samples, Bounds bounds, int seed) {
+        Random.InitState(seed);
+        return RandomPointsInBounds(samples, bounds);
+    }
+
     public static Vector3[] RandomPointsInBounds(int samples, Bounds bounds) {
         Vector3[] result = new Vector3[samples];
         Vector3 size = bounds.size;
