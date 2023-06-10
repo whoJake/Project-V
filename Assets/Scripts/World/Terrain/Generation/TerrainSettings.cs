@@ -6,13 +6,5 @@ using UnityEngine;
 public class TerrainSettings : ScriptableObject
 {
     [Range(0, 2048)] public int seed;
-    public TerrainLayerSettings[] layers;
-
-    public TerrainLayerSettingsStruct[] layersStruct { get {
-            TerrainLayerSettingsStruct[] result = new TerrainLayerSettingsStruct[layers.Length];
-            for(int i = 0; i < layers.Length; i++) {
-                result[i] = layers[i].AsStruct();
-            }
-            return result;
-        } }
+    public TerrainLayerGenerator[] layers;
 }

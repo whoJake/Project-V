@@ -5,34 +5,34 @@ using UnityEngine;
 public class TerrainLayer : MonoBehaviour
 {
     private ActiveState state;
-    public TerrainLayerSettings settings;
     private List<TerrainChunk> chunks;
+
+    public TerrainLayerGenerator generator;
 
     public TerrainHandler handler;
     public int id;
-    public Vector3 origin { get { return settings.origin; } }
+    public Vector3 origin;
 
     private Vector3Int chunkCount;
 
     public bool generating;
     public bool generated;
 
-    private StarterTerrain st;
-
-    public TerrainLayer Initialize(int _id, TerrainHandler _handler, TerrainLayerSettings _settings, ActiveState _state, StarterTerrain st) {
+    public TerrainLayer Initialize(int _id, Vector3 _origin, TerrainHandler _handler, TerrainLayerGenerator _generator, ActiveState _state) {
         id = _id;
+        origin = _origin;
         handler = _handler;
-        settings = _settings;
+        generator = _generator;
         state = _state;
         generated = false;
         generating = false;
 
         chunks = new List<TerrainChunk>();
 
+        float chunkHeight = handler.voxelsPerAxis.y * handler.voxelScale;
         chunkCount = new Vector3Int(Mathf.CeilToInt(handler.generatedArea.x / handler.voxelsPerAxis.x / handler.voxelScale),
-                                    Mathf.FloorToInt(settings.depth / handler.voxelsPerAxis.y / handler.voxelScale),
+                                    Mathf.FloorToInt(generator.GetDepth(chunkHeight) / handler.voxelsPerAxis.y / handler.voxelScale),
                                     Mathf.CeilToInt(handler.generatedArea.y / handler.voxelsPerAxis.z / handler.voxelScale));
-        this.st = st;
 
         StartCoroutine(Generate());
         return this;
@@ -75,7 +75,13 @@ public class TerrainLayer : MonoBehaviour
     //     number of chunks per axis to generate
     //
     public IEnumerator Generate() {
-        Vector3Int halfChunkCount = Vector3Int.FloorToInt((Vector3)chunkCount / 2f);
+        Vector3Int halfChunkCount = Vector3Int.CeilToInt((Vector3)chunkCount / 2f);
+
+        //Bit of a hacky way to fix centering issues when chunkCount doesnt allow for an exact centre chunk
+        Vector3 originOffset = Vector3.zero;
+        if (new Vector2(halfChunkCount.x, halfChunkCount.z) * 2 == new Vector2(chunkCount.x, chunkCount.z))
+            originOffset = new Vector3(handler.voxelsPerAxis.x * handler.voxelScale / 2f, 0, handler.voxelsPerAxis.z * handler.voxelScale / 2f);
+
         for(int x = 0; x < chunkCount.x; x++) {
             for(int y = 0; y < chunkCount.y; y++) {
                 for(int z = 0; z < chunkCount.z; z++) {
@@ -86,10 +92,11 @@ public class TerrainLayer : MonoBehaviour
                     Vector3 position = origin + new Vector3(handler.voxelsPerAxis.x * chunkID.x,
                                                           -(handler.voxelsPerAxis.y * chunkID.y + (handler.voxelsPerAxis.y / 2f)), //To account for y position being at the start not the centre
                                                             handler.voxelsPerAxis.z * chunkID.z)
-                                                            * handler.voxelScale;
+                                                            * handler.voxelScale
+                                                            + originOffset;
 
                     GameObject chunkGameObject = CreateChunkGameObject(chunkID.x + "," + (-chunkID.y) + "," + chunkID.z, position);
-                    TerrainChunk chunk = chunkGameObject.AddComponent<TerrainChunk>().Initialize(this, position, state, st);
+                    TerrainChunk chunk = chunkGameObject.AddComponent<TerrainChunk>().Initialize(this, position, state);
                     chunks.Add(chunk);
                     yield return null;
                 }
@@ -97,7 +104,7 @@ public class TerrainLayer : MonoBehaviour
         }
         generated = true;
         generating = false;
-        st.ReleaseBuffers();
+        generator.ReleaseBuffers();
         SetState(state);
         TerrainHandler.OnLayerGenerated?.Invoke(id);
     }

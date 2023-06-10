@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d09b404c84cc39f48aa820a7665397fe, type: 3}
+  m_Name: Experimental
+  m_EditorClassIdentifier: 
+  seed: 755
+  layers:
+  - {fileID: 11400000, guid: 90389a70b56e47445986224532a967e3, type: 2}
+  - {fileID: 11400000, guid: 90389a70b56e47445986224532a967e3, type: 2}
+  - {fileID: 11400000, guid: 90389a70b56e47445986224532a967e3, type: 2}
+  - {fileID: 11400000, guid: 90389a70b56e47445986224532a967e3, type: 2}

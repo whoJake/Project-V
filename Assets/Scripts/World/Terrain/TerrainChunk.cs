@@ -25,24 +25,19 @@ public class TerrainChunk : MonoBehaviour
     public bool generated { get { return densityTexture != null; } }
 
     private static bool shadersLoaded = false;
-    private static ComputeShader computeDensityShader;
     private static ComputeShader computeVerticesShader;
-    private static ComputeBuffer layerSettingsBuffer;
-
-    private StarterTerrain st;
 
     private void Awake() {
         targetFilter = GetComponent<MeshFilter>();
         targetCollider = GetComponent<MeshCollider>();
     }
 
-    public TerrainChunk Initialize(TerrainLayer _layer, Vector3 _centre, ActiveState _state, StarterTerrain st) {
+    public TerrainChunk Initialize(TerrainLayer _layer, Vector3 _centre, ActiveState _state) {
         layer = _layer;
         centre = _centre;
         state = _state;
         editRequests = new List<ChunkEditRequest>();
 
-        this.st = st;
         Generate();
 
         return this;
@@ -155,17 +150,7 @@ public class TerrainChunk : MonoBehaviour
     //   densityTexture:
     //     empty texture to put density values in
     private IEnumerator ComputeDensity(RenderTexture densityTexture) {
-        
-        //computeDensityShader.SetTexture(0, "_DensityTexture", densityTexture);
-        //computeDensityShader.SetInt("layer_index", layer.id);
-        //computeDensityShader.SetFloat("voxel_scale", handler.voxelScale);
-
-        //computeDensityShader.SetVector("chunk_origin", origin);
-        
-        st.Generate(ref densityTexture, this);
-
-        Vector3Int threads = RTUtils.CalculateThreadAmount(handler.textureDimensions, 8);
-        //computeDensityShader.Dispatch(0, threads.x, threads.y, threads.z);
+        layer.generator.Generate(ref densityTexture, this, handler.settings.seed);
 
         yield return ComputeUtils.WaitForResource(densityTexture);
         yield return CalculateVerticesAndApplyToMesh();
@@ -224,20 +209,9 @@ public class TerrainChunk : MonoBehaviour
     // Summery:
     //   Loads the resources needed to start compute
     //
-    public static void InitializeCompute(TerrainSettings settings) {
-        if (shadersLoaded) {
-            Debug.Log("Compute shaders have already been initialized");
+    public static void InitializeCompute() {
+        if (shadersLoaded)
             return;
-        }
-
-        //Could be big so we only set it once
-        layerSettingsBuffer = new ComputeBuffer(settings.layers.Length, TerrainLayerSettings.stride);
-        layerSettingsBuffer.SetData(settings.layersStruct);
-
-        //Compute Density
-        computeDensityShader = Resources.Load<ComputeShader>("Compute/Noise/ChunkNoiseGeneration");
-        computeDensityShader.SetBuffer(0, "_ChunkSettings", layerSettingsBuffer);
-        computeDensityShader.SetInt("seed", settings.seed);
 
         //Compute Vertices
         computeVerticesShader = Resources.Load<ComputeShader>("Compute/MCubes/MarchingCube");
@@ -246,6 +220,6 @@ public class TerrainChunk : MonoBehaviour
     }
 
     public static void ReleaseBuffers() {
-        layerSettingsBuffer.Release();
+        //layerSettingsBuffer.Release();
     }
 }

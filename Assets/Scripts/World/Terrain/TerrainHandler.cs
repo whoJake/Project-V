@@ -7,10 +7,12 @@ public class TerrainHandler : MonoBehaviour
     [SerializeField]
     private Camera mainCamera;
 
+    private Dictionary<int, TerrainLayer> loadedLayers;
+
+    
     [SerializeField]
     private TerrainSettings authoredSettings;
-    private Dictionary<int, TerrainLayer> loadedLayers;
-    public TerrainSettings activeSettings;
+    public TerrainSettings settings;
 
     struct LayerGenRequest {
         public int id;
@@ -18,10 +20,8 @@ public class TerrainHandler : MonoBehaviour
     }
     private List<LayerGenRequest> generationQueue;
 
-    [SerializeField]
-    private bool authorLayers;
-    [SerializeField]
-    private int randomGenCount;
+    //[SerializeField]
+    //private int randomGenCount;
 
     public Vector2Int generatedArea; //Only an approximate area that will be generated. Should always generate slightly larger than this but problems exist !
     [SerializeField]
@@ -51,9 +51,11 @@ public class TerrainHandler : MonoBehaviour
 
     private void Start() {
         generationQueue = new List<LayerGenRequest>();
-        activeSettings = authorLayers ? authoredSettings : GenerateLayerSettings(randomGenCount);
-        activeSettings.seed = Random.Range(0, 1024);
-        InitializeGeneration();
+        loadedLayers = new Dictionary<int, TerrainLayer>();
+        settings = authoredSettings;
+        settings.seed = Random.Range(0, 1024);
+
+        TerrainChunk.InitializeCompute();
     }
 
     private void Update() {
@@ -68,8 +70,9 @@ public class TerrainHandler : MonoBehaviour
     }
 
     private void UpdateLayerActivity() {
-        if (!mainCamera) {
-            for(int i = 0; i < activeSettings.layers.Length; i++) {
+        if (true) { 
+        //if (!mainCamera) {
+            for(int i = 0; i < settings.layers.Length; i++) {
                 if (!loadedLayers.ContainsKey(i)) {
                     LayerGenRequest info = new LayerGenRequest { id = i, state = ActiveState.Active };
                     if (!generationQueue.Contains(info)) {
@@ -78,52 +81,6 @@ public class TerrainHandler : MonoBehaviour
                 }
             }
             return;
-        }
-
-        int playerCurLayerIndex = 0;
-        for(int layer = 0; layer < activeSettings.layers.Length; layer++) {
-            TerrainLayerSettings layerSettings = activeSettings.layers[layer];
-            bool playerIsBetweenLayers = (mainCamera.transform.position.y <= layerSettings.origin.y) &&
-                                         (mainCamera.transform.position.y >= layerSettings.origin.y - layerSettings.genDepth);
-
-            if (playerIsBetweenLayers) {
-                playerCurLayerIndex = layer;
-                break;
-            }
-        }
-
-        for (int i = 0; i < activeSettings.layers.Length; i++) {
-            //Positive dstFromPlayer is above, Negative is below
-            int dstFromPlayer = playerCurLayerIndex - i;
-
-            //Check generation step
-            ActiveState calcState;
-            dstFromPlayer = Mathf.Abs(dstFromPlayer);
-            if (dstFromPlayer < 2) {
-                calcState = ActiveState.Active;
-            } else if (dstFromPlayer < 5) {
-                calcState = ActiveState.Static;
-            } else if (dstFromPlayer < 6) {
-                calcState = ActiveState.Inactive;
-            } else {
-                //Unload
-                if (loadedLayers.ContainsKey(i)) {
-                    if (loadedLayers[i].generated) {
-                        Destroy(loadedLayers[i].gameObject);
-                        loadedLayers.Remove(i);
-                    }
-                }
-                continue;
-            }
-
-            if (!loadedLayers.ContainsKey(i)) {
-                LayerGenRequest info = new LayerGenRequest { id = i, state = calcState };
-                if (!generationQueue.Contains(info)) {
-                    generationQueue.Add(info);
-                }
-            } else {
-                loadedLayers[i].SetState(calcState);
-            }
         }
     }
 
@@ -153,10 +110,13 @@ public class TerrainHandler : MonoBehaviour
 
         GameObject layerGObj = new GameObject("Layer: " + layerIndex);
         layerGObj.transform.parent = transform;
-        StarterTerrain st = new StarterTerrain();
-        st.numOfPlatforms = 20;
 
-        TerrainLayer layer = layerGObj.AddComponent<TerrainLayer>().Initialize(layerIndex, this, activeSettings.layers[layerIndex], createState, st);
+        Vector3 layerOrigin = generationStartPosition;
+        if (layerIndex-1 >= 0 && loadedLayers[layerIndex-1] != null) {
+            layerOrigin = loadedLayers[layerIndex - 1].origin + Vector3.down * loadedLayers[layerIndex - 1].generator.GetDepth(0);
+        }
+
+        TerrainLayer layer = layerGObj.AddComponent<TerrainLayer>().Initialize(layerIndex, layerOrigin, this, settings.layers[layerIndex].Clone(), createState);
 
         loadedLayers.Add(layerIndex, layer);
         return layer;
@@ -169,6 +129,7 @@ public class TerrainHandler : MonoBehaviour
     // Parameters:
     //   count:
     //     number of layers to be generated
+    /*
     TerrainSettings GenerateLayerSettings(int count) {
         TerrainSettings result = ScriptableObject.CreateInstance<TerrainSettings>();
         result.layers = new TerrainLayerSettings[count + 1];
@@ -179,28 +140,12 @@ public class TerrainHandler : MonoBehaviour
         }
         return result;
     }
-
-    private void InitializeGeneration() {
-        loadedLayers = new Dictionary<int, TerrainLayer>();
-
-        Vector3 layerOrigin = generationStartPosition;
-        for (int layer = 0; layer < activeSettings.layers.Length; layer++) {
-            TerrainLayerSettings layerSettings = activeSettings.layers[layer];
-            float chunksOnY = Mathf.FloorToInt(layerSettings.depth / voxelsPerAxis.y / voxelScale);
-            float generatedDepth = chunksOnY * voxelsPerAxis.y * voxelScale;
-
-            layerSettings.genDepth = generatedDepth;
-            layerSettings.origin = layerOrigin;
-
-            layerOrigin.y -= generatedDepth + (margin * voxelScale);
-        }
-        TerrainChunk.InitializeCompute(activeSettings);
-    }
+    */
 
     private void OnDrawGizmos() {
-        if(activeSettings != null && showLayerBounds) {
-            for(int layer = 0; layer < activeSettings.layers.Length; layer++) {
-                Gizmos.DrawWireCube(activeSettings.layers[layer].origin - new Vector3(0, activeSettings.layers[layer].genDepth / 2f, 0), new Vector3(generatedArea.x, activeSettings.layers[layer].genDepth, generatedArea.y));
+        if(loadedLayers != null && showLayerBounds) {
+            for(int layer = 0; layer < loadedLayers.Count; layer++) {
+                Gizmos.DrawWireCube(loadedLayers[layer].origin - new Vector3(0, loadedLayers[layer].generator.GetDepth(0) / 2f, 0), new Vector3(generatedArea.x, loadedLayers[layer].generator.GetDepth(0), generatedArea.y));
             }
         }
     }

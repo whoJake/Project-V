@@ -37,5 +37,8 @@ void Generate (uint3 id : SV_DispatchThreadID)
         }
     }
 
-    _Target[id] = near_platform;
+    float dst_from_chasm = distance(_LayerOrigin.xz, world_position.xz);
+    float dst_from_edge = (dst_from_chasm - 25.0) / 25.0;
+
+    _Target[id] = dst_from_edge;
 }
