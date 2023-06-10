@@ -1,5 +1,15 @@
 #pragma kernel Generate
 #include "../Noise/Fractal.cginc"
+#include "../MathUtils.cginc"
+
+struct NoiseArg{
+    int octaves;
+    float frequency;
+    float persistance;
+    float lacunarity;
+};
+
+StructuredBuffer<NoiseArg> _NoiseArgs;
 
 RWTexture3D<float> _Target;
 
@@ -15,25 +25,55 @@ float  _VoxelScale;
 float3 _LayerOrigin;
 float3 _LayerSize;
 
+float _ChasmRadius;
+
+float GetChasmMask(float3 world_position){
+    float3 chasm_centre = float3( _LayerOrigin.x, world_position.y, _LayerOrigin.z );
+    float chasm_radius = _ChasmRadius;
+
+    float dst_from_centre = distance( world_position, chasm_centre );
+
+    float3 radial_dir = normalize( world_position - chasm_centre );
+    float3 radial_position = chasm_centre + radial_dir * chasm_radius;
+    NoiseArg radial_args = _NoiseArgs[2];
+    float radial_noise = fnoise01( radial_position, radial_args.octaves, radial_args.frequency, radial_args.persistance, radial_args.lacunarity ) * 2 - 1;
+
+    chasm_radius += radial_noise * min( 10, chasm_radius * 0.1 );
+
+    float chasm_mask = 1 - saturate( -( dst_from_centre - chasm_radius ) / ( chasm_radius * 0.1 ) );
+    return chasm_mask;
+}
 
 float GetPlatformValue(float3 world_position){
     uint platform_count, filler;
     _PlatformBuffer.GetDimensions( platform_count, filler );
 
-    float platform_shape = 0;
+    float platform_total = 0;
     for( uint i = 0; i < platform_count; i++ ){
         float3 platform_position = _PlatformBuffer[i];
         float platform_radius = lerp( _PlatformRadiusRange.x, _PlatformRadiusRange.y, snoise01( platform_position ) );
+
+        float3 radial_dir = normalize( world_position - platform_position );
+        float3 radial_position = platform_position + radial_dir * platform_radius;
+        NoiseArg radial_args = _NoiseArgs[0];
+        float radial_noise = fnoise01( radial_position, radial_args.octaves, radial_args.frequency, radial_args.persistance, radial_args.lacunarity ) * 2 - 1;
+
+        platform_radius += radial_noise * platform_radius * 0.25;
 
         float dst_from_platform = distance( world_position, platform_position );
         float above_below = sign( platform_position.y - world_position.y );
         float side_multiplier = saturate( above_below + 1 );
 
-        float platform_shape_noise = 1 - fnoise01( world_position, 5, 0.02, 0.6, 1.5 );
-        platform_shape += saturate( -( dst_from_platform - platform_radius ) / platform_radius ) * side_multiplier * platform_shape_noise;
+        NoiseArg platform_args = _NoiseArgs[1];
+        float platform_shape_noise = fnoise01( world_position, platform_args.octaves, platform_args.frequency, platform_args.persistance, platform_args.lacunarity );
+        platform_shape_noise = saturate( remap( platform_shape_noise, 0, 0.75, 0, 0.4 ) );
+
+        float radius_mask = saturate( -( dst_from_platform - platform_radius ) / platform_radius );
+
+        platform_total += saturate( radius_mask * side_multiplier - radius_mask * platform_shape_noise );
     }
 
-    return platform_shape;
+    return saturate( platform_total );
 }
 
 [numthreads(8,8,8)]
@@ -48,6 +88,7 @@ void Generate (uint3 id : SV_DispatchThreadID)
     float3 inlayer_position = world_position - _LayerOrigin;
 
     float platform = GetPlatformValue( world_position );
+    float chasm = GetChasmMask( world_position );
 
-    _Target[id] = saturate( platform );
+    _Target[id] = platform * chasm;
 }

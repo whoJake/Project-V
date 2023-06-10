@@ -79,13 +79,8 @@ World
 	ChunkBarrierEdit.compute
 		Perform some kind of ground check to ensure that it isnt creating an impact crator that is flaoting in midair
 
-	ChunkNoiseGeneration.compute
-		I think this needs a full rework
-		Only have 3 layerSettings be sent per dispatch
-		Caves
-		Some kind of ceiling feature
-		Figure out data structure of chunks to be saved and stored
-		Add terrain affectors outside of generation (rays, points, cubes, connecting paths between layers)
+	StarterTerrain.compute
+		add detail to top of platforms
 
 	Theory
 		256 MIN RADIUS -> 500 MIN DIAMETER

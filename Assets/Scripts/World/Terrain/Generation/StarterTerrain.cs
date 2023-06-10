@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Terrain/Starter")]
@@ -12,10 +13,15 @@ public class StarterTerrain : TerrainLayerGenerator
     public int numOfPlatforms;
     public Vector2 depthRange;
 
+    public Vector2 chasmRadiusRange;
+
+    public NoiseArgs[] noiseArgs;
+
     private float depth = -1;
 
     private bool layerInitialized = false;
     private ComputeBuffer platformBuffer;
+    private ComputeBuffer noiseArgsBuffer;
 
     private void OnEnable() {
         shader = Resources.Load<ComputeShader>("Compute/Layers/StarterTerrain");
@@ -23,13 +29,18 @@ public class StarterTerrain : TerrainLayerGenerator
 
     private void InitializeLayer(TerrainLayer layer, int seed) {
         Debug.Log("Initializing Starter Terrain Generator");
+        Random.InitState(seed);
 
-        CreatePlatformBuffer(layer, seed);
+        CreatePlatformBuffer(layer);
+        CreateNoiseArgsBuffer();
         shader.SetBuffer(0, "_PlatformBuffer", platformBuffer);
+        shader.SetBuffer(0, "_NoiseArgs", noiseArgsBuffer);
         shader.SetVector("_PlatformRadiusRange", platformRadiusRange);
 
         shader.SetVector("_LayerOrigin", layer.origin);
         shader.SetVector("_LayerSize", layer.GetBounds().size);
+
+        shader.SetFloat("_ChasmRadius", Random.Range(chasmRadiusRange.x, chasmRadiusRange.y));
 
         shader.SetFloat("_VoxelScale", layer.handler.voxelScale);
         layerInitialized = true;
@@ -37,16 +48,22 @@ public class StarterTerrain : TerrainLayerGenerator
 
     public override void ReleaseBuffers() {
         platformBuffer.Release();
+        noiseArgsBuffer.Release();
     }
 
-    public void CreatePlatformBuffer(TerrainLayer layer, int seed) {
+    public void CreatePlatformBuffer(TerrainLayer layer) {
         platformBuffer = new ComputeBuffer(numOfPlatforms, 12);
         Bounds bounds = layer.GetBounds();
-        bounds.Expand(-100f);
+        bounds.Expand(-platformRadiusRange.y * 1.25f);
 
         Vector3[] platformPositions = MathUtils.RandomPointsInBounds(numOfPlatforms, bounds);
 
         platformBuffer.SetData(platformPositions);
+    }
+
+    public void CreateNoiseArgsBuffer() {
+        noiseArgsBuffer = new ComputeBuffer(noiseArgs.Length, NoiseArgs.stride);
+        noiseArgsBuffer.SetData(noiseArgs);
     }
 
     public override void Generate(ref RenderTexture target, TerrainChunk chunk, int seed) {
@@ -70,3 +87,4 @@ public class StarterTerrain : TerrainLayerGenerator
         return depth;
     }
 }
+

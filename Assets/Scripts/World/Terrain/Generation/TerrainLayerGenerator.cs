@@ -8,3 +8,13 @@ public abstract class TerrainLayerGenerator : ScriptableObject {
     public abstract float GetDepth(float chunkHeight);
     public abstract void ReleaseBuffers();
 }
+
+[System.Serializable]
+public struct NoiseArgs {
+    public int octaves;
+    public float frequency;
+    public float persistance;
+    public float lacunarity;
+
+    public static int stride = sizeof(int) + sizeof(float) * 3;
+}
