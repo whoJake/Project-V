@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Terrain/Starter")]
@@ -8,14 +7,23 @@ public class StarterTerrain : TerrainLayerGenerator
 {
     private ComputeShader shader;
 
-    public float platformDensity;
-    public Vector2 platformRadiusRange;
-    public int numOfPlatforms;
-    public Vector2 depthRange;
+    [SerializeField]
+    private int numOfPlatforms;
+    [SerializeField]
+    private Vector2 platformRadiusRange;
+    [SerializeField]
+    private Vector2 platformFlatnessRange;
+    [SerializeField]
+    private float platformTopDisplacement;
 
-    public Vector2 chasmRadiusRange;
+    [SerializeField]
+    private Vector2 depthRange;
 
-    public NoiseArgs[] noiseArgs;
+    [SerializeField]
+    private Vector2 chasmRadiusRange;
+
+    [SerializeField]
+    private NoiseArgs[] noiseArgs;
 
     private float depth = -1;
 
@@ -29,13 +37,15 @@ public class StarterTerrain : TerrainLayerGenerator
 
     private void InitializeLayer(TerrainLayer layer, int seed) {
         Debug.Log("Initializing Starter Terrain Generator");
-        Random.InitState(seed);
+        //Random.InitState(seed);
 
         CreatePlatformBuffer(layer);
         CreateNoiseArgsBuffer();
         shader.SetBuffer(0, "_PlatformBuffer", platformBuffer);
         shader.SetBuffer(0, "_NoiseArgs", noiseArgsBuffer);
         shader.SetVector("_PlatformRadiusRange", platformRadiusRange);
+        shader.SetFloat("_PlatformTopDisplacement", platformTopDisplacement);
+        shader.SetVector("_PlatformFlatnessRange", platformFlatnessRange);
 
         shader.SetVector("_LayerOrigin", layer.origin);
         shader.SetVector("_LayerSize", layer.GetBounds().size);

@@ -66,13 +66,13 @@ Items
 				Write shader for these ice crystals, maybe colour gradient with some normal mapping
 World
 	General
-		When layers both have transition values for the same face between layers an error should be outputted
 		Maybe have some kind of gameplay element that seperates the layer (mist etc.) to cover up the transition and hide the uglyness
-		Look into better method for fog, exponential squared fog looks terrible because of the diagonal viewing issue
+		Look into better method for fog, exponential squared fog looks terrible because of the diagonal viewing issue, low hanging fog like in that bethesda game trailer
+			https://twitter.com/ephtracy/status/1619493640237367298
+			https://twitter.com/BenjiSales/status/1668003498510766082/photo/1
 		Implement dynamic loading for the chunks themselves
 
 	TerrainHandler.cs
-		Have settings be generated dynamically
 		Add in-unity variables for chunk loading ranges
 		Somehow implement look direction into the chunk loading?
 
@@ -80,7 +80,12 @@ World
 		Perform some kind of ground check to ensure that it isnt creating an impact crator that is flaoting in midair
 
 	StarterTerrain.compute
-		add detail to top of platforms
+		Platforms seem done
+		Add other structures perhaps tall pillars coming from bottom of platforms towards ground level
+		Add top and bottom base so that layer transitions make sense
+		Add outer and inner walls for boundry wall and chasm wall
+		https://twitter.com/masaki_hirooka/status/1635306087221178368
+		https://twitter.com/iamagco/status/1614925562870468610/photo/1
 
 	Theory
 		256 MIN RADIUS -> 500 MIN DIAMETER

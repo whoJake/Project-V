@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 917e3c5e44760d44eac3eaf6a04879a8, type: 3}
   m_Name: Starter 1
   m_EditorClassIdentifier: 
-  platformDensity: 0
-  platformRadiusRange: {x: 50, y: 75}
   numOfPlatforms: 75
+  platformRadiusRange: {x: 50, y: 75}
+  platformFlatnessRange: {x: 0.5, y: 0.7}
+  platformTopDisplacement: 5
   depthRange: {x: 100, y: 200}
   chasmRadiusRange: {x: 100, y: 150}
   noiseArgs:
@@ -30,3 +31,7 @@ MonoBehaviour:
     frequency: 0.015
     persistance: 0.5
     lacunarity: 1.6
+  - octaves: 5
+    frequency: 0.02
+    persistance: 0.5
+    lacunarity: 1.7

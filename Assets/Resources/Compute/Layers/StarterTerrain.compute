@@ -15,6 +15,8 @@ RWTexture3D<float> _Target;
 
 StructuredBuffer<float3> _PlatformBuffer;
 float2 _PlatformRadiusRange;
+float _PlatformTopDisplacement;
+float2 _PlatformFlatnessRange;
 
 int    _Seed;
 
@@ -51,29 +53,40 @@ float GetPlatformValue(float3 world_position){
     float platform_total = 0;
     for( uint i = 0; i < platform_count; i++ ){
         float3 platform_position = _PlatformBuffer[i];
-        float platform_radius = lerp( _PlatformRadiusRange.x, _PlatformRadiusRange.y, snoise01( platform_position ) );
+        float noise01 = snoise01( platform_position );
+        float platform_radius = lerp( _PlatformRadiusRange.x, _PlatformRadiusRange.y, noise01 );
+        float platform_flatness = lerp( _PlatformFlatnessRange.x, _PlatformFlatnessRange.y, 1 - noise01 );
 
         float3 radial_dir = normalize( world_position - platform_position );
+        platform_radius -= saturate( abs( dot( radial_dir, float3( 0, 1, 0 ) ) ) ) * platform_radius * platform_flatness;
+
         float3 radial_position = platform_position + radial_dir * platform_radius;
         NoiseArg radial_args = _NoiseArgs[0];
         float radial_noise = fnoise01( radial_position, radial_args.octaves, radial_args.frequency, radial_args.persistance, radial_args.lacunarity ) * 2 - 1;
 
         platform_radius += radial_noise * platform_radius * 0.25;
+        
+        NoiseArg above_platform_args = _NoiseArgs[3];
+        float3 world_position_at_platform = float3( world_position.x, platform_position.y, world_position.z );
+        float above_noise = fnoise( world_position_at_platform, above_platform_args.octaves, above_platform_args.frequency, above_platform_args.persistance, above_platform_args.lacunarity );
 
-        float dst_from_platform = distance( world_position, platform_position );
-        float above_below = sign( platform_position.y - world_position.y );
-        float side_multiplier = saturate( above_below + 1 );
+        float vertical_dst_from_platform = world_position.y - platform_position.y - ( platform_radius * 0.1 ) - ( above_noise * _PlatformTopDisplacement ); //pos above, neg below
+        float side_multiplier = saturate( -( vertical_dst_from_platform / ( platform_radius * 0.1 ) ) );
+        //. 1 radius above, -1 radius below, 0 at platform hi
+
 
         NoiseArg platform_args = _NoiseArgs[1];
         float platform_shape_noise = fnoise01( world_position, platform_args.octaves, platform_args.frequency, platform_args.persistance, platform_args.lacunarity );
         platform_shape_noise = saturate( remap( platform_shape_noise, 0, 0.75, 0, 0.4 ) );
+        
+        float dst_from_platform = distance( world_position, platform_position );
+        float radius_mask = saturate( -( dst_from_platform - platform_radius ) / ( platform_radius * 0.1) );
 
-        float radius_mask = saturate( -( dst_from_platform - platform_radius ) / platform_radius );
-
-        platform_total += saturate( radius_mask * side_multiplier - radius_mask * platform_shape_noise );
+        float current_platform_shape = saturate( radius_mask * side_multiplier - radius_mask * platform_shape_noise );
+        platform_total += current_platform_shape;
     }
 
-    return saturate( platform_total );
+    return platform_total;
 }
 
 [numthreads(8,8,8)]

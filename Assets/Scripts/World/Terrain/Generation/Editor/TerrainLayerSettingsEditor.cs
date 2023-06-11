@@ -35,6 +35,7 @@ public class TerrainLayerSettingsEditor : Editor
 
     public override void OnInspectorGUI() {
         useCustomInspector = EditorGUILayout.Toggle("Use Custom Insepctor?", useCustomInspector);
+        EditorGUILayout.Space();
 
         if (useCustomInspector) CustomInspector();
         else                    base.DrawDefaultInspector();
