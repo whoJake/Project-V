@@ -18,7 +18,17 @@ float easein(float x, int power) {
     return pow(x, power);
 }
 
+float easebackout(float x, int power){
+    float c1 = 1.70158;
+    float c3 = c1 + 1;
+
+    return 1 + c3 * pow( x - 1, power ) + c1 * pow( x - 1, power - 1 );
+}
+
 float remap(float val, float oldA, float oldB, float newA, float newB) {
+
+    //return newA + invlerp( val, oldA, oldB ) * (newB - newA);
+
     float a = val - oldA;
     float b = newB - newA;
     float c = oldB - oldA;

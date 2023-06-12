@@ -236,7 +236,7 @@ public class PlayerMovement : MonoBehaviour
     //     Will activate this controller once the first layer has fully generated
     //
     private void OnLayerGenerated(int index) {
-        if (index == 1) isActive = true;
+        if (index == 0) isActive = true;
     }
 
 }

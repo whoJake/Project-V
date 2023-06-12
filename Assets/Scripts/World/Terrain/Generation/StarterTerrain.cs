@@ -23,6 +23,13 @@ public class StarterTerrain : TerrainLayerGenerator
     private Vector2 chasmRadiusRange;
 
     [SerializeField]
+    private float topSurfaceRadius;
+    [SerializeField]
+    private float bottomSurfaceRadius;
+    [SerializeField]
+    private float cliffFeatureDepth;
+
+    [SerializeField]
     private NoiseArgs[] noiseArgs;
 
     private float depth = -1;
@@ -47,7 +54,12 @@ public class StarterTerrain : TerrainLayerGenerator
         shader.SetFloat("_PlatformTopDisplacement", platformTopDisplacement);
         shader.SetVector("_PlatformFlatnessRange", platformFlatnessRange);
 
+        shader.SetFloat("_TopSurfaceRadius", topSurfaceRadius);
+        shader.SetFloat("_BottomSurfaceRadius", bottomSurfaceRadius);
+        shader.SetFloat("_CliffFeatureDepth", cliffFeatureDepth);
+
         shader.SetVector("_LayerOrigin", layer.origin);
+
         shader.SetVector("_LayerSize", layer.GetBounds().size);
 
         shader.SetFloat("_ChasmRadius", Random.Range(chasmRadiusRange.x, chasmRadiusRange.y));

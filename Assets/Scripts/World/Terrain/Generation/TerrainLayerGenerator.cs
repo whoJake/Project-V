@@ -11,10 +11,11 @@ public abstract class TerrainLayerGenerator : ScriptableObject {
 
 [System.Serializable]
 public struct NoiseArgs {
+    public Vector3 scale;
     public int octaves;
     public float frequency;
     public float persistance;
     public float lacunarity;
 
-    public static int stride = sizeof(int) + sizeof(float) * 3;
+    public static int stride = sizeof(int) + sizeof(float) * 6;
 }

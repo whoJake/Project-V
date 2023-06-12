@@ -3,6 +3,7 @@
 #include "../MathUtils.cginc"
 
 struct NoiseArg{
+    float3 scale;
     int octaves;
     float frequency;
     float persistance;
@@ -18,6 +19,10 @@ float2 _PlatformRadiusRange;
 float _PlatformTopDisplacement;
 float2 _PlatformFlatnessRange;
 
+float _TopSurfaceRadius;
+float _BottomSurfaceRadius;
+float _CliffFeatureDepth;
+
 int    _Seed;
 
 float3 _ChunkOrigin;
@@ -29,7 +34,32 @@ float3 _LayerSize;
 
 float _ChasmRadius;
 
+//. -1 = 16 inside surface, 0, on surface, 1 = 16 outside surface
+float GetSignedBaseSurfaceDistance(float3 world_position){
+    float layer_normalized_height = ( -( world_position.y - _LayerOrigin.y ) ) / _LayerSize.y;
+    float layer_eased_height = easein( layer_normalized_height , 5 );
+
+    float dst_from_centre = distance( world_position.xz, _LayerOrigin.xz );
+
+    float current_radius = lerp( _TopSurfaceRadius, _BottomSurfaceRadius, layer_eased_height );
+    float signed_dst_base_surface = clamp( ( dst_from_centre - current_radius ) / _CliffFeatureDepth, -1, 1 );
+
+    return signed_dst_base_surface;
+}
+
+float GetBaseShape(float3 world_position, float signed_dst_base_surface){
+    float base = saturate( signed_dst_base_surface + 0.5 );
+
+    NoiseArg surface_noise_args = _NoiseArgs[4];
+    float surface_noise = fnoise01( world_position * surface_noise_args.scale, surface_noise_args.octaves, surface_noise_args.frequency, surface_noise_args.persistance, surface_noise_args.lacunarity );
+
+    float surface_shape = base + ( 1 - abs( signed_dst_base_surface ) ) * surface_noise;
+
+    return surface_shape;
+}
+
 float GetChasmMask(float3 world_position){
+    //Possibly room to remove some temp variables here
     float3 chasm_centre = float3( _LayerOrigin.x, world_position.y, _LayerOrigin.z );
     float chasm_radius = _ChasmRadius;
 
@@ -72,7 +102,7 @@ float GetPlatformValue(float3 world_position){
 
         float vertical_dst_from_platform = world_position.y - platform_position.y - ( platform_radius * 0.1 ) - ( above_noise * _PlatformTopDisplacement ); //pos above, neg below
         float side_multiplier = saturate( -( vertical_dst_from_platform / ( platform_radius * 0.1 ) ) );
-        //. 1 radius above, -1 radius below, 0 at platform hi
+        //. 1 radius above, -1 radius below, 0 at platform height
 
 
         NoiseArg platform_args = _NoiseArgs[1];
@@ -100,8 +130,12 @@ void Generate (uint3 id : SV_DispatchThreadID)
     float3 world_position = _ChunkOrigin + ( id * _VoxelScale );
     float3 inlayer_position = world_position - _LayerOrigin;
 
+    float signed_dst_base_surface = GetSignedBaseSurfaceDistance( world_position );
+    float base_surface = GetBaseShape( world_position, signed_dst_base_surface );
+    //_Target[id] = base_surface; return;
+
     float platform = GetPlatformValue( world_position );
     float chasm = GetChasmMask( world_position );
 
-    _Target[id] = platform * chasm;
+    _Target[id] = max( base_surface, platform * chasm );
 }

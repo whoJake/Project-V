@@ -87,6 +87,10 @@ World
 		https://twitter.com/masaki_hirooka/status/1635306087221178368
 		https://twitter.com/iamagco/status/1614925562870468610/photo/1
 
+		Add top surface
+		Do video demo of current system
+		Add new variables into StarterTerrainEditor.cs
+
 	Theory
 		256 MIN RADIUS -> 500 MIN DIAMETER
 		1024 MAX SIZE A.K.A NOISE TEXTURE SIZE

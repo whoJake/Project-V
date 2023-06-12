@@ -10,28 +10,40 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 917e3c5e44760d44eac3eaf6a04879a8, type: 3}
-  m_Name: Starter 1
+  m_Name: toScale starter
   m_EditorClassIdentifier: 
-  numOfPlatforms: 75
-  platformRadiusRange: {x: 50, y: 75}
-  platformFlatnessRange: {x: 0.5, y: 0.7}
-  platformTopDisplacement: 5
-  depthRange: {x: 100, y: 200}
-  chasmRadiusRange: {x: 100, y: 150}
+  numOfPlatforms: 60
+  platformRadiusRange: {x: 75, y: 150}
+  platformFlatnessRange: {x: 0.1, y: 0.5}
+  platformTopDisplacement: 2.5
+  depthRange: {x: 400, y: 500}
+  chasmRadiusRange: {x: 400, y: 600}
+  topSurfaceRadius: 750
+  bottomSurfaceRadius: 350
+  cliffFeatureDepth: 64
   noiseArgs:
-  - octaves: 6
+  - scale: {x: 0, y: 0, z: 0}
+    octaves: 6
     frequency: 0.021
     persistance: 0.35
     lacunarity: 1.5
-  - octaves: 4
+  - scale: {x: 0, y: 0, z: 0}
+    octaves: 4
     frequency: 0.02
     persistance: 0.5
     lacunarity: 1.5
-  - octaves: 5
+  - scale: {x: 0, y: 0, z: 0}
+    octaves: 5
     frequency: 0.015
     persistance: 0.5
     lacunarity: 1.6
-  - octaves: 5
+  - scale: {x: 0, y: 0, z: 0}
+    octaves: 5
+    frequency: 0.02
+    persistance: 0.5
+    lacunarity: 1.7
+  - scale: {x: 0.6, y: 0.2, z: 0.6}
+    octaves: 5
     frequency: 0.02
     persistance: 0.5
     lacunarity: 1.7
