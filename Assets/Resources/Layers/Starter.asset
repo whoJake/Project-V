@@ -20,10 +20,10 @@ MonoBehaviour:
   chasmRadiusRange: {x: 150, y: 150}
   upperSurfaceDepth: 32
   upperSurfaceFeatureDepth: 8
-  cliffLipSize: {x: 32, y: 16}
-  topSurfaceRadius: 235
-  bottomSurfaceRadius: 65
+  upperRadius: 250
+  lowerRadius: 100
   cliffFeatureDepth: 16
+  cliffLedgeSize: {x: 32, y: 8}
   noiseArgs:
   - scale: {x: 0, y: 0, z: 0}
     octaves: 6

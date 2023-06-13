@@ -21,7 +21,7 @@ float2 _PlatformFlatnessRange;
 
 float _UpperSurfaceDepth;
 float _UpperSurfaceFeatureDepth;
-float2 _CliffLipSize;
+float2 _CliffLedgeSize;
 
 float _UpperRadius;
 float _LowerRadius;
@@ -64,8 +64,8 @@ float GetBaseShape(float3 world_position, float signed_dst_base_surface){
 float GetTopSurfaceMask(float3 world_position){
     float surface_world_height = _LayerOrigin.y - _UpperSurfaceDepth;
     float radius_at_surface = GetRadiusAtNormalizedHeight( -surface_world_height / _LayerSize.y );
-    float lip_mask = saturate( ( abs( distance( world_position.xz, _LayerOrigin.xz ) - radius_at_surface ) ) / _CliffLipSize.x );
-    surface_world_height -= easeinout( lip_mask, 4 ) * _CliffLipSize.y;
+    float lip_mask = saturate( ( abs( distance( world_position.xz, _LayerOrigin.xz ) - radius_at_surface ) ) / _CliffLedgeSize.x );
+    surface_world_height -= easeinout( lip_mask, 4 ) * _CliffLedgeSize.y;
 
     NoiseArg top_surface_noise_args = _NoiseArgs[5];
     float3 sample_position = float3( world_position.x, _LayerOrigin.y, world_position.z );

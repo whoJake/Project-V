@@ -4,7 +4,7 @@ using UnityEditor;
 [CustomEditor(typeof(StarterTerrain))]
 public class StarterTerrainEditor : Editor 
 {
-    private bool useCustomInspector;
+    private bool useCustomInspector = true;
 
     SerializedProperty numOfPlatformsProperty;
     SerializedProperty platformRadiusRangeProperty;
@@ -13,6 +13,14 @@ public class StarterTerrainEditor : Editor
 
     SerializedProperty depthRangeProperty;
     SerializedProperty chasmRadiusRangeProperty;
+
+    SerializedProperty upperSurfaceDepthProperty;
+    SerializedProperty upperSurfaceFeatureDepthProperty;
+
+    SerializedProperty upperRadiusProperty;
+    SerializedProperty lowerRadiusProperty;
+    SerializedProperty cliffFeatureDepthProperty;
+    SerializedProperty cliffLedgeSizeProperty;
 
     SerializedProperty noiseArgsProperty;
 
@@ -32,6 +40,15 @@ public class StarterTerrainEditor : Editor
 
         depthRangeProperty = serializedObject.FindProperty("depthRange");
         chasmRadiusRangeProperty = serializedObject.FindProperty("chasmRadiusRange");
+
+        upperSurfaceDepthProperty = serializedObject.FindProperty("upperSurfaceDepth");
+        upperSurfaceFeatureDepthProperty = serializedObject.FindProperty("upperSurfaceFeatureDepth");
+        
+        upperRadiusProperty = serializedObject.FindProperty("upperRadius");
+        lowerRadiusProperty = serializedObject.FindProperty("lowerRadius");
+        cliffFeatureDepthProperty = serializedObject.FindProperty("cliffFeatureDepth");
+        cliffLedgeSizeProperty = serializedObject.FindProperty("cliffLedgeSize");
+
         noiseArgsProperty = serializedObject.FindProperty("noiseArgs");
     }
 
@@ -44,6 +61,22 @@ public class StarterTerrainEditor : Editor
         EditorGUILayout.PropertyField(platformRadiusRangeProperty, new GUIContent("Radius Range"));
         EditorGUILayout.PropertyField(platformFlatnessRangeProperty, new GUIContent("Flatness Range"));
         EditorGUILayout.PropertyField(platformTopDisplacementProperty, new GUIContent("Surface Max Displacement"));
+        EditorGUI.indentLevel--;
+        EditorGUILayout.Space();
+
+        EditorGUILayout.LabelField(new GUIContent("Top Surface"), EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        EditorGUILayout.PropertyField(upperSurfaceDepthProperty, new GUIContent("Depth"));
+        EditorGUILayout.PropertyField(upperSurfaceFeatureDepthProperty, new GUIContent("Feature Depth"));
+        EditorGUI.indentLevel--;
+        EditorGUILayout.Space();
+
+        EditorGUILayout.LabelField(new GUIContent("Main Shape"), EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        EditorGUILayout.PropertyField(upperRadiusProperty, new GUIContent("Upper Radius"));
+        EditorGUILayout.PropertyField(lowerRadiusProperty, new GUIContent("Lower Radius"));
+        EditorGUILayout.PropertyField(cliffLedgeSizeProperty, new GUIContent("Cliff Ledge Size"));
+        EditorGUILayout.PropertyField(cliffFeatureDepthProperty, new GUIContent("Cliff Face Feature Depth"));
         EditorGUI.indentLevel--;
         EditorGUILayout.Space();
 
