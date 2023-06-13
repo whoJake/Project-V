@@ -80,34 +80,12 @@ World
 		Perform some kind of ground check to ensure that it isnt creating an impact crator that is flaoting in midair
 
 	StarterTerrain.compute
-		Platforms seem done
-		Add other structures perhaps tall pillars coming from bottom of platforms towards ground level
-		Add top and bottom base so that layer transitions make sense
-		Add outer and inner walls for boundry wall and chasm wall
+		Let platforms have more complex shapes other than noised circles
+		Improve generation of platforms on C# so that they can form a feasible path to the bottom
+		Add paths into side of wall
+		Add noise to platform stems
 		https://twitter.com/masaki_hirooka/status/1635306087221178368
 		https://twitter.com/iamagco/status/1614925562870468610/photo/1
-
-		Add top surface
-		Do video demo of current system
-		Add new variables into StarterTerrainEditor.cs
-
-	Theory
-		256 MIN RADIUS -> 500 MIN DIAMETER
-		1024 MAX SIZE A.K.A NOISE TEXTURE SIZE
-		Nodes have a bunch of stats such as isGround, growth countdown, type all that can be used to affect it over time
-		Terrain can be transformed by certain terrain affectors, circular, ray, etc
-
-	Chunk
-		OUTDATED
-		512 total size split into 8 -> 128x128 chunks
-		128 tall?
-		10.5m nodes per chunk
-
-		uint type -> 4B
-		bool floor -> 1B
-		10.5MB uncompressed per chunk on disk
-
-		Each layer has its own noise values, lerp between them in order to keep continuity between layers
 
 	MeshMaths.cs
 		Add method that can join meshInfos

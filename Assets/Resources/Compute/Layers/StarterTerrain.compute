@@ -19,6 +19,9 @@ float2 _PlatformRadiusRange;
 float _PlatformTopDisplacement;
 float2 _PlatformFlatnessRange;
 
+float2 _PlatformStemPinchRange;
+float2 _PlatformStemRadius;
+
 float _UpperSurfaceDepth;
 float _UpperSurfaceFeatureDepth;
 float2 _CliffLedgeSize;
@@ -26,6 +29,7 @@ float2 _CliffLedgeSize;
 float _UpperRadius;
 float _LowerRadius;
 float _CliffFeatureDepth;
+int _CliffSlopeEasePower;
 
 int    _Seed;
 
@@ -38,8 +42,13 @@ float3 _LayerSize;
 
 float _ChasmRadius;
 
+float GetNormalizedHeightAtRadius(float radius){
+    float linear_height = invlerp(radius, _UpperRadius, _LowerRadius);
+    return easein( linear_height, 1.0 / _CliffSlopeEasePower );
+}
+
 float GetRadiusAtNormalizedHeight(float layer_normalized_height){
-    float eased_height = easein( layer_normalized_height, 5 );
+    float eased_height = easein( layer_normalized_height, _CliffSlopeEasePower );
     return lerp( _UpperRadius, _LowerRadius, eased_height );
 }
 
@@ -132,8 +141,25 @@ float GetPlatformValue(float3 world_position){
         float radius_mask = saturate( -( dst_from_platform - platform_radius ) / ( 16.0 ) );
 
         //. 3D shape noise NOT currently implemented
-        float current_platform_shape = saturate( radius_mask * side_multiplier );// + radius_mask * platform_shape_noise * ( 1 - side_multiplier ) );
-        platform_total += current_platform_shape;
+        float current_platform_shape = saturate( radius_mask * side_multiplier );
+
+
+        //Underneath pillar shape
+        float radius_at_height = distance( platform_position.xz, _LayerOrigin.xz );
+        float height_of_slope_below_platform = _LayerOrigin.y - GetNormalizedHeightAtRadius( radius_at_height ) * _LayerSize.y;
+
+        float normalized_platform_to_slope_height = invlerp( world_position.y, platform_position.y, height_of_slope_below_platform );
+        bool stem_multiplier = radius_at_height > _ChasmRadius && normalized_platform_to_slope_height > 0 && world_position.y < platform_position.y;
+        
+        float stem_radius_t = abs( saturate( remap( saturate( normalized_platform_to_slope_height ), _PlatformStemPinchRange.x, _PlatformStemPinchRange.y, 0, 1 ) ) - 0.5 ) * 2;
+        stem_radius_t = easeinout( stem_radius_t, 3 );
+
+        float stem_radius = lerp( _PlatformStemRadius.x, _PlatformStemRadius.y, stem_radius_t );
+        float dst_from_stem_centre = distance( world_position.xz, platform_position.xz );
+
+        float platform_stem_shape = saturate( -( dst_from_stem_centre - stem_radius ) / 4.0 );
+        
+        platform_total += max( current_platform_shape, platform_stem_shape * stem_multiplier );
     }
 
     return platform_total;
@@ -153,7 +179,6 @@ void Generate (uint3 id : SV_DispatchThreadID)
     float signed_dst_base_surface = GetSignedBaseSurfaceDistance( world_position );
     float base_surface = GetBaseShape( world_position, signed_dst_base_surface );
     float top_surface_mask = GetTopSurfaceMask( world_position );
-    //_Target[id] = top_surface_mask; return;
 
     float platform = GetPlatformValue( world_position );
     float chasm = GetChasmMask( world_position );

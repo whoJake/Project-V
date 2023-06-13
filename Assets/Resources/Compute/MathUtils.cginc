@@ -10,12 +10,12 @@ float3 setmagnitude(float3 v, float mag){
     return normalize(v) * mag;
 }
 
-float easeout(float x, int power) {
-    return 1 - pow(1 - x, power);
+float easeout(float x, float power) {
+    return 1 - pow(abs( 1 - x ), power);
 }
 
-float easein(float x, int power) {
-    return pow(x, power);
+float easein(float x, float power) {
+    return pow(abs( x ), power);
 }
 
 float easeinout(float x, int power){
@@ -23,21 +23,8 @@ float easeinout(float x, int power){
     return lerp( pow(2, power-1) * easein(x, power), 1 - pow(-2 * x + 2, power) / 2 , b );
 }
 
-float easebackout(float x, int power){
-    float c1 = 1.70158;
-    float c3 = c1 + 1;
-
-    return 1 + c3 * pow( x - 1, power ) + c1 * pow( x - 1, power - 1 );
-}
-
 float remap(float val, float oldA, float oldB, float newA, float newB) {
-
-    //return newA + invlerp( val, oldA, oldB ) * (newB - newA);
-
-    float a = val - oldA;
-    float b = newB - newA;
-    float c = oldB - oldA;
-    return oldA + (a * b) / c;
+    return newA + invlerp( val, oldA, oldB ) * (newB - newA);
 }
 
 float2 clampmagnitude(float2 v, float min, float max){

@@ -16,12 +16,15 @@ MonoBehaviour:
   platformRadiusRange: {x: 25, y: 50}
   platformFlatnessRange: {x: 0.2, y: 0.6}
   platformTopDisplacement: 3
+  platformStemPinchRange: {x: 0.3, y: 0.7}
+  platformStemRadius: {x: 5, y: 15}
   depthRange: {x: 400, y: 600}
   chasmRadiusRange: {x: 150, y: 150}
   upperSurfaceDepth: 32
   upperSurfaceFeatureDepth: 8
   upperRadius: 250
   lowerRadius: 100
+  cliffSlopeEasePower: 5
   cliffFeatureDepth: 16
   cliffLedgeSize: {x: 32, y: 8}
   noiseArgs:

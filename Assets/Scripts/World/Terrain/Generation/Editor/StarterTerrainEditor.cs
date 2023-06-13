@@ -11,6 +11,9 @@ public class StarterTerrainEditor : Editor
     SerializedProperty platformFlatnessRangeProperty;
     SerializedProperty platformTopDisplacementProperty;
 
+    SerializedProperty platformStemPinchRangeProperty;
+    SerializedProperty platformStemRadiusProperty;
+
     SerializedProperty depthRangeProperty;
     SerializedProperty chasmRadiusRangeProperty;
 
@@ -19,6 +22,7 @@ public class StarterTerrainEditor : Editor
 
     SerializedProperty upperRadiusProperty;
     SerializedProperty lowerRadiusProperty;
+    SerializedProperty cliffSlopeEasePowerProperty;
     SerializedProperty cliffFeatureDepthProperty;
     SerializedProperty cliffLedgeSizeProperty;
 
@@ -38,6 +42,9 @@ public class StarterTerrainEditor : Editor
         platformFlatnessRangeProperty = serializedObject.FindProperty("platformFlatnessRange");
         platformTopDisplacementProperty = serializedObject.FindProperty("platformTopDisplacement");
 
+        platformStemPinchRangeProperty = serializedObject.FindProperty("platformStemPinchRange");
+        platformStemRadiusProperty = serializedObject.FindProperty("platformStemRadius");
+
         depthRangeProperty = serializedObject.FindProperty("depthRange");
         chasmRadiusRangeProperty = serializedObject.FindProperty("chasmRadiusRange");
 
@@ -46,6 +53,7 @@ public class StarterTerrainEditor : Editor
         
         upperRadiusProperty = serializedObject.FindProperty("upperRadius");
         lowerRadiusProperty = serializedObject.FindProperty("lowerRadius");
+        cliffSlopeEasePowerProperty = serializedObject.FindProperty("cliffSlopeEasePower");
         cliffFeatureDepthProperty = serializedObject.FindProperty("cliffFeatureDepth");
         cliffLedgeSizeProperty = serializedObject.FindProperty("cliffLedgeSize");
 
@@ -61,6 +69,13 @@ public class StarterTerrainEditor : Editor
         EditorGUILayout.PropertyField(platformRadiusRangeProperty, new GUIContent("Radius Range"));
         EditorGUILayout.PropertyField(platformFlatnessRangeProperty, new GUIContent("Flatness Range"));
         EditorGUILayout.PropertyField(platformTopDisplacementProperty, new GUIContent("Surface Max Displacement"));
+        EditorGUILayout.LabelField(new GUIContent("Stem"), EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        EditorGUILayout.PropertyField(platformStemPinchRangeProperty, new GUIContent("Pinch Range"));
+        platformStemPinchRangeProperty.vector2Value = new Vector2(Mathf.Clamp01(platformStemPinchRangeProperty.vector2Value.x),
+                                                                  Mathf.Clamp01(platformStemPinchRangeProperty.vector2Value.y));
+        EditorGUILayout.PropertyField(platformStemRadiusProperty, new GUIContent("Radius"));
+        EditorGUI.indentLevel--;
         EditorGUI.indentLevel--;
         EditorGUILayout.Space();
 
@@ -75,6 +90,7 @@ public class StarterTerrainEditor : Editor
         EditorGUI.indentLevel++;
         EditorGUILayout.PropertyField(upperRadiusProperty, new GUIContent("Upper Radius"));
         EditorGUILayout.PropertyField(lowerRadiusProperty, new GUIContent("Lower Radius"));
+        EditorGUILayout.PropertyField(cliffSlopeEasePowerProperty, new GUIContent("Slope Ease Power"));
         EditorGUILayout.PropertyField(cliffLedgeSizeProperty, new GUIContent("Cliff Ledge Size"));
         EditorGUILayout.PropertyField(cliffFeatureDepthProperty, new GUIContent("Cliff Face Feature Depth"));
         EditorGUI.indentLevel--;
