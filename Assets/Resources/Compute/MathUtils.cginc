@@ -18,6 +18,11 @@ float easein(float x, int power) {
     return pow(x, power);
 }
 
+float easeinout(float x, int power){
+    float b = x > 0.5;
+    return lerp( pow(2, power-1) * easein(x, power), 1 - pow(-2 * x + 2, power) / 2 , b );
+}
+
 float easebackout(float x, int power){
     float c1 = 1.70158;
     float c3 = c1 + 1;

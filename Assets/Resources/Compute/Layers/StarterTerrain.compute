@@ -19,8 +19,12 @@ float2 _PlatformRadiusRange;
 float _PlatformTopDisplacement;
 float2 _PlatformFlatnessRange;
 
-float _TopSurfaceRadius;
-float _BottomSurfaceRadius;
+float _UpperSurfaceDepth;
+float _UpperSurfaceFeatureDepth;
+float2 _CliffLipSize;
+
+float _UpperRadius;
+float _LowerRadius;
 float _CliffFeatureDepth;
 
 int    _Seed;
@@ -34,17 +38,18 @@ float3 _LayerSize;
 
 float _ChasmRadius;
 
+float GetRadiusAtNormalizedHeight(float layer_normalized_height){
+    float eased_height = easein( layer_normalized_height, 5 );
+    return lerp( _UpperRadius, _LowerRadius, eased_height );
+}
+
 //. -1 = 16 inside surface, 0, on surface, 1 = 16 outside surface
 float GetSignedBaseSurfaceDistance(float3 world_position){
     float layer_normalized_height = ( -( world_position.y - _LayerOrigin.y ) ) / _LayerSize.y;
-    float layer_eased_height = easein( layer_normalized_height , 5 );
+    float current_radius = GetRadiusAtNormalizedHeight( layer_normalized_height );
 
     float dst_from_centre = distance( world_position.xz, _LayerOrigin.xz );
-
-    float current_radius = lerp( _TopSurfaceRadius, _BottomSurfaceRadius, layer_eased_height );
-    float signed_dst_base_surface = clamp( ( dst_from_centre - current_radius ) / _CliffFeatureDepth, -1, 1 );
-
-    return signed_dst_base_surface;
+    return clamp( ( dst_from_centre - current_radius ) / _CliffFeatureDepth, -1, 1 );
 }
 
 float GetBaseShape(float3 world_position, float signed_dst_base_surface){
@@ -53,9 +58,23 @@ float GetBaseShape(float3 world_position, float signed_dst_base_surface){
     NoiseArg surface_noise_args = _NoiseArgs[4];
     float surface_noise = fnoise01( world_position * surface_noise_args.scale, surface_noise_args.octaves, surface_noise_args.frequency, surface_noise_args.persistance, surface_noise_args.lacunarity );
 
-    float surface_shape = base + ( 1 - abs( signed_dst_base_surface ) ) * surface_noise;
+    return base + ( 1 - abs( signed_dst_base_surface ) ) * surface_noise;
+}
 
-    return surface_shape;
+float GetTopSurfaceMask(float3 world_position){
+    float surface_world_height = _LayerOrigin.y - _UpperSurfaceDepth;
+    float radius_at_surface = GetRadiusAtNormalizedHeight( -surface_world_height / _LayerSize.y );
+    float lip_mask = saturate( ( abs( distance( world_position.xz, _LayerOrigin.xz ) - radius_at_surface ) ) / _CliffLipSize.x );
+    surface_world_height -= easeinout( lip_mask, 4 ) * _CliffLipSize.y;
+
+    NoiseArg top_surface_noise_args = _NoiseArgs[5];
+    float3 sample_position = float3( world_position.x, _LayerOrigin.y, world_position.z );
+    float top_surface_noise = fnoise01( sample_position * top_surface_noise_args.scale, top_surface_noise_args.octaves, top_surface_noise_args.frequency, top_surface_noise_args.persistance, top_surface_noise_args.lacunarity ) * 2 - 1;
+    float noise_mask = 1 - saturate( abs( surface_world_height - world_position.y ) / _UpperSurfaceFeatureDepth );
+
+    surface_world_height += top_surface_noise * noise_mask * max( 0.8, lip_mask ) * _UpperSurfaceFeatureDepth;
+
+    return 1 - saturate( ( world_position.y - surface_world_height ) / _UpperSurfaceFeatureDepth );
 }
 
 float GetChasmMask(float3 world_position){
@@ -68,11 +87,11 @@ float GetChasmMask(float3 world_position){
     float3 radial_dir = normalize( world_position - chasm_centre );
     float3 radial_position = chasm_centre + radial_dir * chasm_radius;
     NoiseArg radial_args = _NoiseArgs[2];
-    float radial_noise = fnoise01( radial_position, radial_args.octaves, radial_args.frequency, radial_args.persistance, radial_args.lacunarity ) * 2 - 1;
+    float radial_noise = fnoise01( radial_position * radial_args.scale, radial_args.octaves, radial_args.frequency, radial_args.persistance, radial_args.lacunarity ) * 2 - 1;
 
     chasm_radius += radial_noise * min( 10, chasm_radius * 0.1 );
 
-    float chasm_mask = 1 - saturate( -( dst_from_centre - chasm_radius ) / ( chasm_radius * 0.1 ) );
+    float chasm_mask = saturate( ( dst_from_centre - chasm_radius ) / ( 16.0 ) );
     return chasm_mask;
 }
 
@@ -94,7 +113,7 @@ float GetPlatformValue(float3 world_position){
         NoiseArg radial_args = _NoiseArgs[0];
         float radial_noise = fnoise01( radial_position, radial_args.octaves, radial_args.frequency, radial_args.persistance, radial_args.lacunarity ) * 2 - 1;
 
-        platform_radius += radial_noise * platform_radius * 0.25;
+        platform_radius += radial_noise * platform_radius * 0.15;
         
         NoiseArg above_platform_args = _NoiseArgs[3];
         float3 world_position_at_platform = float3( world_position.x, platform_position.y, world_position.z );
@@ -107,12 +126,13 @@ float GetPlatformValue(float3 world_position){
 
         NoiseArg platform_args = _NoiseArgs[1];
         float platform_shape_noise = fnoise01( world_position, platform_args.octaves, platform_args.frequency, platform_args.persistance, platform_args.lacunarity );
-        platform_shape_noise = saturate( remap( platform_shape_noise, 0, 0.75, 0, 0.4 ) );
+        platform_shape_noise = ( platform_shape_noise * 2 - 1 );
         
         float dst_from_platform = distance( world_position, platform_position );
-        float radius_mask = saturate( -( dst_from_platform - platform_radius ) / ( platform_radius * 0.1) );
+        float radius_mask = saturate( -( dst_from_platform - platform_radius ) / ( 16.0 ) );
 
-        float current_platform_shape = saturate( radius_mask * side_multiplier - radius_mask * platform_shape_noise );
+        //. 3D shape noise NOT currently implemented
+        float current_platform_shape = saturate( radius_mask * side_multiplier );// + radius_mask * platform_shape_noise * ( 1 - side_multiplier ) );
         platform_total += current_platform_shape;
     }
 
@@ -132,10 +152,11 @@ void Generate (uint3 id : SV_DispatchThreadID)
 
     float signed_dst_base_surface = GetSignedBaseSurfaceDistance( world_position );
     float base_surface = GetBaseShape( world_position, signed_dst_base_surface );
-    //_Target[id] = base_surface; return;
+    float top_surface_mask = GetTopSurfaceMask( world_position );
+    //_Target[id] = top_surface_mask; return;
 
     float platform = GetPlatformValue( world_position );
     float chasm = GetChasmMask( world_position );
 
-    _Target[id] = max( base_surface, platform * chasm );
+    _Target[id] = max( base_surface * top_surface_mask, platform * chasm );
 }

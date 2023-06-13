@@ -18,6 +18,9 @@ MonoBehaviour:
   platformTopDisplacement: 3
   depthRange: {x: 400, y: 600}
   chasmRadiusRange: {x: 150, y: 150}
+  upperSurfaceDepth: 32
+  upperSurfaceFeatureDepth: 8
+  cliffLipSize: {x: 32, y: 16}
   topSurfaceRadius: 235
   bottomSurfaceRadius: 65
   cliffFeatureDepth: 16
@@ -47,3 +50,8 @@ MonoBehaviour:
     frequency: 0.02
     persistance: 0.5
     lacunarity: 1.7
+  - scale: {x: 0.7, y: 0.5, z: 0.7}
+    octaves: 7
+    frequency: 0.01
+    persistance: 0.6
+    lacunarity: 1.6
