@@ -83,7 +83,6 @@ World
 		Let platforms have more complex shapes other than noised circles
 		Improve generation of platforms on C# so that they can form a feasible path to the bottom
 		Add paths into side of wall
-		Add noise to platform stems
 		https://twitter.com/masaki_hirooka/status/1635306087221178368
 		https://twitter.com/iamagco/status/1614925562870468610/photo/1
 

@@ -13,6 +13,7 @@ public class StarterTerrainEditor : Editor
 
     SerializedProperty platformStemPinchRangeProperty;
     SerializedProperty platformStemRadiusProperty;
+    SerializedProperty platformStemFeatureDepthProperty;
 
     SerializedProperty depthRangeProperty;
     SerializedProperty chasmRadiusRangeProperty;
@@ -44,6 +45,7 @@ public class StarterTerrainEditor : Editor
 
         platformStemPinchRangeProperty = serializedObject.FindProperty("platformStemPinchRange");
         platformStemRadiusProperty = serializedObject.FindProperty("platformStemRadius");
+        platformStemFeatureDepthProperty = serializedObject.FindProperty("platformStemFeatureDepth");
 
         depthRangeProperty = serializedObject.FindProperty("depthRange");
         chasmRadiusRangeProperty = serializedObject.FindProperty("chasmRadiusRange");
@@ -72,9 +74,10 @@ public class StarterTerrainEditor : Editor
         EditorGUILayout.LabelField(new GUIContent("Stem"), EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
         EditorGUILayout.PropertyField(platformStemPinchRangeProperty, new GUIContent("Pinch Range"));
-        platformStemPinchRangeProperty.vector2Value = new Vector2(Mathf.Clamp01(platformStemPinchRangeProperty.vector2Value.x),
-                                                                  Mathf.Clamp01(platformStemPinchRangeProperty.vector2Value.y));
+        platformStemPinchRangeProperty.vector2Value = new Vector2(Mathf.Clamp(platformStemPinchRangeProperty.vector2Value.x, -0.5f, 1.5f),
+                                                                  Mathf.Clamp(platformStemPinchRangeProperty.vector2Value.y, -0.5f, 1.5f));
         EditorGUILayout.PropertyField(platformStemRadiusProperty, new GUIContent("Radius"));
+        EditorGUILayout.PropertyField(platformStemFeatureDepthProperty, new GUIContent("Feature Depth"));
         EditorGUI.indentLevel--;
         EditorGUI.indentLevel--;
         EditorGUILayout.Space();

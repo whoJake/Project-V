@@ -21,6 +21,7 @@ float2 _PlatformFlatnessRange;
 
 float2 _PlatformStemPinchRange;
 float2 _PlatformStemRadius;
+float _PlatformStemFeatureDepth;
 
 float _UpperSurfaceDepth;
 float _UpperSurfaceFeatureDepth;
@@ -144,6 +145,7 @@ float GetPlatformValue(float3 world_position){
         float current_platform_shape = saturate( radius_mask * side_multiplier );
 
 
+
         //Underneath pillar shape
         float radius_at_height = distance( platform_position.xz, _LayerOrigin.xz );
         float height_of_slope_below_platform = _LayerOrigin.y - GetNormalizedHeightAtRadius( radius_at_height ) * _LayerSize.y;
@@ -155,9 +157,16 @@ float GetPlatformValue(float3 world_position){
         stem_radius_t = easeinout( stem_radius_t, 3 );
 
         float stem_radius = lerp( _PlatformStemRadius.x, _PlatformStemRadius.y, stem_radius_t );
+
+        NoiseArg stem_radius_noise_args = _NoiseArgs[6];
+        float3 stem_centre = float3( platform_position.x, world_position.y, platform_position.z );
+        float3 stem_radius_noise_sample_position = stem_centre + normalize( world_position - stem_centre ) * stem_radius;
+        float stem_radius_noise = fnoise01( stem_radius_noise_sample_position * stem_radius_noise_args.scale, stem_radius_noise_args.octaves, stem_radius_noise_args.frequency, stem_radius_noise_args.persistance, stem_radius_noise_args.lacunarity ) * 2 - 1;
+        stem_radius += stem_radius_noise * _PlatformStemFeatureDepth;
+
         float dst_from_stem_centre = distance( world_position.xz, platform_position.xz );
 
-        float platform_stem_shape = saturate( -( dst_from_stem_centre - stem_radius ) / 4.0 );
+        float platform_stem_shape = saturate( -( dst_from_stem_centre - stem_radius ) / 8.0 );
         
         platform_total += max( current_platform_shape, platform_stem_shape * stem_multiplier );
     }

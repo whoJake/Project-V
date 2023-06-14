@@ -20,6 +20,8 @@ public class StarterTerrain : TerrainLayerGenerator
     private Vector2 platformStemPinchRange;
     [SerializeField]
     private Vector2 platformStemRadius;
+    [SerializeField]
+    private float platformStemFeatureDepth;
 
     [SerializeField]
     private Vector2 depthRange;
@@ -43,7 +45,7 @@ public class StarterTerrain : TerrainLayerGenerator
     private Vector2 cliffLedgeSize;
 
     [SerializeField]
-    private NoiseArgs[] noiseArgs;
+    private NamedNoiseArgs[] noiseArgs;
 
     private float depth = -1;
 
@@ -70,6 +72,7 @@ public class StarterTerrain : TerrainLayerGenerator
 
         shader.SetVector("_PlatformStemPinchRange", platformStemPinchRange);
         shader.SetVector("_PlatformStemRadius", platformStemRadius);
+        shader.SetFloat("_PlatformStemFeatureDepth", platformStemFeatureDepth);
 
         shader.SetFloat("_UpperSurfaceDepth", upperSurfaceDepth);
         shader.SetFloat("_UpperSurfaceFeatureDepth", upperSurfaceFeatureDepth);
@@ -107,7 +110,12 @@ public class StarterTerrain : TerrainLayerGenerator
 
     public void CreateNoiseArgsBuffer() {
         noiseArgsBuffer = new ComputeBuffer(noiseArgs.Length, NoiseArgs.stride);
-        noiseArgsBuffer.SetData(noiseArgs);
+        NoiseArgs[] sNoiseArgs = new NoiseArgs[noiseArgs.Length];
+        //Convert to struct
+        for(int i = 0; i < noiseArgs.Length; i++) {
+            sNoiseArgs[i] = (NoiseArgs) noiseArgs[i];
+        }
+        noiseArgsBuffer.SetData(sNoiseArgs);
     }
 
     public override void Generate(ref RenderTexture target, TerrainChunk chunk, int seed) {

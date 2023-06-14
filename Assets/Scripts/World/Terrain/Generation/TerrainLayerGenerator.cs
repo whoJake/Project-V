@@ -10,6 +10,25 @@ public abstract class TerrainLayerGenerator : ScriptableObject {
 }
 
 [System.Serializable]
+public class NamedNoiseArgs {
+    public string tag;
+    public Vector3 scale;
+    [Min(0)] public int octaves;
+    public float frequency;
+    public float persistance;
+    public float lacunarity;
+
+    public static explicit operator NoiseArgs(NamedNoiseArgs n) {
+        return new NoiseArgs {
+            scale = n.scale,
+            octaves = n.octaves,
+            frequency = n.frequency,
+            persistance = n.persistance,
+            lacunarity = n.lacunarity
+        };
+    }
+}
+
 public struct NoiseArgs {
     public Vector3 scale;
     public int octaves;

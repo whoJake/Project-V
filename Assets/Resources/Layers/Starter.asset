@@ -17,7 +17,8 @@ MonoBehaviour:
   platformFlatnessRange: {x: 0.2, y: 0.6}
   platformTopDisplacement: 3
   platformStemPinchRange: {x: 0.3, y: 0.7}
-  platformStemRadius: {x: 5, y: 15}
+  platformStemRadius: {x: 10, y: 20}
+  platformStemFeatureDepth: 4
   depthRange: {x: 400, y: 600}
   chasmRadiusRange: {x: 150, y: 150}
   upperSurfaceDepth: 32
@@ -28,33 +29,45 @@ MonoBehaviour:
   cliffFeatureDepth: 16
   cliffLedgeSize: {x: 32, y: 8}
   noiseArgs:
-  - scale: {x: 0, y: 0, z: 0}
+  - tag: Platform Radial
+    scale: {x: 0, y: 0, z: 0}
     octaves: 6
-    frequency: 0.021
-    persistance: 0.35
-    lacunarity: 1.5
-  - scale: {x: 0, y: 0, z: 0}
-    octaves: 4
-    frequency: 0.02
+    frequency: 0.017
     persistance: 0.5
     lacunarity: 1.5
-  - scale: {x: 0, y: 0, z: 0}
+  - tag: Platform 3D (UNUSED)
+    scale: {x: 0, y: 0, z: 0}
+    octaves: 6
+    frequency: 0.002
+    persistance: 0.6
+    lacunarity: 1.6
+  - tag: Chasm Radial
+    scale: {x: 1, y: 0.5, z: 1}
     octaves: 5
     frequency: 0.015
     persistance: 0.5
     lacunarity: 1.6
-  - scale: {x: 0, y: 0, z: 0}
+  - tag: Platform Surface
+    scale: {x: 0, y: 0, z: 0}
     octaves: 5
     frequency: 0.02
     persistance: 0.5
     lacunarity: 1.7
-  - scale: {x: 1, y: 0.4, z: 1}
+  - tag: Slope Surface
+    scale: {x: 0.6, y: 0.3, z: 0.6}
     octaves: 5
     frequency: 0.02
     persistance: 0.5
     lacunarity: 1.7
-  - scale: {x: 0.7, y: 0.5, z: 0.7}
+  - tag: Top Surface
+    scale: {x: 0.7, y: 0.5, z: 0.7}
     octaves: 7
     frequency: 0.01
     persistance: 0.6
     lacunarity: 1.6
+  - tag: Stem Radius
+    scale: {x: 1.2, y: 0.7, z: 1.2}
+    octaves: 6
+    frequency: 0.01
+    persistance: 0.6
+    lacunarity: 1.5
