@@ -4,7 +4,7 @@ using UnityEditor;
 [CustomEditor(typeof(StarterTerrain))]
 public class StarterTerrainEditor : Editor 
 {
-    private bool useCustomInspector = true;
+    private bool useCustomInspector = false;
 
     SerializedProperty numOfPlatformsProperty;
     SerializedProperty platformRadiusRangeProperty;

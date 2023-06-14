@@ -151,7 +151,7 @@ float GetPlatformValue(float3 world_position){
         float height_of_slope_below_platform = _LayerOrigin.y - GetNormalizedHeightAtRadius( radius_at_height ) * _LayerSize.y;
 
         float normalized_platform_to_slope_height = invlerp( world_position.y, platform_position.y, height_of_slope_below_platform );
-        bool stem_multiplier = radius_at_height > _ChasmRadius && normalized_platform_to_slope_height > 0 && world_position.y < platform_position.y;
+        bool stem_multiplier = radius_at_height > _ChasmRadius && radius_at_height > _LowerRadius && normalized_platform_to_slope_height > 0 && world_position.y < platform_position.y;
         
         float stem_radius_t = abs( saturate( remap( saturate( normalized_platform_to_slope_height ), _PlatformStemPinchRange.x, _PlatformStemPinchRange.y, 0, 1 ) ) - 0.5 ) * 2;
         stem_radius_t = easeinout( stem_radius_t, 3 );
@@ -192,5 +192,5 @@ void Generate (uint3 id : SV_DispatchThreadID)
     float platform = GetPlatformValue( world_position );
     float chasm = GetChasmMask( world_position );
 
-    _Target[id] = max( base_surface * top_surface_mask, platform * chasm );
+    _Target[id] = max( base_surface * top_surface_mask, platform );
 }
