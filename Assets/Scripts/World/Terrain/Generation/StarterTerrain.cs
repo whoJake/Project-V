@@ -32,6 +32,13 @@ public class StarterTerrain : TerrainLayerGenerator
     private float bonusPlatformMinDistance;
 
     [SerializeField]
+    private Vector2Int platformPathConnectingCountRange;
+    [SerializeField]
+    private Vector2 platformPathConnectorsRadiusRange;
+    [SerializeField]
+    private Vector2 platformPathConnectorsFlatnessRange;
+
+    [SerializeField]
     private Vector2 platformStemPinchRange;
     [SerializeField]
     private Vector2 platformStemRadius;
@@ -110,10 +117,10 @@ public class StarterTerrain : TerrainLayerGenerator
                           Mathf.Pow(height, cliffSlopeEasePower));
     }
 
-    public Platform CreatePlatform(Vector3 position, float radiusScale, float shapeFeatureScale, bool hasStem) {
+    public Platform CreatePlatform(Vector3 position, float radius, float shapeFeatureScale, bool hasStem) {
         Platform result = new Platform {
             position = position,
-            radius = Random.Range(platformRadiusRange.x, platformRadiusRange.y) * radiusScale,
+            radius = radius,
             flatness = Random.Range(platformFlatnessRange.x, platformFlatnessRange.y),
             shapeFeatureStrength = platformShapeFeatureStrength * shapeFeatureScale,
             surfaceFeatureDepth = platformTopDisplacement,
@@ -127,35 +134,113 @@ public class StarterTerrain : TerrainLayerGenerator
         return result;
     }
 
-    public void CreatePlatformBuffer(TerrainLayer layer) {
+    private bool IsBelowExistingPlatform(Platform checkPlatform, List<Platform> existingPlatforms) {
+        foreach(Platform platform in existingPlatforms) {
+            Vector2 checkHorizontal = new Vector2(checkPlatform.position.x, checkPlatform.position.z);
+            Vector2 existingHorizontal = new Vector2(platform.position.x, platform.position.z);
+
+            bool inHorizontalRange = Vector2.Distance(checkHorizontal, existingHorizontal) < (checkPlatform.radius * 0.8f);
+            bool lessThanHeight = checkPlatform.position.y < platform.position.y;
+
+            if (inHorizontalRange && lessThanHeight && platform.hasStem == 1) 
+                return true;
+        }
+        return false;
+    }
+
+    private void AddPathPlatforms(ref List<Platform> platforms, Vector3 lSize, Vector3 lOrigin) {
+        float minDepth = upperSurfaceDepth / lSize.y;
+        float maxDepth = 1.0f - (platformRadiusRange.y / lSize.y);
+
+        float curDepth = minDepth;
+        float curAngle = 0f;
+        float direction = Random.Range(0, 2) * 2 - 1;
+        int connectingPlatformCount = 0;
+        float prevPlacementRadius = 0;
+        bool firstPlatform = true;
+
+        while (curDepth <= maxDepth) {
+            bool isConnector = connectingPlatformCount != 0;
+
+            float pRadius = isConnector ? Random.Range(platformPathConnectorsRadiusRange.x, platformPathConnectorsRadiusRange.y) :
+                                          Random.Range(platformRadiusRange.x, platformRadiusRange.y);
+            float radiusAtDepth = GetRadiusAtNormalizedHeight(curDepth);
+            curAngle += (pRadius / radiusAtDepth) * direction;
+
+            Vector2 vecToCurAngle = new Vector2(Mathf.Sin(curAngle), Mathf.Cos(curAngle));
+
+            bool switchDirection = Random.Range(0f, 1f) < platformPathSwitchDirectionChance && !isConnector;
+            direction = switchDirection ? -direction : direction;
+
+            float placementRadius = radiusAtDepth - pRadius;
+
+            float dstFromWall;
+            float dstFromWall_t = Random.Range(0f, 1f);
+            if(firstPlatform) {
+                //First platform always connects to wall
+                dstFromWall = 0;
+            }else if (isConnector) {
+                dstFromWall = 0;
+                placementRadius = prevPlacementRadius + Random.Range(-pRadius / 2f, +pRadius / 2f);
+            } else {
+                //Makes sure that when switching direction, the platform is always more outdented than not, helps with stopping overlapping a little bit
+                if (switchDirection) 
+                    dstFromWall_t = Mathf.Max(dstFromWall_t, 1 - dstFromWall_t);
+                dstFromWall = Mathf.Lerp(platformPathDistanceFromWallRange.x, platformPathDistanceFromWallRange.y, dstFromWall_t);
+            }
+
+            placementRadius -= dstFromWall;
+
+            Vector3 pPosition = new Vector3(vecToCurAngle.x * placementRadius, lOrigin.y - curDepth * lSize.y, vecToCurAngle.y * placementRadius);
+            Platform result = CreatePlatform(pPosition, pRadius, 1, !isConnector);
+            if (!isConnector) {
+                bool underPlatform = IsBelowExistingPlatform(result, platforms);
+                if (underPlatform)
+                    result.hasStem = 0;
+            }
+
+            platforms.Add(result);
+
+            if (isConnector)
+                connectingPlatformCount--;
+            else
+                connectingPlatformCount = Random.Range(platformPathConnectingCountRange.x, platformPathConnectingCountRange.y + 1);
+
+            curDepth += Random.Range(platformPathVerticalDifferenceRange.x, platformPathVerticalDifferenceRange.y) / lSize.y;
+            curAngle += (pRadius + Random.Range(platformPathHorizontalDifferenceRange.x, platformPathHorizontalDifferenceRange.y)) / radiusAtDepth * direction;
+            prevPlacementRadius = placementRadius;
+            firstPlatform = false;
+        }
+    }
+
+    private void DisplayPlatformPositions(List<Platform> platforms) {
+        float colorStep = 1f / platforms.Count;
+        for(int i = 0; i < platforms.Count; i++) {
+            Vector3 pos = platforms[i].position;
+            float radius = platforms[i].radius;
+
+            GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            go.transform.position = pos;
+            go.transform.localScale = new Vector3(radius * 2, 1, radius * 2);
+            float greyScale = colorStep * i;
+            go.GetComponent<MeshRenderer>().material.color = new Color(greyScale, greyScale, greyScale);
+        }
+    }
+
+    private void AddBonusPlatforms(ref List<Platform> platforms, Vector3 lSize, Vector3 lOrigin) {
+
+    }
+
+    private void CreatePlatformBuffer(TerrainLayer layer) {
         List<Platform> platforms = new List<Platform>();
         Vector3 layerSize = layer.GetBounds().size;
+        Vector3 layerOrigin = layer.origin;
+
+        AddPathPlatforms(ref platforms, layerSize, layerOrigin);
+        //AddBonusPlatforms(ref platforms, layerSize, layerOrigin);
 
         float minDepth = (upperSurfaceDepth + upperSurfaceFeatureDepth) / layerSize.y;
         float maxDepth = 1f - ((Random.Range(platformPathVerticalDifferenceRange.x, platformPathVerticalDifferenceRange.y) + platformRadiusRange.y) / layerSize.y);
-
-        float currentDepth = minDepth;
-        float currentAngle = 0f;
-        bool switchedLast = false;
-
-        while (currentDepth <= maxDepth) { 
-            float radius = GetRadiusAtNormalizedHeight(currentDepth);
-            Vector2 radialDir = new Vector2(Mathf.Sin(currentAngle), Mathf.Cos(currentAngle));
-
-            float inset_t = Random.Range(switchedLast ? 0.5f : 0f, 1f);
-            radius -= Mathf.Lerp(platformPathDistanceFromWallRange.x, platformPathDistanceFromWallRange.y, inset_t);
-
-            Vector3 pos = new Vector3(radialDir.x * radius, layer.origin.y - currentDepth * layerSize.y, radialDir.y * radius);
-
-            Platform result = CreatePlatform(pos, 1, 1, true);
-            platforms.Add(result);
-
-            bool switchDir = Random.Range(0f, 1f) < platformPathSwitchDirectionChance;
-            currentDepth += Random.Range(platformPathVerticalDifferenceRange.x, platformPathVerticalDifferenceRange.y) / layerSize.y;
-            float hDst = Random.Range(platformPathHorizontalDifferenceRange.x, platformPathHorizontalDifferenceRange.y);
-            currentAngle += (hDst / radius) * (switchDir ? -1 : 1);
-            switchedLast = switchDir;
-        }
 
         //Bonus platforms
         int numOfBonusPlatforms = 0;
@@ -196,8 +281,8 @@ public class StarterTerrain : TerrainLayerGenerator
             numOfBonusPlatforms++;
         }
 
-        Debug.Log(numOfBonusPlatforms + " bonus platforms spawned");
-
+        Debug.Log(platforms.Count + " platforms spawned\n" + numOfBonusPlatforms + " of them are bonus platforms");
+        //DisplayPlatformPositions(platforms);
         platformBuffer = new ComputeBuffer(platforms.Count, Platform.stride);
         platformBuffer.SetData(platforms.ToArray());
     }

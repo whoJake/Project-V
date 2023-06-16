@@ -14,8 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   numOfPlatforms: 40
   platformRadiusRange: {x: 25, y: 50}
+  platformShapeFeatureStrength: 0.15
   platformFlatnessRange: {x: 0.2, y: 0.6}
   platformTopDisplacement: 3
+  platformPathHorizontalDifferenceRange: {x: 0, y: 0}
+  platformPathVerticalDifferenceRange: {x: 0, y: 0}
+  platformPathDistanceFromWallRange: {x: 0, y: 0}
+  platformPathSwitchDirectionChance: 0
+  bonusPlatformMinDistance: 0
+  platformPathConnectingCountRange: {x: 0, y: 0}
+  platformPathConnectorsRadiusRange: {x: 0, y: 0}
+  platformPathConnectorsFlatnessRange: {x: 0, y: 0}
   platformStemPinchRange: {x: 0.3, y: 0.7}
   platformStemRadius: {x: 10, y: 20}
   platformStemFeatureDepth: 4

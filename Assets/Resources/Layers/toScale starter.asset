@@ -12,19 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 917e3c5e44760d44eac3eaf6a04879a8, type: 3}
   m_Name: toScale starter
   m_EditorClassIdentifier: 
-  numOfPlatforms: 12
-  platformRadiusRange: {x: 60, y: 150}
-  platformShapeFeatureRadius: 0.15
+  numOfPlatforms: 0
+  platformRadiusRange: {x: 110, y: 175}
+  platformShapeFeatureStrength: 0.2
   platformFlatnessRange: {x: 0.5, y: 0.6}
   platformTopDisplacement: 2.5
-  platformPathHorizontalDifferenceRange: {x: 250, y: 350}
-  platformPathVerticalDifferenceRange: {x: 10, y: 40}
-  platformPathDistanceFromWallRange: {x: 60, y: 175}
-  platformPathSwitchDirectionChance: 0.05
+  platformPathHorizontalDifferenceRange: {x: 4, y: 15}
+  platformPathVerticalDifferenceRange: {x: 10, y: 20}
+  platformPathDistanceFromWallRange: {x: -10, y: 15}
+  platformPathSwitchDirectionChance: 0.005
   bonusPlatformMinDistance: 90
+  platformPathConnectingCountRange: {x: 1, y: 3}
+  platformPathConnectorsRadiusRange: {x: 65, y: 75}
+  platformPathConnectorsFlatnessRange: {x: 0.1, y: 0.3}
   platformStemPinchRange: {x: 0.05, y: 1.1}
-  platformStemRadius: {x: 30, y: 60}
-  platformStemFeatureDepth: 30
+  platformStemRadius: {x: 40, y: 60}
+  platformStemFeatureDepth: 20
   depthRange: {x: 400, y: 500}
   chasmRadiusRange: {x: 0, y: 0}
   upperSurfaceDepth: 32

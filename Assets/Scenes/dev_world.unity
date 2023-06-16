@@ -502,7 +502,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1348413850}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 4}
+  m_LocalPosition: {x: 0, y: 0, z: 3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -771,7 +771,7 @@ MonoBehaviour:
   invertY: 0
   mouseSensitivity: {x: 1, y: 1}
   rotationPoint: {fileID: 339226494}
-  length: 3
+  length: 4
   willControlTransform: 1
   controlTransform: {fileID: 1638216716}
   controlTransformType: 1

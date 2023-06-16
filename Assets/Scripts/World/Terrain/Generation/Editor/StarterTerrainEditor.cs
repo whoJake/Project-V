@@ -22,6 +22,11 @@ public class StarterTerrainEditor : Editor
     SerializedProperty platformPathSwitchDirectionChanceProperty;
     SerializedProperty bonusPlatformMinDistanceProperty;
 
+
+    SerializedProperty platformPathConnectingCountRangeProperty;
+    SerializedProperty platformPathConnectorsRadiusRangeProperty;
+    SerializedProperty platformPathConnectorsFlatnessRangeProperty;
+
     SerializedProperty depthRangeProperty;
     SerializedProperty chasmRadiusRangeProperty;
 
@@ -60,6 +65,10 @@ public class StarterTerrainEditor : Editor
         platformPathDistanceFromWallRangeProperty = serializedObject.FindProperty("platformPathDistanceFromWallRange");
         platformPathSwitchDirectionChanceProperty = serializedObject.FindProperty("platformPathSwitchDirectionChance");
         bonusPlatformMinDistanceProperty = serializedObject.FindProperty("bonusPlatformMinDistance");
+
+        platformPathConnectingCountRangeProperty = serializedObject.FindProperty("platformPathConnectingCountRange");
+        platformPathConnectorsRadiusRangeProperty = serializedObject.FindProperty("platformPathConnectorsRadiusRange");
+        platformPathConnectorsFlatnessRangeProperty = serializedObject.FindProperty("platformPathConnectorsFlatnessRange");
 
         depthRangeProperty = serializedObject.FindProperty("depthRange");
         chasmRadiusRangeProperty = serializedObject.FindProperty("chasmRadiusRange");
@@ -101,6 +110,12 @@ public class StarterTerrainEditor : Editor
         EditorGUILayout.PropertyField(platformPathVerticalDifferenceRangeProperty, new GUIContent("Veritcal Distance Range"));
         EditorGUILayout.PropertyField(platformPathDistanceFromWallRangeProperty, new GUIContent("Distance From Wall Range"));
         EditorGUILayout.PropertyField(platformPathSwitchDirectionChanceProperty, new GUIContent("Switch Direction Chance"));
+        EditorGUILayout.LabelField(new GUIContent("Connectors"), EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        EditorGUILayout.PropertyField(platformPathConnectingCountRangeProperty, new GUIContent("Count Range"));
+        EditorGUILayout.PropertyField(platformPathConnectorsRadiusRangeProperty, new GUIContent("Radius Range"));
+        EditorGUILayout.PropertyField(platformPathConnectorsFlatnessRangeProperty, new GUIContent("Flatness Range"));
+        EditorGUI.indentLevel--;
         EditorGUI.indentLevel--;
         EditorGUI.indentLevel--;
         EditorGUILayout.Space();

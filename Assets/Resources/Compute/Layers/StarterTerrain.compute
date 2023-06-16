@@ -144,7 +144,7 @@ float GetPlatformValue(float3 world_position){
         float platform_shape_noise = fnoise01( world_position, platform_args.octaves, platform_args.frequency, platform_args.persistance, platform_args.lacunarity ) * 2 - 1;
         
         float dst_from_platform = distance( world_position, platform_position );
-        float radius_mask = saturate( -( dst_from_platform - platform_radius ) / ( 32.0 ) );
+        float radius_mask = saturate( -( dst_from_platform - platform_radius ) / ( 12.0 ) );
 
         //. 3D shape noise NOT currently implemented
         float current_platform_shape = saturate( radius_mask * side_multiplier );
