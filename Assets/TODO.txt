@@ -85,10 +85,6 @@ World
 		Let platforms have more complex shapes other than noised circles
 		Improve generation of platforms on C# so that they can form a feasible path to the bottom
 		Add paths into side of wall
-		Move some more data into the platform struct such as: which should help improve flexibility of platform generation
-			hasStem
-			radius
-			stemRadius
 		https://twitter.com/masaki_hirooka/status/1635306087221178368
 		https://twitter.com/iamagco/status/1614925562870468610/photo/1
 		How will this layer be structed. Keep openness whilst still having clear silluettes

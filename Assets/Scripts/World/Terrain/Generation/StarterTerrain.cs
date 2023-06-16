@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 [CreateAssetMenu(menuName = "Terrain/Starter")]
 public class StarterTerrain : TerrainLayerGenerator
@@ -13,7 +14,7 @@ public class StarterTerrain : TerrainLayerGenerator
     private Vector2 platformRadiusRange;
     [SerializeField]
     [Range(0f, 1f)]
-    private float platformShapeFeatureRadius;
+    private float platformShapeFeatureStrength;
     [SerializeField]
     private Vector2 platformFlatnessRange;
     [SerializeField]
@@ -80,14 +81,6 @@ public class StarterTerrain : TerrainLayerGenerator
         CreateNoiseArgsBuffer();
         shader.SetBuffer(0, "_PlatformBuffer", platformBuffer);
         shader.SetBuffer(0, "_NoiseArgs", noiseArgsBuffer);
-        shader.SetVector("_PlatformRadiusRange", platformRadiusRange);
-        shader.SetFloat("_PlatformShapeFeatureRadius", platformShapeFeatureRadius);
-        shader.SetFloat("_PlatformTopDisplacement", platformTopDisplacement);
-        shader.SetVector("_PlatformFlatnessRange", platformFlatnessRange);
-
-        shader.SetVector("_PlatformStemPinchRange", platformStemPinchRange);
-        shader.SetVector("_PlatformStemRadius", platformStemRadius);
-        shader.SetFloat("_PlatformStemFeatureDepth", platformStemFeatureDepth);
 
         shader.SetFloat("_UpperSurfaceDepth", upperSurfaceDepth);
         shader.SetFloat("_UpperSurfaceFeatureDepth", upperSurfaceFeatureDepth);
@@ -99,7 +92,6 @@ public class StarterTerrain : TerrainLayerGenerator
         shader.SetFloat("_CliffFeatureDepth", cliffFeatureDepth);
 
         shader.SetVector("_LayerOrigin", layer.origin);
-
         shader.SetVector("_LayerSize", layer.GetBounds().size);
 
         shader.SetFloat("_ChasmRadius", Random.Range(chasmRadiusRange.x, chasmRadiusRange.y));
@@ -118,8 +110,25 @@ public class StarterTerrain : TerrainLayerGenerator
                           Mathf.Pow(height, cliffSlopeEasePower));
     }
 
+    public Platform CreatePlatform(Vector3 position, float radiusScale, float shapeFeatureScale, bool hasStem) {
+        Platform result = new Platform {
+            position = position,
+            radius = Random.Range(platformRadiusRange.x, platformRadiusRange.y) * radiusScale,
+            flatness = Random.Range(platformFlatnessRange.x, platformFlatnessRange.y),
+            shapeFeatureStrength = platformShapeFeatureStrength * shapeFeatureScale,
+            surfaceFeatureDepth = platformTopDisplacement,
+            hasStem = hasStem ? 1 : 0,
+
+            stemRadius = platformStemRadius,
+            stemPinchRange = platformStemPinchRange,
+            stemFeatureStrength = platformStemFeatureDepth
+        };
+        
+        return result;
+    }
+
     public void CreatePlatformBuffer(TerrainLayer layer) {
-        List<Vector3> platformPositions = new List<Vector3>();
+        List<Platform> platforms = new List<Platform>();
         Vector3 layerSize = layer.GetBounds().size;
 
         float minDepth = (upperSurfaceDepth + upperSurfaceFeatureDepth) / layerSize.y;
@@ -137,7 +146,9 @@ public class StarterTerrain : TerrainLayerGenerator
             radius -= Mathf.Lerp(platformPathDistanceFromWallRange.x, platformPathDistanceFromWallRange.y, inset_t);
 
             Vector3 pos = new Vector3(radialDir.x * radius, layer.origin.y - currentDepth * layerSize.y, radialDir.y * radius);
-            platformPositions.Add(pos);
+
+            Platform result = CreatePlatform(pos, 1, 1, true);
+            platforms.Add(result);
 
             bool switchDir = Random.Range(0f, 1f) < platformPathSwitchDirectionChance;
             currentDepth += Random.Range(platformPathVerticalDifferenceRange.x, platformPathVerticalDifferenceRange.y) / layerSize.y;
@@ -161,10 +172,12 @@ public class StarterTerrain : TerrainLayerGenerator
             Vector3 possiblePosition = new Vector3(radialDir.x * radius, layer.origin.y - depth * layerSize.y, radialDir.y * radius);
 
             bool valid = true;
-            foreach(Vector3 platform in platformPositions) {
-                float horizontalDistance = Vector2.Distance(new Vector2(platform.x, platform.z), new Vector2(possiblePosition.x, possiblePosition.z));
-                float verticalDistance = Mathf.Abs(platform.y - possiblePosition.y);
-                float pureDistance = Vector3.Distance(platform, possiblePosition);
+            foreach(Platform platform in platforms) {
+                Vector3 platformPosition = platform.position;
+
+                float horizontalDistance = Vector2.Distance(new Vector2(platformPosition.x, platformPosition.z), new Vector2(possiblePosition.x, possiblePosition.z));
+                float verticalDistance = Mathf.Abs(platformPosition.y - possiblePosition.y);
+                float pureDistance = Vector3.Distance(platformPosition, possiblePosition);
                 float centerDistance = Vector2.Distance(new Vector2(possiblePosition.x, possiblePosition.z), new Vector2(layer.origin.x, layer.origin.z));
 
                 if(pureDistance < bonusPlatformMinDistance 
@@ -178,14 +191,15 @@ public class StarterTerrain : TerrainLayerGenerator
 
             if (!valid) continue;
 
-            platformPositions.Add(possiblePosition);
+            Platform result = CreatePlatform(possiblePosition, 1, 1, true);
+            platforms.Add(result);
             numOfBonusPlatforms++;
         }
 
         Debug.Log(numOfBonusPlatforms + " bonus platforms spawned");
 
-        platformBuffer = new ComputeBuffer(platformPositions.Count, 12);
-        platformBuffer.SetData(platformPositions.ToArray());
+        platformBuffer = new ComputeBuffer(platforms.Count, Platform.stride);
+        platformBuffer.SetData(platforms.ToArray());
     }
 
     public void CreateNoiseArgsBuffer() {
@@ -218,5 +232,19 @@ public class StarterTerrain : TerrainLayerGenerator
 
         return depth;
     }
+}
+
+public struct Platform {
+    public static int stride = sizeof(float) * 13;
+    public Vector3 position;
+    public float radius;
+    public float flatness;
+
+    public float surfaceFeatureDepth;
+    public float shapeFeatureStrength;
+    public float hasStem;
+    public Vector2 stemRadius;
+    public Vector2 stemPinchRange;
+    public float stemFeatureStrength;
 }
 

@@ -8,7 +8,7 @@ public class StarterTerrainEditor : Editor
 
     SerializedProperty numOfPlatformsProperty;
     SerializedProperty platformRadiusRangeProperty;
-    SerializedProperty platformShapeFeatureRadiusProperty;
+    SerializedProperty platformShapeFeatureStrengthProperty;
     SerializedProperty platformFlatnessRangeProperty;
     SerializedProperty platformTopDisplacementProperty;
 
@@ -47,7 +47,7 @@ public class StarterTerrainEditor : Editor
     private void OnEnable() {
         numOfPlatformsProperty = serializedObject.FindProperty("numOfPlatforms");
         platformRadiusRangeProperty = serializedObject.FindProperty("platformRadiusRange");
-        platformShapeFeatureRadiusProperty = serializedObject.FindProperty("platformShapeFeatureRadius");
+        platformShapeFeatureStrengthProperty = serializedObject.FindProperty("platformShapeFeatureStrength");
         platformFlatnessRangeProperty = serializedObject.FindProperty("platformFlatnessRange");
         platformTopDisplacementProperty = serializedObject.FindProperty("platformTopDisplacement");
 
@@ -83,7 +83,7 @@ public class StarterTerrainEditor : Editor
         EditorGUI.indentLevel++;
         EditorGUILayout.PropertyField(numOfPlatformsProperty, new GUIContent("Count"));
         EditorGUILayout.PropertyField(platformRadiusRangeProperty, new GUIContent("Radius Range"));
-        EditorGUILayout.PropertyField(platformShapeFeatureRadiusProperty, new GUIContent("Feature Radius"));
+        EditorGUILayout.PropertyField(platformShapeFeatureStrengthProperty, new GUIContent("Feature Strength"));
         EditorGUILayout.PropertyField(platformFlatnessRangeProperty, new GUIContent("Flatness Range"));
         EditorGUILayout.PropertyField(platformTopDisplacementProperty, new GUIContent("Surface Max Displacement"));
         EditorGUILayout.LabelField(new GUIContent("Stem"), EditorStyles.boldLabel);
