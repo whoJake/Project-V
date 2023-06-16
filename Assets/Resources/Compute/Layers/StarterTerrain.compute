@@ -16,6 +16,7 @@ RWTexture3D<float> _Target;
 
 StructuredBuffer<float3> _PlatformBuffer;
 float2 _PlatformRadiusRange;
+float _PlatformShapeFeatureRadius;
 float _PlatformTopDisplacement;
 float2 _PlatformFlatnessRange;
 
@@ -121,9 +122,9 @@ float GetPlatformValue(float3 world_position){
 
         float3 radial_position = platform_position + radial_dir * platform_radius;
         NoiseArg radial_args = _NoiseArgs[0];
-        float radial_noise = fnoise01( radial_position, radial_args.octaves, radial_args.frequency, radial_args.persistance, radial_args.lacunarity ) * 2 - 1;
+        float radial_noise = fnoise01( radial_position * radial_args.scale, radial_args.octaves, radial_args.frequency, radial_args.persistance, radial_args.lacunarity ) * 2 - 1;
 
-        platform_radius += radial_noise * platform_radius * 0.15;
+        platform_radius += radial_noise * platform_radius * _PlatformShapeFeatureRadius;
         
         NoiseArg above_platform_args = _NoiseArgs[3];
         float3 world_position_at_platform = float3( world_position.x, platform_position.y, world_position.z );
@@ -139,7 +140,7 @@ float GetPlatformValue(float3 world_position){
         platform_shape_noise = ( platform_shape_noise * 2 - 1 );
         
         float dst_from_platform = distance( world_position, platform_position );
-        float radius_mask = saturate( -( dst_from_platform - platform_radius ) / ( 16.0 ) );
+        float radius_mask = saturate( -( dst_from_platform - platform_radius ) / ( 32.0 ) );
 
         //. 3D shape noise NOT currently implemented
         float current_platform_shape = saturate( radius_mask * side_multiplier );
@@ -166,7 +167,7 @@ float GetPlatformValue(float3 world_position){
 
         float dst_from_stem_centre = distance( world_position.xz, platform_position.xz );
 
-        float platform_stem_shape = saturate( -( dst_from_stem_centre - stem_radius ) / 8.0 );
+        float platform_stem_shape = saturate( -( dst_from_stem_centre - stem_radius ) / 32.0 );
         
         platform_total += max( current_platform_shape, platform_stem_shape * stem_multiplier );
     }

@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   numOfPlatforms: 12
   platformRadiusRange: {x: 60, y: 150}
-  platformFlatnessRange: {x: 0.4, y: 0.7}
+  platformShapeFeatureRadius: 0.15
+  platformFlatnessRange: {x: 0.5, y: 0.6}
   platformTopDisplacement: 2.5
   platformPathHorizontalDifferenceRange: {x: 250, y: 350}
   platformPathVerticalDifferenceRange: {x: 10, y: 40}
@@ -30,14 +31,14 @@ MonoBehaviour:
   upperSurfaceFeatureDepth: 16
   upperRadius: 750
   lowerRadius: 350
-  cliffSlopeEasePower: 4
+  cliffSlopeEasePower: 5
   cliffFeatureDepth: 64
   cliffLedgeSize: {x: 64, y: 16}
   noiseArgs:
   - tag: Platform Radial
-    scale: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
     octaves: 6
-    frequency: 0.017
+    frequency: 0.012
     persistance: 0.5
     lacunarity: 1.5
   - tag: Platform 3D (UNUSED)

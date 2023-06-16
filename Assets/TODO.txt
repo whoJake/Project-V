@@ -70,7 +70,9 @@ World
 		Look into better method for fog, exponential squared fog looks terrible because of the diagonal viewing issue, low hanging fog like in that bethesda game trailer
 			https://twitter.com/ephtracy/status/1619493640237367298
 			https://twitter.com/BenjiSales/status/1668003498510766082/photo/1
+			https://twitter.com/ying0yi/status/1543533432348692480/photo/4
 		Implement dynamic loading for the chunks themselves
+		Top layer is open and easy to see across, lower levels produce more fog. Fog gets stronger the further away from the centre you go
 
 	TerrainHandler.cs
 		Add in-unity variables for chunk loading ranges
@@ -87,9 +89,9 @@ World
 			hasStem
 			radius
 			stemRadius
-		Update StarterTerrainEditor.cs
 		https://twitter.com/masaki_hirooka/status/1635306087221178368
 		https://twitter.com/iamagco/status/1614925562870468610/photo/1
+		How will this layer be structed. Keep openness whilst still having clear silluettes
 
 	MeshMaths.cs
 		Add method that can join meshInfos

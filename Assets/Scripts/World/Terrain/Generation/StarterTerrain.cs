@@ -12,6 +12,9 @@ public class StarterTerrain : TerrainLayerGenerator
     [SerializeField]
     private Vector2 platformRadiusRange;
     [SerializeField]
+    [Range(0f, 1f)]
+    private float platformShapeFeatureRadius;
+    [SerializeField]
     private Vector2 platformFlatnessRange;
     [SerializeField]
     private float platformTopDisplacement;
@@ -78,6 +81,7 @@ public class StarterTerrain : TerrainLayerGenerator
         shader.SetBuffer(0, "_PlatformBuffer", platformBuffer);
         shader.SetBuffer(0, "_NoiseArgs", noiseArgsBuffer);
         shader.SetVector("_PlatformRadiusRange", platformRadiusRange);
+        shader.SetFloat("_PlatformShapeFeatureRadius", platformShapeFeatureRadius);
         shader.SetFloat("_PlatformTopDisplacement", platformTopDisplacement);
         shader.SetVector("_PlatformFlatnessRange", platformFlatnessRange);
 

@@ -4,16 +4,23 @@ using UnityEditor;
 [CustomEditor(typeof(StarterTerrain))]
 public class StarterTerrainEditor : Editor 
 {
-    private bool useCustomInspector = false;
+    private bool useCustomInspector = true;
 
     SerializedProperty numOfPlatformsProperty;
     SerializedProperty platformRadiusRangeProperty;
+    SerializedProperty platformShapeFeatureRadiusProperty;
     SerializedProperty platformFlatnessRangeProperty;
     SerializedProperty platformTopDisplacementProperty;
 
     SerializedProperty platformStemPinchRangeProperty;
     SerializedProperty platformStemRadiusProperty;
     SerializedProperty platformStemFeatureDepthProperty;
+
+    SerializedProperty platformPathHorizontalDifferenceRangeProperty;
+    SerializedProperty platformPathVerticalDifferenceRangeProperty;
+    SerializedProperty platformPathDistanceFromWallRangeProperty;
+    SerializedProperty platformPathSwitchDirectionChanceProperty;
+    SerializedProperty bonusPlatformMinDistanceProperty;
 
     SerializedProperty depthRangeProperty;
     SerializedProperty chasmRadiusRangeProperty;
@@ -40,12 +47,19 @@ public class StarterTerrainEditor : Editor
     private void OnEnable() {
         numOfPlatformsProperty = serializedObject.FindProperty("numOfPlatforms");
         platformRadiusRangeProperty = serializedObject.FindProperty("platformRadiusRange");
+        platformShapeFeatureRadiusProperty = serializedObject.FindProperty("platformShapeFeatureRadius");
         platformFlatnessRangeProperty = serializedObject.FindProperty("platformFlatnessRange");
         platformTopDisplacementProperty = serializedObject.FindProperty("platformTopDisplacement");
 
         platformStemPinchRangeProperty = serializedObject.FindProperty("platformStemPinchRange");
         platformStemRadiusProperty = serializedObject.FindProperty("platformStemRadius");
         platformStemFeatureDepthProperty = serializedObject.FindProperty("platformStemFeatureDepth");
+
+        platformPathHorizontalDifferenceRangeProperty = serializedObject.FindProperty("platformPathHorizontalDifferenceRange");
+        platformPathVerticalDifferenceRangeProperty = serializedObject.FindProperty("platformPathVerticalDifferenceRange");
+        platformPathDistanceFromWallRangeProperty = serializedObject.FindProperty("platformPathDistanceFromWallRange");
+        platformPathSwitchDirectionChanceProperty = serializedObject.FindProperty("platformPathSwitchDirectionChance");
+        bonusPlatformMinDistanceProperty = serializedObject.FindProperty("bonusPlatformMinDistance");
 
         depthRangeProperty = serializedObject.FindProperty("depthRange");
         chasmRadiusRangeProperty = serializedObject.FindProperty("chasmRadiusRange");
@@ -69,6 +83,7 @@ public class StarterTerrainEditor : Editor
         EditorGUI.indentLevel++;
         EditorGUILayout.PropertyField(numOfPlatformsProperty, new GUIContent("Count"));
         EditorGUILayout.PropertyField(platformRadiusRangeProperty, new GUIContent("Radius Range"));
+        EditorGUILayout.PropertyField(platformShapeFeatureRadiusProperty, new GUIContent("Feature Radius"));
         EditorGUILayout.PropertyField(platformFlatnessRangeProperty, new GUIContent("Flatness Range"));
         EditorGUILayout.PropertyField(platformTopDisplacementProperty, new GUIContent("Surface Max Displacement"));
         EditorGUILayout.LabelField(new GUIContent("Stem"), EditorStyles.boldLabel);
@@ -78,6 +93,14 @@ public class StarterTerrainEditor : Editor
                                                                   Mathf.Clamp(platformStemPinchRangeProperty.vector2Value.y, -0.5f, 1.5f));
         EditorGUILayout.PropertyField(platformStemRadiusProperty, new GUIContent("Radius"));
         EditorGUILayout.PropertyField(platformStemFeatureDepthProperty, new GUIContent("Feature Depth"));
+        EditorGUI.indentLevel--;
+        EditorGUILayout.LabelField(new GUIContent("Placement"), EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        EditorGUILayout.PropertyField(bonusPlatformMinDistanceProperty, new GUIContent("Absolute Minimum Distance"));
+        EditorGUILayout.PropertyField(platformPathHorizontalDifferenceRangeProperty, new GUIContent("Horizontal Distance Range"));
+        EditorGUILayout.PropertyField(platformPathVerticalDifferenceRangeProperty, new GUIContent("Veritcal Distance Range"));
+        EditorGUILayout.PropertyField(platformPathDistanceFromWallRangeProperty, new GUIContent("Distance From Wall Range"));
+        EditorGUILayout.PropertyField(platformPathSwitchDirectionChanceProperty, new GUIContent("Switch Direction Chance"));
         EditorGUI.indentLevel--;
         EditorGUI.indentLevel--;
         EditorGUILayout.Space();
