@@ -53,7 +53,6 @@ public class TerrainHandler : MonoBehaviour
         generationQueue = new List<LayerGenRequest>();
         loadedLayers = new Dictionary<int, TerrainLayer>();
         settings = authoredSettings;
-        settings.seed = Random.Range(0, 1024);
 
         TerrainChunk.InitializeCompute();
     }

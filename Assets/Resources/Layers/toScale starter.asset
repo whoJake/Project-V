@@ -17,7 +17,7 @@ MonoBehaviour:
   platformShapeFeatureStrength: 0.2
   platformFlatnessRange: {x: 0.5, y: 0.6}
   platformTopDisplacement: 2.5
-  platformPathHorizontalDifferenceRange: {x: 4, y: 15}
+  platformPathHorizontalDifferenceRange: {x: 10, y: 25}
   platformPathVerticalDifferenceRange: {x: 10, y: 20}
   platformPathDistanceFromWallRange: {x: -10, y: 15}
   platformPathSwitchDirectionChance: 0.005

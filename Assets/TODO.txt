@@ -88,6 +88,7 @@ World
 		https://twitter.com/masaki_hirooka/status/1635306087221178368
 		https://twitter.com/iamagco/status/1614925562870468610/photo/1
 		How will this layer be structed. Keep openness whilst still having clear silluettes
+		Move bonus platforms into its own methdo
 
 	MeshMaths.cs
 		Add method that can join meshInfos

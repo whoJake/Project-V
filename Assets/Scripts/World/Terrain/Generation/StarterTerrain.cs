@@ -149,7 +149,7 @@ public class StarterTerrain : TerrainLayerGenerator
     }
 
     private void AddPathPlatforms(ref List<Platform> platforms, Vector3 lSize, Vector3 lOrigin) {
-        float minDepth = upperSurfaceDepth / lSize.y;
+        float minDepth = (upperSurfaceDepth + cliffLedgeSize.y) / lSize.y;
         float maxDepth = 1.0f - (platformRadiusRange.y / lSize.y);
 
         float curDepth = minDepth;
