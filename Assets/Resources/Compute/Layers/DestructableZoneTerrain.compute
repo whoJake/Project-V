@@ -1,0 +1,53 @@
+#pragma kernel CSMain
+
+struct Wall{
+    float3 position;
+    float3 bounds;
+};
+
+StructuredBuffer<Wall> _WallBuffer;
+
+RWTexture3D<float> _Target;
+
+float3 _ChunkOrigin;
+float3 _ChunkSize;
+float  _VoxelScale;
+
+float3 _LayerOrigin;
+float3 _LayerSize;
+
+float sdBox( float3 p, float3 position, float3 bounds ){
+    p -= position;
+
+    float3 q = abs( p ) - bounds;
+    return length( max( q, 0.0 ) ) + min( max( q.x, max( q.y, q.z ) ) , 0.0 );
+}
+
+float GetWalls( float3 world_position ){
+    uint num_of_walls, wall_stride;
+    _WallBuffer.GetDimensions(num_of_walls, wall_stride);
+
+    float result = 0;
+    for(uint i = 0; i < num_of_walls; i++){
+        Wall wall = _WallBuffer[i];
+
+        float dst_from_box = sdBox( world_position, wall.position, wall.bounds );
+        result += saturate( -dst_from_box );
+    }
+    return saturate( result );
+}
+
+[numthreads(8,8,8)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    uint w, h, d;
+    _Target.GetDimensions(w, h, d);
+    if (id.x >= w || id.y >= h || id.z >= d) return;
+    uint3 texture_size = uint3(w, h, d);
+
+    float3 world_position = _ChunkOrigin + ( id * _VoxelScale );
+
+    float wls = GetWalls( world_position );
+
+    _Target[id.xyz] = wls;
+}
