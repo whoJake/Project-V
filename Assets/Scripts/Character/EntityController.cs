@@ -15,6 +15,8 @@ public class EntityController : MonoBehaviour
     [SerializeField] private float drag = 7f;
     [SerializeField] private LayerMask ignoreForGrounded;
 
+    [SerializeField] private float maxStepHeight = 0.5f;
+
     public float currentSpeed;
     [SerializeField] private int maxCollisionChecks = 5;
     [SerializeField] private float minimumMoveDistance = 0.001f;
@@ -23,6 +25,7 @@ public class EntityController : MonoBehaviour
 
     [SerializeField] private float skinWidth = 0.005f;
     private CapsuleCollider capsule;
+    private float capHeight { get { return Mathf.Max(capsule.radius * 2, capsule.height); } }
 
     private void Awake() {
         capsule = GetComponent<CapsuleCollider>();
@@ -67,9 +70,11 @@ public class EntityController : MonoBehaviour
 
         //Remove components of velocity that move it towards a collision, try new velocity and repeat
         while (TestMovement(desiredTranslation, out RaycastHit hit) && checks < maxCollisionChecks) {
-            float dot = Vector3.Dot(hit.normal, velocity);
-            velocity -= hit.normal * dot;
-            desiredTranslation = velocity * Time.deltaTime;
+            if(!HitClimbableStep(hit.point, ref velocity)) {
+                float dot = Vector3.Dot(hit.normal, velocity);
+                velocity -= hit.normal * dot;
+                desiredTranslation = velocity * Time.deltaTime;
+            }
             checks++;
         }
         if (checks == maxCollisionChecks)
@@ -78,12 +83,27 @@ public class EntityController : MonoBehaviour
         Move(desiredTranslation);
     }
     
+    private bool HitClimbableStep(Vector3 hitPoint, ref Vector3 velocity) {
+        Vector3 origin = new Vector3(hitPoint.x, transform.position.y - capHeight / 2f, hitPoint.z);
+        origin.y += maxStepHeight + skinWidth;
+        origin += new Vector3(velocity.x, 0f, velocity.z).normalized * skinWidth;
+
+        Debug.DrawLine(origin, origin + Vector3.down * (maxStepHeight + skinWidth), Color.red, 5f);
+
+        if(Physics.Raycast(origin, Vector3.down, out RaycastHit hit, maxStepHeight + skinWidth, ~ignoreForGrounded)) {
+            Debug.Log("Found step");
+            transform.position = new Vector3(transform.position.x, hit.point.y + capHeight / 2f + skinWidth, transform.position.z);
+            velocity.y = 0f;
+            return true;
+        }
+        return false;
+    }
 
     private bool TestMovement(Vector3 translation, out RaycastHit hitInfo) {
         translation += translation.normalized * skinWidth;
 
         Vector3 center = transform.position + capsule.center;
-        float capsulePointHeight = Mathf.Max(0f, capsule.height - (capsule.radius * 2));
+        float capsulePointHeight = capHeight - capsule.radius * 2f;
 
         Vector3 point1 = center + ( transform.up * capsulePointHeight / 2f );
         Vector3 point2 = center - ( transform.up * capsulePointHeight / 2f );
@@ -94,8 +114,9 @@ public class EntityController : MonoBehaviour
     public void Move(Vector3 translation) {
         bool failed = TestMovement(translation, out RaycastHit hit);
 
-        if (failed)
+        if (failed) {
             translation = translation.normalized * (hit.distance - skinWidth);
+        }
 
         if (translation.magnitude <= minimumMoveDistance)
             translation = Vector3.zero;
