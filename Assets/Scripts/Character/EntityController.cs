@@ -89,15 +89,23 @@ public class EntityController : MonoBehaviour
     }
     
     private bool HitClimbableStep(Vector3 hitPoint) {
-        Vector3 origin = new Vector3(hitPoint.x, transform.position.y - capsuleHeight / 2f, hitPoint.z);
+        float transformBottomY = transform.position.y - capsuleHeight / 2f;
+        Vector3 origin = new Vector3(hitPoint.x, transformBottomY, hitPoint.z);
         origin.y += maxStepHeight + skinWidth;
         origin += new Vector3(velocity.x, 0f, velocity.z).normalized * skinWidth;
 
         if(Physics.Raycast(origin, Vector3.down, out RaycastHit hit, maxStepHeight + skinWidth, ~ignoreForGrounded)) {
-            if (Vector3.Dot(hit.normal, Vector3.up) <= 0.99)
-                return false;
+            if (Physics.Raycast(hit.point, Vector3.up, out RaycastHit _, capsuleHeight + skinWidth * 4, ~ignoreForGrounded))
+                return false; //Gap above stair isnt large enough to fit the capusule
 
-            transform.position = new Vector3(transform.position.x, hit.point.y + capsuleHeight / 2f + skinWidth, transform.position.z);
+            if (Vector3.Dot(hit.normal, Vector3.up) <= 0.99)
+                return false; //Detected surface is not a step
+
+            Vector3 climbStep = new Vector3(0f, hit.point.y - transformBottomY, 0f);
+            if (TestMovement(climbStep, out RaycastHit _))
+                return false; //Cannot move up enough to climb step and not hit head
+
+            Move(climbStep + Vector3.up * skinWidth);
             velocity = new Vector3(velocity.x, 0f, velocity.z);
             return true;
         }
