@@ -4,9 +4,9 @@ using UnityEngine;
 
 public abstract class BehaviourProvider : ScriptableObject
 {
-    protected GameObject target;
+    protected EntityController controller;
 
-    public abstract void Initialize(GameObject target);
+    public abstract void Initialize(EntityController _controller);
     public abstract void OnFrameUpdate();
     public abstract void OnPhysicsUpdate();
 }

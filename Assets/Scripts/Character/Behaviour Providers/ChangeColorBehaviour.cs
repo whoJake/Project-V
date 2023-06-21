@@ -13,9 +13,9 @@ public class ChangeColorBehaviour : BehaviourProvider {
     private Material internalMaterial;
     private float timeSinceLast = 0f;
 
-    public override void Initialize(GameObject target) {
-        this.target = target;
-        internalMaterial = target.GetComponent<MeshRenderer>().material;
+    public override void Initialize(EntityController _controller) {
+        controller = _controller;
+        internalMaterial = controller.GetComponent<MeshRenderer>().material;
     }
 
     public override void OnFrameUpdate() {

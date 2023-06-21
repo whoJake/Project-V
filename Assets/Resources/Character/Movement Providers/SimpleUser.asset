@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b308f0f18f395d44aa5c68a8b1212a2, type: 3}
   m_Name: SimpleUser
   m_EditorClassIdentifier: 
-  movementSpeed: 15
-  jumpPower: 10
+  movementSpeed: 11
+  jumpPower: 13

@@ -5,10 +5,10 @@ using UnityEngine;
 
 public abstract class MovementProvider : ScriptableObject
 {
-    protected GameObject target;
+    protected EntityController controller;
     public Action<float> OnJump;
 
-    public abstract void Initialize(GameObject target);
+    public abstract void Initialize(EntityController _controller);
     public abstract MovementState GetMovementState();
 }
 

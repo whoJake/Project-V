@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(CapsuleCollider))]
@@ -11,28 +12,31 @@ public class EntityController : MonoBehaviour
     [SerializeField] private float mass = 1f;
     [SerializeField] private bool useGravity = true;
     public Vector3 velocity;
-    [SerializeField] private float drag;
+    [SerializeField] private float drag = 7f;
     [SerializeField] private LayerMask ignoreForGrounded;
 
     public float currentSpeed;
+    [SerializeField] private int maxCollisionChecks = 5;
+    [SerializeField] private float minimumMoveDistance = 0.001f;
 
-    public bool isGrounded { get; private set; }
+    public bool isGrounded;
 
-    [SerializeField] private float skinWidth = 0.001f;
+    [SerializeField] private float skinWidth = 0.005f;
     private CapsuleCollider capsule;
 
     private void Awake() {
         capsule = GetComponent<CapsuleCollider>();
 
-        movementProvider.Initialize(gameObject);
-        behaviourProvider.Initialize(gameObject);
+        movementProvider.Initialize(this);
+        behaviourProvider.Initialize(this);
 
         movementProvider.OnJump += Jump;
     }
 
     private void Jump(float power) {
         Debug.Log("Jumped");
-        AddForce(Vector3.up * power, ForceType.Impulse);
+        velocity = new Vector3(velocity.x, power, velocity.z);
+        //AddForce(Vector3.up * power, ForceType.Impulse);
     }
 
     private void HandleGravity() {
@@ -47,7 +51,7 @@ public class EntityController : MonoBehaviour
         switch (type) {
             case ForceType.Force:
                 Vector3 acceleration = force / mass;
-                velocity += acceleration * Time.deltaTime * 3;
+                velocity += Time.deltaTime * 3f * acceleration;
                 break;
             case ForceType.Impulse:
                 velocity += force;
@@ -57,28 +61,45 @@ public class EntityController : MonoBehaviour
 
     private void ApplyVelocity() {
         Vector3 desiredTranslation = velocity * Time.deltaTime;
+
+        //Still causes issues specifically under 30 degree decline roofs but seems to work well enough for now
+        int checks = 0;
+
+        //Remove components of velocity that move it towards a collision, try new velocity and repeat
+        while (TestMovement(desiredTranslation, out RaycastHit hit) && checks < maxCollisionChecks) {
+            float dot = Vector3.Dot(hit.normal, velocity);
+            velocity -= hit.normal * dot;
+            desiredTranslation = velocity * Time.deltaTime;
+            checks++;
+        }
+        if (checks == maxCollisionChecks)
+            velocity = Vector3.zero;
+
         Move(desiredTranslation);
     }
+    
 
-    private bool TryMovement(Vector3 translation, out RaycastHit hitInfo) {
+    private bool TestMovement(Vector3 translation, out RaycastHit hitInfo) {
+        translation += translation.normalized * skinWidth;
+
         Vector3 center = transform.position + capsule.center;
         float capsulePointHeight = Mathf.Max(0f, capsule.height - (capsule.radius * 2));
 
         Vector3 point1 = center + ( transform.up * capsulePointHeight / 2f );
-        Vector3 point2 = center - ( transform.up * capsulePointHeight / 2f);
+        Vector3 point2 = center - ( transform.up * capsulePointHeight / 2f );
 
-        return Physics.CapsuleCast(point1, point2, capsule.radius - skinWidth, translation.normalized, out hitInfo, translation.magnitude);
+        return Physics.CapsuleCast(point1, point2, capsule.radius, translation.normalized, out hitInfo, translation.magnitude);
     }
 
     public void Move(Vector3 translation) {
-        bool failed = TryMovement(translation, out RaycastHit hit);
-        Debug.DrawLine(transform.position, transform.position + translation, Color.blue, 2);
+        bool failed = TestMovement(translation, out RaycastHit hit);
 
-        if (failed) {
+        if (failed)
             translation = translation.normalized * (hit.distance - skinWidth);
-        }
 
-        Debug.DrawLine(transform.position, transform.position + translation, Color.red, 2);
+        if (translation.magnitude <= minimumMoveDistance)
+            translation = Vector3.zero;
+
         transform.position += translation;
     }
 
@@ -104,7 +125,7 @@ public class EntityController : MonoBehaviour
     }
 
     private void CheckGrounded() {
-        isGrounded = TryMovement(Vector3.down * skinWidth, out RaycastHit _);
+        isGrounded = TestMovement(Vector3.down * skinWidth * 1.01f, out RaycastHit _);
     }
 
     private void Update() {

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   depth: 128
   walls:
-  - position: {x: 0, y: -32, z: 0}
+  - position: {x: 0, y: -32.1, z: 0}
     bounds: {x: 32, y: 32, z: 32}
   - position: {x: 20, y: 5, z: 0}
     bounds: {x: 2.5, y: 5, z: 10}
