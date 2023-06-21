@@ -11,8 +11,12 @@ public class EntityController : MonoBehaviour
 
     [SerializeField] private float mass = 1f;
     [SerializeField] private bool useGravity = true;
-    public Vector3 velocity;
-    [SerializeField] private float drag = 7f;
+
+    public Vector3 velocity { get; private set; }
+    [SerializeField] private Vector3 velocityDisplay; //Editor only
+
+    [SerializeField] private float groundDrag = 7f;
+    [SerializeField] private float airDrag = 2f;
     [SerializeField] private LayerMask ignoreForGrounded;
 
     [SerializeField] private float maxStepHeight = 0.5f;
@@ -21,11 +25,11 @@ public class EntityController : MonoBehaviour
     [SerializeField] private int maxCollisionChecks = 5;
     [SerializeField] private float minimumMoveDistance = 0.001f;
 
-    public bool isGrounded;
+    public bool isGrounded { get; private set; }
 
     [SerializeField] private float skinWidth = 0.005f;
     private CapsuleCollider capsule;
-    private float capHeight { get { return Mathf.Max(capsule.radius * 2, capsule.height); } }
+    private float capsuleHeight { get { return Mathf.Max(capsule.radius * 2, capsule.height); } }
 
     private void Awake() {
         capsule = GetComponent<CapsuleCollider>();
@@ -70,7 +74,7 @@ public class EntityController : MonoBehaviour
 
         //Remove components of velocity that move it towards a collision, try new velocity and repeat
         while (TestMovement(desiredTranslation, out RaycastHit hit) && checks < maxCollisionChecks) {
-            if(!HitClimbableStep(hit.point, ref velocity)) {
+            if(!HitClimbableStep(hit.point)) {
                 float dot = Vector3.Dot(hit.normal, velocity);
                 velocity -= hit.normal * dot;
                 desiredTranslation = velocity * Time.deltaTime;
@@ -80,20 +84,21 @@ public class EntityController : MonoBehaviour
         if (checks == maxCollisionChecks)
             velocity = Vector3.zero;
 
+        velocityDisplay = velocity; //For editor integration but correct visibility on velocity
         Move(desiredTranslation);
     }
     
-    private bool HitClimbableStep(Vector3 hitPoint, ref Vector3 velocity) {
-        Vector3 origin = new Vector3(hitPoint.x, transform.position.y - capHeight / 2f, hitPoint.z);
+    private bool HitClimbableStep(Vector3 hitPoint) {
+        Vector3 origin = new Vector3(hitPoint.x, transform.position.y - capsuleHeight / 2f, hitPoint.z);
         origin.y += maxStepHeight + skinWidth;
         origin += new Vector3(velocity.x, 0f, velocity.z).normalized * skinWidth;
 
-        Debug.DrawLine(origin, origin + Vector3.down * (maxStepHeight + skinWidth), Color.red, 5f);
-
         if(Physics.Raycast(origin, Vector3.down, out RaycastHit hit, maxStepHeight + skinWidth, ~ignoreForGrounded)) {
-            Debug.Log("Found step");
-            transform.position = new Vector3(transform.position.x, hit.point.y + capHeight / 2f + skinWidth, transform.position.z);
-            velocity.y = 0f;
+            if (Vector3.Dot(hit.normal, Vector3.up) <= 0.99)
+                return false;
+
+            transform.position = new Vector3(transform.position.x, hit.point.y + capsuleHeight / 2f + skinWidth, transform.position.z);
+            velocity = new Vector3(velocity.x, 0f, velocity.z);
             return true;
         }
         return false;
@@ -103,7 +108,7 @@ public class EntityController : MonoBehaviour
         translation += translation.normalized * skinWidth;
 
         Vector3 center = transform.position + capsule.center;
-        float capsulePointHeight = capHeight - capsule.radius * 2f;
+        float capsulePointHeight = capsuleHeight - capsule.radius * 2f;
 
         Vector3 point1 = center + ( transform.up * capsulePointHeight / 2f );
         Vector3 point2 = center - ( transform.up * capsulePointHeight / 2f );
@@ -133,9 +138,9 @@ public class EntityController : MonoBehaviour
     }
 
     private void ApplyDrag() {
-        float appliedDrag = drag;
+        float appliedDrag = groundDrag;
         if (!isGrounded)
-            appliedDrag = 0f;
+            appliedDrag = airDrag;
 
         if (currentSpeed >= 0.05) {
             Vector3 dragForce = new Vector3(-velocity.x, 0f, -velocity.z).normalized * appliedDrag;

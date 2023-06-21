@@ -6,8 +6,7 @@ using UnityEditor;
 [CustomEditor(typeof(EntityController))]
 public class EntityControllerEditor : Editor
 {
-    
-    private static bool useCustomInspector;
+    private static bool useCustomInspector = true;
     private static bool movementProviderEditorOpen;
     private static bool behaviourProviderEditorOpen;
 
@@ -30,8 +29,10 @@ public class EntityControllerEditor : Editor
     SerializedProperty massProperty;
     SerializedProperty useGravityProperty;
     SerializedProperty velocityProperty;
-    SerializedProperty dragProperty;
+    SerializedProperty groundDragProperty;
+    SerializedProperty airDragProperty;
     SerializedProperty ignoreForGroundedProperty;
+    SerializedProperty maxStepHeightProperty;
     SerializedProperty currentSpeedProperty;
     SerializedProperty maxCollisionChecksProperty;
     SerializedProperty minimumMoveDistanceProperty;
@@ -46,9 +47,11 @@ public class EntityControllerEditor : Editor
 
         massProperty = serializedObject.FindProperty("mass");
         useGravityProperty = serializedObject.FindProperty("useGravity");
-        velocityProperty = serializedObject.FindProperty("velocity");
-        dragProperty = serializedObject.FindProperty("drag");
+        velocityProperty = serializedObject.FindProperty("velocityDisplay");
+        groundDragProperty = serializedObject.FindProperty("groundDrag");
+        airDragProperty = serializedObject.FindProperty("airDrag");
         ignoreForGroundedProperty = serializedObject.FindProperty("ignoreForGrounded");
+        maxStepHeightProperty = serializedObject.FindProperty("maxStepHeight");
         currentSpeedProperty = serializedObject.FindProperty("currentSpeed");
         maxCollisionChecksProperty = serializedObject.FindProperty("maxCollisionChecks");
         minimumMoveDistanceProperty = serializedObject.FindProperty("minimumMoveDistance");
@@ -86,7 +89,8 @@ public class EntityControllerEditor : Editor
 
         EditorGUILayout.PropertyField(useGravityProperty, new GUIContent("Use Gravity?"));
         EditorGUILayout.PropertyField(massProperty, new GUIContent("Mass"));
-        EditorGUILayout.PropertyField(dragProperty, new GUIContent("Drag"));
+        EditorGUILayout.PropertyField(groundDragProperty, new GUIContent("Ground Drag"));
+        EditorGUILayout.PropertyField(airDragProperty, new GUIContent("Air Drag"));
         EditorGUILayout.PropertyField(ignoreForGroundedProperty, new GUIContent("Ignore Grounded Mask"));
 
         EditorGUILayout.Space();
@@ -95,11 +99,13 @@ public class EntityControllerEditor : Editor
         EditorGUI.indentLevel++;
         EditorGUI.BeginDisabledGroup(true);
         EditorGUILayout.PropertyField(velocityProperty, new GUIContent("Velocity"));
+        
         EditorGUILayout.PropertyField(currentSpeedProperty, new GUIContent("Speed"));
         EditorGUI.EndDisabledGroup();
 
         EditorGUILayout.PropertyField(skinWidthProperty, new GUIContent("Skin Width"));
         EditorGUILayout.PropertyField(minimumMoveDistanceProperty, new GUIContent("Min Move Distance"));
+        EditorGUILayout.PropertyField(maxStepHeightProperty, new GUIContent("Max Step Height"));
         EditorGUILayout.PropertyField(maxCollisionChecksProperty, new GUIContent("Max Collision Checks"));
 
         EditorGUI.indentLevel--;
