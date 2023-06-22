@@ -33,6 +33,7 @@ public class EntityControllerEditor : Editor
     SerializedProperty airDragProperty;
     SerializedProperty ignoreForGroundedProperty;
     SerializedProperty maxStepHeightProperty;
+    SerializedProperty maxSlopeAngleProperty;
     SerializedProperty currentSpeedProperty;
     SerializedProperty maxCollisionChecksProperty;
     SerializedProperty minimumMoveDistanceProperty;
@@ -52,7 +53,8 @@ public class EntityControllerEditor : Editor
         airDragProperty = serializedObject.FindProperty("airDrag");
         ignoreForGroundedProperty = serializedObject.FindProperty("ignoreForGrounded");
         maxStepHeightProperty = serializedObject.FindProperty("maxStepHeight");
-        currentSpeedProperty = serializedObject.FindProperty("currentSpeed");
+        maxSlopeAngleProperty = serializedObject.FindProperty("maxSlopeAngle");
+        currentSpeedProperty = serializedObject.FindProperty("currentSpeedDisplay");
         maxCollisionChecksProperty = serializedObject.FindProperty("maxCollisionChecks");
         minimumMoveDistanceProperty = serializedObject.FindProperty("minimumMoveDistance");
         skinWidthProperty = serializedObject.FindProperty("skinWidth");
@@ -74,6 +76,8 @@ public class EntityControllerEditor : Editor
     }
 
     private void CustomInspector() {
+        serializedObject.Update();
+
         EditorGUILayout.LabelField(new GUIContent("Controlling Scripts"), EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
         EditorGUILayout.PropertyField(movementProviderProperty, new GUIContent("Movement Provider"));
@@ -106,9 +110,11 @@ public class EntityControllerEditor : Editor
         EditorGUILayout.PropertyField(skinWidthProperty, new GUIContent("Skin Width"));
         EditorGUILayout.PropertyField(minimumMoveDistanceProperty, new GUIContent("Min Move Distance"));
         EditorGUILayout.PropertyField(maxStepHeightProperty, new GUIContent("Max Step Height"));
+        EditorGUILayout.PropertyField(maxSlopeAngleProperty, new GUIContent("Max Slope Angle"));
         EditorGUILayout.PropertyField(maxCollisionChecksProperty, new GUIContent("Max Collision Checks"));
 
         EditorGUI.indentLevel--;
 
+        serializedObject.ApplyModifiedProperties();
     }
 }

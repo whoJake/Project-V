@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(CapsuleCollider))]
@@ -13,6 +12,10 @@ public class EntityController : MonoBehaviour
     [SerializeField] private bool useGravity = true;
 
     public Vector3 velocity { get; private set; }
+    public Vector2 v2Velocity { get { return new Vector2(velocity.x, velocity.z); } }
+    public float currentSpeed { get { return v2Velocity.magnitude; } }
+
+    [SerializeField] private float currentSpeedDisplay; //Editor only
     [SerializeField] private Vector3 velocityDisplay; //Editor only
 
     [SerializeField] private float groundDrag = 7f;
@@ -20,8 +23,8 @@ public class EntityController : MonoBehaviour
     [SerializeField] private LayerMask ignoreForGrounded;
 
     [SerializeField] private float maxStepHeight = 0.5f;
+    [SerializeField] private float maxSlopeAngle = 30f;
 
-    public float currentSpeed;
     [SerializeField] private int maxCollisionChecks = 5;
     [SerializeField] private float minimumMoveDistance = 0.001f;
 
@@ -30,6 +33,7 @@ public class EntityController : MonoBehaviour
     [SerializeField] private float skinWidth = 0.005f;
     private CapsuleCollider capsule;
     private float capsuleHeight { get { return Mathf.Max(capsule.radius * 2, capsule.height); } }
+    private float moveSpeedLimiter = 1f;
 
     private void Awake() {
         capsule = GetComponent<CapsuleCollider>();
@@ -38,6 +42,21 @@ public class EntityController : MonoBehaviour
         behaviourProvider.Initialize(this);
 
         movementProvider.OnJump += Jump;
+    }
+
+    private void Update() {
+        CheckGrounded();
+        if (useGravity) HandleGravity();
+        ApplyDrag();
+
+        HandleMovement(movementProvider.GetMovementState());
+        ApplyVelocity();
+
+        //Update editor variables
+        velocityDisplay = velocity;
+        currentSpeedDisplay = currentSpeed;
+
+        behaviourProvider.OnFrameUpdate();
     }
 
     private void Jump(float power) {
@@ -51,19 +70,29 @@ public class EntityController : MonoBehaviour
             velocity = new Vector3(velocity.x, 0f, velocity.z);
         } else {
             AddForce(Vector3.down * 9.81f, ForceType.Force);
+            moveSpeedLimiter = 1f;
         }
     }
 
-    public void AddForce(Vector3 force, ForceType type) {
-        switch (type) {
-            case ForceType.Force:
-                Vector3 acceleration = force / mass;
-                velocity += Time.deltaTime * 3f * acceleration;
-                break;
-            case ForceType.Impulse:
-                velocity += force;
-                break;
+    private void ApplyDrag() {
+        float appliedDrag = groundDrag;
+        if (!isGrounded)
+            appliedDrag = airDrag;
+
+        if (currentSpeed >= 0.05) {
+            Vector3 dragForce = new Vector3(-velocity.x, 0f, -velocity.z).normalized * appliedDrag;
+            AddForce(dragForce, ForceType.Force);
+        } else {
+            velocity = new Vector3(0f, velocity.y, 0f);
         }
+    }
+
+    private void HandleMovement(MovementState state) {
+        Vector3 moveForce = (transform.forward * state.direction.y + transform.right * state.direction.x) * state.speed;
+        AddForce(moveForce, ForceType.Force);
+
+        Vector3 clampedMoveVelocity = Vector3.ClampMagnitude(new Vector3(velocity.x, 0f, velocity.z), state.speed * moveSpeedLimiter);
+        velocity = new Vector3(clampedMoveVelocity.x, velocity.y, clampedMoveVelocity.z);
     }
 
     private void ApplyVelocity() {
@@ -74,27 +103,33 @@ public class EntityController : MonoBehaviour
 
         //Remove components of velocity that move it towards a collision, try new velocity and repeat
         while (TestMovement(desiredTranslation, out RaycastHit hit) && checks < maxCollisionChecks) {
-            if(!HitClimbableStep(hit.point)) {
-                float dot = Vector3.Dot(hit.normal, velocity);
-                velocity -= hit.normal * dot;
-                desiredTranslation = velocity * Time.deltaTime;
-            }
             checks++;
+
+            if (TryClimbSlope(hit.normal)) {
+                continue;
+            }else if (TryClimbStep(hit.point)) {
+                desiredTranslation = velocity * Time.deltaTime;
+                continue;
+            }
+
+            //Applies for collisions
+            float dot = Vector3.Dot(hit.normal, velocity);
+            velocity -= hit.normal * dot;
+            desiredTranslation = velocity * Time.deltaTime;
         }
         if (checks == maxCollisionChecks)
             velocity = Vector3.zero;
 
-        velocityDisplay = velocity; //For editor integration but correct visibility on velocity
         Move(desiredTranslation);
     }
-    
-    private bool HitClimbableStep(Vector3 hitPoint) {
+
+    private bool TryClimbStep(Vector3 hitPoint) {
         float transformBottomY = transform.position.y - capsuleHeight / 2f;
         Vector3 origin = new Vector3(hitPoint.x, transformBottomY, hitPoint.z);
         origin.y += maxStepHeight + skinWidth;
         origin += new Vector3(velocity.x, 0f, velocity.z).normalized * skinWidth;
 
-        if(Physics.Raycast(origin, Vector3.down, out RaycastHit hit, maxStepHeight + skinWidth, ~ignoreForGrounded)) {
+        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, maxStepHeight + skinWidth, ~ignoreForGrounded)) {
             if (Physics.Raycast(hit.point, Vector3.up, out RaycastHit _, capsuleHeight + skinWidth * 4, ~ignoreForGrounded))
                 return false; //Gap above stair isnt large enough to fit the capusule
 
@@ -112,6 +147,28 @@ public class EntityController : MonoBehaviour
         return false;
     }
 
+    private bool TryClimbSlope(Vector3 normal) {
+        if (normal == Vector3.up) {
+            moveSpeedLimiter = 1f;
+            return false; //Surface is a floor not a slope!
+        }
+
+        float slopeAngle = Mathf.Acos(Vector3.Dot(normal, Vector3.up)) * Mathf.Rad2Deg;
+        if (slopeAngle - maxSlopeAngle >= 0.01f) {
+            moveSpeedLimiter = 1f;
+            return false; //Slope angle is greater than maximum
+        }
+
+        float targetDst = (v2Velocity * Time.deltaTime).magnitude;
+        float newY = targetDst * Mathf.Sin(slopeAngle * Mathf.Deg2Rad);
+
+        //Also a bit janky but works at reducing speeds up steeper slopes :D
+        moveSpeedLimiter = Mathf.InverseLerp(90, 0, slopeAngle);
+
+        Move(Vector3.up * newY); //Bit of a janky way of handling slopes but trying to edit the velocity or implement it into the move method didnt seem to work
+        return true;
+    }
+
     private bool TestMovement(Vector3 translation, out RaycastHit hitInfo) {
         translation += translation.normalized * skinWidth;
 
@@ -127,9 +184,9 @@ public class EntityController : MonoBehaviour
     public void Move(Vector3 translation) {
         bool failed = TestMovement(translation, out RaycastHit hit);
 
-        if (failed) {
+        if (failed) 
             translation = translation.normalized * (hit.distance - skinWidth);
-        }
+        
 
         if (translation.magnitude <= minimumMoveDistance)
             translation = Vector3.zero;
@@ -137,42 +194,22 @@ public class EntityController : MonoBehaviour
         transform.position += translation;
     }
 
-    private void HandleMovement(MovementState state) {
-        Vector3 moveForce = (transform.forward * state.direction.y + transform.right * state.direction.x) * state.speed;
-        AddForce(moveForce, ForceType.Force);
-
-        Vector3 clampedMoveVelocity = Vector3.ClampMagnitude(new Vector3(velocity.x, 0f, velocity.z), state.speed);
-        velocity = new Vector3(clampedMoveVelocity.x, velocity.y, clampedMoveVelocity.z);
-    }
-
-    private void ApplyDrag() {
-        float appliedDrag = groundDrag;
-        if (!isGrounded)
-            appliedDrag = airDrag;
-
-        if (currentSpeed >= 0.05) {
-            Vector3 dragForce = new Vector3(-velocity.x, 0f, -velocity.z).normalized * appliedDrag;
-            AddForce(dragForce, ForceType.Force);
-        } else {
-            velocity = new Vector3(0f, velocity.y, 0f);
-        }
-    }
-
     private void CheckGrounded() {
         isGrounded = TestMovement(Vector3.down * skinWidth * 1.01f, out RaycastHit _);
     }
 
-    private void Update() {
-        CheckGrounded();
-        if (useGravity) HandleGravity();
-        ApplyDrag();
-
-        HandleMovement(movementProvider.GetMovementState());
-        ApplyVelocity();
-        currentSpeed = new Vector2(velocity.x, velocity.z).magnitude;
-
-        behaviourProvider.OnFrameUpdate();
+    public void AddForce(Vector3 force, ForceType type) {
+        switch (type) {
+            case ForceType.Force:
+                Vector3 acceleration = force / mass;
+                velocity += Time.deltaTime * 3f * acceleration;
+                break;
+            case ForceType.Impulse:
+                velocity += force;
+                break;
+        }
     }
+
 }
 
 public enum ForceType {
