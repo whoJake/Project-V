@@ -178,7 +178,6 @@ public class EntityController : MonoBehaviour
     }
 
     public void Move(Vector3 translation) {
-        //bool failed = TestMovement(translation, out RaycastHit hit);
         int count = 0;
 
         while(TestMovement(translation, out RaycastHit hit) && count < maxCollisionChecks) {

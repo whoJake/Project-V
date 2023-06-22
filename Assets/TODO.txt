@@ -8,11 +8,9 @@ Camera
 	ThirdPersonControllerEditor.cs
 		Have rect/seperator around willControlTransform bool so that it looks nicer
 Player
-	PlayerMovement.cs
-		Convert to state machine to better handle how movement is handled in each case
-		Add additional downward velocity when going down a short slope so that the player will "stick" to the floor
-		Maybe look at switching to UnityInput 2.0 as it uses input events that you subscribe to rather than reading them straight from Input class
-		Make sprinting only work when running forwards, perhaps toggle
+	EntityController.cs
+		Going down slopes
+		Sliding down too steep slopes
 	StatHandler.cs
 		Is queried by mechanics in order to get statistics such as PlayerMovement.cs asking for the speed when its about to move
 		Events for StatChanged etc to get ready for implementing it into UI
