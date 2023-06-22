@@ -33,7 +33,6 @@ public class EntityController : MonoBehaviour
     [SerializeField] private float skinWidth = 0.005f;
     private CapsuleCollider capsule;
     private float capsuleHeight { get { return Mathf.Max(capsule.radius * 2, capsule.height); } }
-    private float moveSpeedLimiter = 1f;
 
     private void Awake() {
         capsule = GetComponent<CapsuleCollider>();
@@ -70,7 +69,6 @@ public class EntityController : MonoBehaviour
             velocity = new Vector3(velocity.x, 0f, velocity.z);
         } else {
             AddForce(Vector3.down * 9.81f, ForceType.Force);
-            moveSpeedLimiter = 1f;
         }
     }
 
@@ -91,7 +89,7 @@ public class EntityController : MonoBehaviour
         Vector3 moveForce = (transform.forward * state.direction.y + transform.right * state.direction.x) * state.speed;
         AddForce(moveForce, ForceType.Force);
 
-        Vector3 clampedMoveVelocity = Vector3.ClampMagnitude(new Vector3(velocity.x, 0f, velocity.z), state.speed * moveSpeedLimiter);
+        Vector3 clampedMoveVelocity = Vector3.ClampMagnitude(new Vector3(velocity.x, 0f, velocity.z), state.speed);
         velocity = new Vector3(clampedMoveVelocity.x, velocity.y, clampedMoveVelocity.z);
     }
 
@@ -103,11 +101,12 @@ public class EntityController : MonoBehaviour
 
         //Remove components of velocity that move it towards a collision, try new velocity and repeat
         while (TestMovement(desiredTranslation, out RaycastHit hit) && checks < maxCollisionChecks) {
+            
             checks++;
+            if (Vector3.Angle(hit.normal, Vector3.up) - maxSlopeAngle <= 0.001f)
+                break; //Hit slope, velocity stays the same
 
-            if (TryClimbSlope(hit.normal)) {
-                continue;
-            }else if (TryClimbStep(hit.point)) {
+            if (TryClimbStep(hit.point)) {
                 desiredTranslation = velocity * Time.deltaTime;
                 continue;
             }
@@ -117,6 +116,7 @@ public class EntityController : MonoBehaviour
             velocity -= hit.normal * dot;
             desiredTranslation = velocity * Time.deltaTime;
         }
+
         if (checks == maxCollisionChecks)
             velocity = Vector3.zero;
 
@@ -147,25 +147,21 @@ public class EntityController : MonoBehaviour
         return false;
     }
 
-    private bool TryClimbSlope(Vector3 normal) {
+    private bool TryClimbSlope(ref Vector3 translation, Vector3 normal) {
         if (normal == Vector3.up) {
-            moveSpeedLimiter = 1f;
             return false; //Surface is a floor not a slope!
         }
 
         float slopeAngle = Mathf.Acos(Vector3.Dot(normal, Vector3.up)) * Mathf.Rad2Deg;
         if (slopeAngle - maxSlopeAngle >= 0.01f) {
-            moveSpeedLimiter = 1f;
             return false; //Slope angle is greater than maximum
         }
 
-        float targetDst = (v2Velocity * Time.deltaTime).magnitude;
+        float targetDst = new Vector2(translation.x, translation.z).magnitude;
+        float newX = targetDst * Mathf.Cos(slopeAngle * Mathf.Deg2Rad);
         float newY = targetDst * Mathf.Sin(slopeAngle * Mathf.Deg2Rad);
 
-        //Also a bit janky but works at reducing speeds up steeper slopes :D
-        moveSpeedLimiter = Mathf.InverseLerp(90, 0, slopeAngle);
-
-        Move(Vector3.up * newY); //Bit of a janky way of handling slopes but trying to edit the velocity or implement it into the move method didnt seem to work
+        translation = new Vector3(translation.x, 0f, translation.z).normalized * newX + Vector3.up * newY;
         return true;
     }
 
@@ -182,13 +178,21 @@ public class EntityController : MonoBehaviour
     }
 
     public void Move(Vector3 translation) {
-        bool failed = TestMovement(translation, out RaycastHit hit);
+        //bool failed = TestMovement(translation, out RaycastHit hit);
+        int count = 0;
 
-        if (failed) 
+        while(TestMovement(translation, out RaycastHit hit) && count < maxCollisionChecks) {
+            count++;
+            if (translation.magnitude <= minimumMoveDistance)
+                translation = Vector3.zero;
+
+            if (TryClimbSlope(ref translation, hit.normal))
+                continue;
+
             translation = translation.normalized * (hit.distance - skinWidth);
-        
+        }
 
-        if (translation.magnitude <= minimumMoveDistance)
+        if (count == maxCollisionChecks)
             translation = Vector3.zero;
 
         transform.position += translation;
