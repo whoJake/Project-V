@@ -5,8 +5,11 @@ using UnityEngine;
 [RequireComponent(typeof(CapsuleCollider))]
 public class EntityController : MonoBehaviour
 {
-    [SerializeField] private MovementProvider movementProvider;
-    [SerializeField] private BehaviourProvider behaviourProvider;
+    [SerializeField] protected MovementProvider movementProvider;
+    public MovementProvider MovementProvider { get { return movementProvider; } }
+
+    [SerializeField] protected BehaviourProvider behaviourProvider;
+    public BehaviourProvider BehaviourProvider { get { return behaviourProvider; } }
 
     [SerializeField] private float mass = 1f;
     [SerializeField] private bool useGravity = true;
@@ -34,28 +37,38 @@ public class EntityController : MonoBehaviour
     private CapsuleCollider capsule;
     private float capsuleHeight { get { return Mathf.Max(capsule.radius * 2, capsule.height); } }
 
-    private void Awake() {
+    protected virtual void Awake() {
         capsule = GetComponent<CapsuleCollider>();
 
-        movementProvider.Initialize(this);
-        behaviourProvider.Initialize(this);
+        if (movementProvider) {
+            SetMovementProvider(movementProvider);
+            movementProvider.Initialize(this);
+        }
+
+        if (behaviourProvider) {
+            SetBehaviourProvider(behaviourProvider);
+            behaviourProvider.Initialize(this);
+        }
 
         movementProvider.OnJump += Jump;
     }
 
-    private void Update() {
+    protected virtual void Update() {
         CheckGrounded();
         if (useGravity) HandleGravity();
         ApplyDrag();
 
-        HandleMovement(movementProvider.GetMovementState());
+        if(movementProvider) 
+            HandleMovement(movementProvider.GetMovementState());
+
         ApplyVelocity();
 
         //Update editor variables
         velocityDisplay = velocity;
         currentSpeedDisplay = currentSpeed;
 
-        behaviourProvider.OnFrameUpdate();
+        if(behaviourProvider)
+            if(behaviourProvider.IsActive) behaviourProvider.OnFrameUpdate();
     }
 
     private void Jump(float power) {
@@ -213,6 +226,13 @@ public class EntityController : MonoBehaviour
         }
     }
 
+    public void SetMovementProvider(MovementProvider a) {
+        movementProvider = Instantiate(a);
+    }
+
+    public void SetBehaviourProvider(BehaviourProvider a) {
+        behaviourProvider = Instantiate(a);
+    }
 }
 
 public enum ForceType {

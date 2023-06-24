@@ -31,7 +31,9 @@ public class ChangeColorBehaviour : BehaviourProvider {
         internalMaterial.color = Color.Lerp(a, b, timeSinceLast);
     }
 
-    public override void OnPhysicsUpdate() {
-        
+    public override void Disable() {
+        base.Disable();
+        internalMaterial.color = Color.white;
     }
+
 }

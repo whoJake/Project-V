@@ -11,10 +11,6 @@ public class UserMovement : MovementProvider {
     [SerializeField]
     private float jumpPower;
 
-    public override void Initialize(EntityController _controller) {
-        controller = _controller;
-    }
-
     public override MovementState GetMovementState() {
         if (Input.GetButtonDown("Jump") && controller.isGrounded) {
             OnJump?.Invoke(jumpPower);
