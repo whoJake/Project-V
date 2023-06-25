@@ -49,8 +49,6 @@ public class EntityController : MonoBehaviour
             SetBehaviourProvider(behaviourProvider);
             behaviourProvider.Initialize(this);
         }
-
-        movementProvider.OnJump += Jump;
     }
 
     protected virtual void Update() {
@@ -67,12 +65,15 @@ public class EntityController : MonoBehaviour
         velocityDisplay = velocity;
         currentSpeedDisplay = currentSpeed;
 
-        if(behaviourProvider)
-            if(behaviourProvider.IsActive) behaviourProvider.OnFrameUpdate();
+        if (behaviourProvider)
+            if (behaviourProvider.IsActive) {
+                behaviourProvider.OnPhysicsUpdate();
+                behaviourProvider.OnFrameUpdate();
+            }
     }
 
     private void Jump(float power) {
-        Debug.Log("Jumped");
+        Debug.Log("Jumped with " + power + " power");
         velocity = new Vector3(velocity.x, power, velocity.z);
         //AddForce(Vector3.up * power, ForceType.Impulse);
     }
@@ -187,7 +188,7 @@ public class EntityController : MonoBehaviour
         Vector3 point1 = center + ( transform.up * capsulePointHeight / 2f );
         Vector3 point2 = center - ( transform.up * capsulePointHeight / 2f );
 
-        return Physics.CapsuleCast(point1, point2, capsule.radius, translation.normalized, out hitInfo, translation.magnitude);
+        return Physics.CapsuleCast(point1, point2, capsule.radius, translation.normalized, out hitInfo, translation.magnitude, ~ignoreForGrounded);
     }
 
     public void Move(Vector3 translation) {
@@ -227,7 +228,9 @@ public class EntityController : MonoBehaviour
     }
 
     public void SetMovementProvider(MovementProvider a) {
+        if (movementProvider) movementProvider.OnJump -= Jump;
         movementProvider = Instantiate(a);
+        movementProvider.OnJump += Jump;
     }
 
     public void SetBehaviourProvider(BehaviourProvider a) {

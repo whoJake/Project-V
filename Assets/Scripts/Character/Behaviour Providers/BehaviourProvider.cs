@@ -5,9 +5,12 @@ using UnityEngine;
 public abstract class BehaviourProvider : ScriptableObject
 {
     protected EntityController controller;
-    public bool IsActive { get; private set; } = true;
+    public bool IsActive { get; private set; } = false;
 
-    public abstract void Initialize(EntityController _controller);
+    public virtual void Initialize(EntityController _controller) {
+        controller = _controller;
+        Enable();
+    }
     public virtual void OnFrameUpdate() { }
     public virtual void OnPhysicsUpdate() { }
 

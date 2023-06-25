@@ -29,6 +29,7 @@ public class ThirdPersonControllerEditor : Editor
     SerializedProperty controlTransformProperty;
     SerializedProperty controlTransformTypeProperty;
     SerializedProperty shouldAvoidOcclusionProperty;
+    SerializedProperty occlusionLayerMaskProperty;
     SerializedProperty avoidBufferProperty;
     SerializedProperty avoidSmoothingTimeProperty;
 
@@ -44,6 +45,7 @@ public class ThirdPersonControllerEditor : Editor
         controlTransformProperty = serializedObject.FindProperty("controlTransform");
         controlTransformTypeProperty = serializedObject.FindProperty("controlTransformType");
         shouldAvoidOcclusionProperty = serializedObject.FindProperty("shouldAvoidOcclusion");
+        occlusionLayerMaskProperty = serializedObject.FindProperty("occlusionLayerMask");
         avoidBufferProperty = serializedObject.FindProperty("avoidBuffer");
         avoidSmoothingTimeProperty = serializedObject.FindProperty("avoidSmoothingTime");
     }
@@ -70,6 +72,7 @@ public class ThirdPersonControllerEditor : Editor
         EditorGUILayout.PropertyField(shouldAvoidOcclusionProperty, new GUIContent("Should Avoid Occlusion?"));
         if (shouldAvoidOcclusionProperty.boolValue) {
             EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(occlusionLayerMaskProperty, new GUIContent("Layer Mask"));
             EditorGUILayout.PropertyField(avoidBufferProperty, new GUIContent("Buffer Length"));
             EditorGUILayout.PropertyField(avoidSmoothingTimeProperty, new GUIContent("Smoothing Time"));
             EditorGUI.indentLevel--;

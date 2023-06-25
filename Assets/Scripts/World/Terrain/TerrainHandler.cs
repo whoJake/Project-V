@@ -20,9 +20,6 @@ public class TerrainHandler : MonoBehaviour
     }
     private List<LayerGenRequest> generationQueue;
 
-    //[SerializeField]
-    //private int randomGenCount;
-
     public Vector2Int generatedArea; //Only an approximate area that will be generated. Should always generate slightly larger than this but problems exist !
     [SerializeField]
     private Vector3Int chunkSize;

@@ -22,6 +22,7 @@ public class ThirdPersonController : MonoBehaviour
 
     [Space]
     [SerializeField]    private bool shouldAvoidOcclusion;
+    [SerializeField]    private LayerMask occlusionLayerMask;
     [SerializeField]    private float avoidBuffer;
     [SerializeField]    private float avoidSmoothingTime;
 
@@ -95,7 +96,7 @@ public class ThirdPersonController : MonoBehaviour
     private void AvoidOcclusion() {
         Vector3 camToRotate = controlCamera.transform.position - rotationPoint.position;
         Ray occlusionRay = new Ray(rotationPoint.position, camToRotate);
-        bool occluded = Physics.Raycast(occlusionRay, out RaycastHit hitInfo, length, ~LayerMask.GetMask("Player"));
+        bool occluded = Physics.Raycast(occlusionRay, out RaycastHit hitInfo, length, ~occlusionLayerMask);
 
         float nLength = length;
         if (occluded)

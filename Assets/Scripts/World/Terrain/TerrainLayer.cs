@@ -137,6 +137,8 @@ public class TerrainLayer : MonoBehaviour
         GameObject result = new GameObject(name);
         result.transform.parent = transform;
         result.transform.position = position;
+        result.tag = "Terrain";
+        result.layer = LayerMask.NameToLayer("Terrain");
 
         result.AddComponent<MeshFilter>();
         result.AddComponent<MeshRenderer>().material = handler.material;

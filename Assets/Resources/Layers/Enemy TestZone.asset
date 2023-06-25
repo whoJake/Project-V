@@ -17,8 +17,10 @@ MonoBehaviour:
   - position: {x: 0, y: -32.1, z: 0}
     bounds: {x: 32, y: 32, z: 32}
   - position: {x: 20, y: 5, z: 0}
-    bounds: {x: 2.5, y: 5, z: 10}
+    bounds: {x: 5, y: 5, z: 20}
   - position: {x: -20, y: 7.5, z: 0}
-    bounds: {x: 5, y: 7.5, z: 10}
+    bounds: {x: 10, y: 20, z: 20}
   - position: {x: 0, y: 5, z: 15}
-    bounds: {x: 7.5, y: 5, z: 2.5}
+    bounds: {x: 15, y: 15, z: 5}
+  - position: {x: -10, y: 7.5, z: 0}
+    bounds: {x: 10, y: 5, z: 15}

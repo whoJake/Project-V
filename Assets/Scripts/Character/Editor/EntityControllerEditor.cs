@@ -6,7 +6,7 @@ using UnityEditor;
 [CustomEditor(typeof(EntityController))]
 public class EntityControllerEditor : Editor
 {
-    private static bool useCustomInspector = true;
+    protected static bool useCustomInspector = true;
     private static bool movementProviderEditorOpen;
     private static bool behaviourProviderEditorOpen;
 
@@ -39,7 +39,7 @@ public class EntityControllerEditor : Editor
     SerializedProperty minimumMoveDistanceProperty;
     SerializedProperty skinWidthProperty;
 
-    private void OnEnable() {
+    protected virtual void OnEnable() {
         movementProviderProperty = serializedObject.FindProperty("movementProvider");
         Editor.CreateCachedEditor((MovementProvider) movementProviderProperty.objectReferenceValue, null, ref movementProviderEditor);
 
@@ -75,7 +75,7 @@ public class EntityControllerEditor : Editor
         EditorGUI.indentLevel--;
     }
 
-    private void CustomInspector() {
+    protected virtual void CustomInspector() {
         serializedObject.Update();
 
         EditorGUILayout.LabelField(new GUIContent("Controlling Scripts"), EditorStyles.boldLabel);

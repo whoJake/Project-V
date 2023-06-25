@@ -18,13 +18,18 @@ public class KiteZoneMovement : MovementProvider {
 
     public override MovementState GetMovementState() {
         Vector2 direction = Vector2.zero;
+        float moveSpeed = 0f;
         Zone currentZone = GetZone();
-        if (target && currentZone != null) {
-            Vector3 vec2target = target.position - controller.transform.position;
-            direction = new Vector2(vec2target.x, vec2target.z).normalized;
-        }
 
-        if(currentZone != null) {
+        if(currentZone != null && !(canOverride && !canMove)) {
+            if (target) {
+                Vector3 vec2target = target.position - controller.transform.position;
+                direction = new Vector2(vec2target.x, vec2target.z).normalized;
+            }
+
+            canOverride = currentZone.overridable;
+            moveSpeed = currentZone.moveSpeed;
+
             switch (currentZone.kiteDir) {
                 case Zone.KiteDirection.Forward:
                     controller.BehaviourProvider?.Enable();
@@ -44,7 +49,7 @@ public class KiteZoneMovement : MovementProvider {
 
         return new MovementState() {
             direction = direction,
-            speed = (currentZone != null) ? currentZone.moveSpeed : 0f,
+            speed = moveSpeed,
             isCrouched = false
         };
     }
