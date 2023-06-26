@@ -28,6 +28,7 @@ public class EntityControllerEditor : Editor
 
     SerializedProperty massProperty;
     SerializedProperty useGravityProperty;
+    SerializedProperty lockonTargetProperty;
     SerializedProperty velocityProperty;
     SerializedProperty groundDragProperty;
     SerializedProperty airDragProperty;
@@ -48,6 +49,7 @@ public class EntityControllerEditor : Editor
 
         massProperty = serializedObject.FindProperty("mass");
         useGravityProperty = serializedObject.FindProperty("useGravity");
+        lockonTargetProperty = serializedObject.FindProperty("lockonTarget");
         velocityProperty = serializedObject.FindProperty("velocityDisplay");
         groundDragProperty = serializedObject.FindProperty("groundDrag");
         airDragProperty = serializedObject.FindProperty("airDrag");
@@ -105,6 +107,7 @@ public class EntityControllerEditor : Editor
         EditorGUILayout.PropertyField(velocityProperty, new GUIContent("Velocity"));
         
         EditorGUILayout.PropertyField(currentSpeedProperty, new GUIContent("Speed"));
+        EditorGUILayout.PropertyField(lockonTargetProperty, new GUIContent("Lockon Target"));
         EditorGUI.EndDisabledGroup();
 
         EditorGUILayout.PropertyField(skinWidthProperty, new GUIContent("Skin Width"));

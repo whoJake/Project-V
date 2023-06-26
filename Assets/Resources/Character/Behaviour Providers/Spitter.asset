@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ad19f5ff5905d441bb5a3bb6439f3ec, type: 3}
+  m_Name: Spitter
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 896051743544414979, guid: 2ef57984e99cc7a4e8a8b68b0565869f, type: 3}
+  attackSpeed: 1.5
+  attackWindupTime: 0.2
+  attackWinddownTime: 0.05
+  numOfBulletsPerShot: 5
+  bulletSpread: 0.1
+  detectPlayerRange: 30
+  detectPlayerRangeBuffer: 5

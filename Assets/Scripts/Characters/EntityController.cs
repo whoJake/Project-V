@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(CapsuleCollider))]
@@ -13,6 +14,8 @@ public class EntityController : MonoBehaviour
 
     [SerializeField] private float mass = 1f;
     [SerializeField] private bool useGravity = true;
+
+    public GameObject lockonTarget;
 
     public Vector3 velocity { get; private set; }
     public Vector2 v2Velocity { get { return new Vector2(velocity.x, velocity.z); } }
@@ -35,7 +38,8 @@ public class EntityController : MonoBehaviour
 
     [SerializeField] private float skinWidth = 0.005f;
     private CapsuleCollider capsule;
-    private float capsuleHeight { get { return Mathf.Max(capsule.radius * 2, capsule.height); } }
+    public float capsuleHeight { get { return Mathf.Max(capsule.radius * 2, capsule.height); } }
+    public float capsuleRadius { get { return capsule.radius; } }
 
     protected virtual void Awake() {
         capsule = GetComponent<CapsuleCollider>();
@@ -56,7 +60,7 @@ public class EntityController : MonoBehaviour
         if (useGravity) HandleGravity();
         ApplyDrag();
 
-        if(movementProvider) 
+        if (movementProvider)
             HandleMovement(movementProvider.GetMovementState());
 
         ApplyVelocity();
@@ -65,11 +69,10 @@ public class EntityController : MonoBehaviour
         velocityDisplay = velocity;
         currentSpeedDisplay = currentSpeed;
 
-        if (behaviourProvider)
-            if (behaviourProvider.IsActive) {
-                behaviourProvider.OnPhysicsUpdate();
-                behaviourProvider.OnFrameUpdate();
-            }
+        if (behaviourProvider && behaviourProvider.IsActive) { 
+            behaviourProvider.OnPhysicsUpdate();
+            behaviourProvider.OnFrameUpdate();
+        }
     }
 
     private void Jump(float power) {
@@ -194,19 +197,25 @@ public class EntityController : MonoBehaviour
     public void Move(Vector3 translation) {
         int count = 0;
 
-        while(TestMovement(translation, out RaycastHit hit) && count < maxCollisionChecks) {
+        if(TestMovement(translation, out RaycastHit hit)) { //&& count < maxCollisionChecks) {
             count++;
             if (translation.magnitude <= minimumMoveDistance)
                 translation = Vector3.zero;
 
-            if (TryClimbSlope(ref translation, hit.normal))
-                continue;
-
-            translation = translation.normalized * (hit.distance - skinWidth);
+            bool climbed = false;
+            if (TryClimbSlope(ref translation, hit.normal)) {
+                if (!TestMovement(translation, out hit))
+                    climbed = true;
+            }
+            
+            if(!climbed)
+                translation = translation.normalized * (hit.distance - skinWidth);
         }
 
+        /*
         if (count == maxCollisionChecks)
             translation = Vector3.zero;
+        */
 
         transform.position += translation;
     }

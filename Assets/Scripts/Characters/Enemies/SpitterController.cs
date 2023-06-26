@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class SpitterController : EntityController
 {
-    [SerializeField] private Transform attackTarget;
+    [SerializeField] private GameObject attackTarget;
 
     protected override void Awake() {
         base.Awake();
-        movementProvider.SetTarget(attackTarget);
+        //lockonTarget = attackTarget;
     }
 }

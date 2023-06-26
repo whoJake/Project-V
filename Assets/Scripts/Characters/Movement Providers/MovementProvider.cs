@@ -6,7 +6,6 @@ using UnityEngine;
 public abstract class MovementProvider : ScriptableObject
 {
     protected EntityController controller;
-    public Transform target;
     public Action<float> OnJump;
 
     public bool canOverride { get; protected set; } = true;
@@ -14,10 +13,6 @@ public abstract class MovementProvider : ScriptableObject
 
     public virtual void Initialize(EntityController _controller) {
         controller = _controller;
-    }
-
-    public virtual void SetTarget(Transform _target) {
-        target = _target;
     }
 
     public abstract MovementState GetMovementState();

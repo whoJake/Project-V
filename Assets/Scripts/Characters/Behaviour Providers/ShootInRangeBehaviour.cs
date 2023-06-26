@@ -6,7 +6,6 @@ using UnityEngine;
 public class ShootInRangeBehaviour : BehaviourProvider
 {
     [SerializeField] private float range;
-    private Transform target;
 
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private float attackSpeed;
@@ -15,10 +14,8 @@ public class ShootInRangeBehaviour : BehaviourProvider
     private Coroutine fireSequence;
 
     public override void OnFrameUpdate() {
-        target = controller.MovementProvider.target;
-
-        if (target) {
-            if(Vector3.Distance(controller.transform.position, target.position) < range) {
+        if (controller.lockonTarget) {
+            if(Vector3.Distance(controller.transform.position, controller.lockonTarget.transform.position) < range) {
                 Enable();
             } else {
                 Disable();
@@ -47,7 +44,7 @@ public class ShootInRangeBehaviour : BehaviourProvider
 
     private void SpawnBullet() {
         GameObject bullet = GameObject.Instantiate(bulletPrefab);
-        Vector3 vec2target = (target.position - controller.transform.position).normalized;
+        Vector3 vec2target = (controller.lockonTarget.transform.position - controller.transform.position).normalized;
         bullet.transform.position = controller.transform.position + vec2target * 1f;
         bullet.transform.forward = vec2target;
 
