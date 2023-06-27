@@ -12,7 +12,6 @@ public class SpitterBehaviour : BehaviourProvider {
     [SerializeField] private float attackWinddownTime;
 
     [SerializeField] private int numOfBulletsPerShot;
-    [Range(0f, 1f)]
     [SerializeField] private float bulletSpread;
 
     [SerializeField] private float detectPlayerRange;
@@ -67,19 +66,15 @@ public class SpitterBehaviour : BehaviourProvider {
 
     private void Shoot() {
         for(int i = 0; i < numOfBulletsPerShot; i++) {
-            GameObject bullet = GameObject.Instantiate(bulletPrefab);
-            bullet.transform.position = controller.transform.position + controller.transform.forward * controller.capsuleRadius * 1.01f;
-            bullet.tag = "IgnoreProjectile";
-            bullet.layer = LayerMask.NameToLayer("Projectile");
-
-            Vector3 forward = (controller.lockonTarget.transform.position - controller.transform.position).normalized;
-            bullet.transform.forward = forward;
-
             float angOnCircle = Random.Range(0f, Mathf.PI * 2);
-            float xSpread = Mathf.Sin(angOnCircle) * bulletSpread;
-            float ySpread = Mathf.Cos(angOnCircle) * bulletSpread;
+            float radius = Random.Range(0f, bulletSpread);
+            float xSpread = Mathf.Sin(angOnCircle) * radius;
+            float ySpread = Mathf.Cos(angOnCircle) * radius;
 
-            bullet.transform.forward = (forward + (bullet.transform.right * xSpread) + (bullet.transform.up * ySpread)).normalized;
+            Vector3 bulletTarget = controller.lockonTarget.transform.position + Vector3.right * xSpread + Vector3.forward * ySpread;
+            Vector3 vec2target = (controller.lockonTarget.transform.position - controller.transform.position).normalized;
+            Vector3 bulletSpawn = controller.transform.position + vec2target * (controller.capsuleRadius + bulletPrefab.transform.localScale.x);
+            GameObject bullet = Projectile.Spawn(bulletPrefab, bulletSpawn, bulletTarget);
 
             bullet.GetComponent<MeshRenderer>().material.color = Random.ColorHSV();
         }

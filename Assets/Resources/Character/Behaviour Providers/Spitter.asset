@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ad19f5ff5905d441bb5a3bb6439f3ec, type: 3}
   m_Name: Spitter
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 896051743544414979, guid: 2ef57984e99cc7a4e8a8b68b0565869f, type: 3}
-  attackSpeed: 1.5
+  bulletPrefab: {fileID: 5254004645483560775, guid: 8797e81ffe5df5946b3bdfb1a6c27cf0, type: 3}
+  attackSpeed: 0.75
   attackWindupTime: 0.2
   attackWinddownTime: 0.05
-  numOfBulletsPerShot: 5
-  bulletSpread: 0.1
+  numOfBulletsPerShot: 7
+  bulletSpread: 4
   detectPlayerRange: 30
   detectPlayerRangeBuffer: 5
