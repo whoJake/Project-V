@@ -42,10 +42,8 @@ public class EntityControllerEditor : Editor
 
     protected virtual void OnEnable() {
         movementProviderProperty = serializedObject.FindProperty("movementProvider");
-        Editor.CreateCachedEditor((MovementProvider) movementProviderProperty.objectReferenceValue, null, ref movementProviderEditor);
 
         behaviourProviderProperty = serializedObject.FindProperty("behaviourProvider");
-        Editor.CreateCachedEditor((BehaviourProvider)behaviourProviderProperty.objectReferenceValue, null, ref behaviourProviderEditor);
 
         massProperty = serializedObject.FindProperty("mass");
         useGravityProperty = serializedObject.FindProperty("useGravity");
@@ -82,10 +80,14 @@ public class EntityControllerEditor : Editor
 
         EditorGUILayout.LabelField(new GUIContent("Controlling Scripts"), EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
+
         EditorGUILayout.PropertyField(movementProviderProperty, new GUIContent("Movement Provider"));
+        Editor.CreateCachedEditor((MovementProvider)movementProviderProperty.objectReferenceValue, null, ref movementProviderEditor);
         CreateFoldoutEditor(movementProviderEditor, ref movementProviderEditorOpen, "Edit");
         EditorGUILayout.Space();
+
         EditorGUILayout.PropertyField(behaviourProviderProperty, new GUIContent("Behaviour Provider"));
+        Editor.CreateCachedEditor((BehaviourProvider)behaviourProviderProperty.objectReferenceValue, null, ref behaviourProviderEditor);
         CreateFoldoutEditor(behaviourProviderEditor, ref behaviourProviderEditorOpen, "Edit");
         EditorGUI.indentLevel--;
         EditorGUILayout.Space();

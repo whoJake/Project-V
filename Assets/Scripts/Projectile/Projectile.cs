@@ -6,6 +6,7 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     public bool useGravity;
+    public bool setGravity;
     public float gravity = 9.81f;
 
     public float speed;
@@ -27,8 +28,6 @@ public class Projectile : MonoBehaviour
     }
 
     private void Update() {
-        Vector3 prevPos = transform.position;
-
         Vector3 translation = transform.forward * horizontalVelocity
                             + transform.up * verticalVelocity;
         transform.Translate(translation * Time.deltaTime, Space.World);
@@ -71,6 +70,9 @@ public class Projectile : MonoBehaviour
         if (script.useGravity) {
             Vector3 targetModified = new Vector3(targetPosition.x, position.y, targetPosition.z);
             projectile.transform.LookAt(targetModified);
+
+            if(!script.setGravity) 
+                script.gravity = (2 * script.heightOfApex) / (script.timeToReachApex * script.timeToReachApex);
 
             script.verticalVelocity = script.timeToReachApex * script.gravity;
             float verticalDistance = targetPosition.y - position.y;

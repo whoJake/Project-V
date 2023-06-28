@@ -128,10 +128,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useGravity: 1
+  setGravity: 0
   gravity: 9.81
   speed: 0
-  heightOfApex: 25
-  timeToReachApex: 1.5
+  heightOfApex: 20
+  timeToReachApex: 1.2
   lifetime: 20
   damage: 5
   destructionRadius: 1.5
