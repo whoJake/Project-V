@@ -7,8 +7,6 @@ using UnityEditor;
 public class EntityControllerEditor : Editor
 {
     protected static bool useCustomInspector = true;
-    private static bool movementProviderEditorOpen;
-    private static bool behaviourProviderEditorOpen;
 
     public override void OnInspectorGUI() {
         useCustomInspector = EditorGUILayout.Toggle("Use Custom Inspector?", useCustomInspector);
@@ -21,10 +19,7 @@ public class EntityControllerEditor : Editor
     }
 
     SerializedProperty movementProviderProperty;
-    Editor movementProviderEditor;
-
     SerializedProperty behaviourProviderProperty;
-    Editor behaviourProviderEditor;
 
     SerializedProperty massProperty;
     SerializedProperty useGravityProperty;
@@ -60,21 +55,6 @@ public class EntityControllerEditor : Editor
         skinWidthProperty = serializedObject.FindProperty("skinWidth");
     }
 
-    private void CreateFoldoutEditor(Editor editor, ref bool foldout, string title) {
-        EditorGUI.indentLevel++;
-        EditorGUILayout.BeginHorizontal();
-        EditorGUI.IndentedRect(EditorGUILayout.GetControlRect());
-        foldout = EditorGUILayout.BeginFoldoutHeaderGroup(foldout, new GUIContent(title));
-        EditorGUILayout.EndHorizontal();
-
-        if (foldout) {
-            editor.OnInspectorGUI();
-        }
-        EditorGUI.EndFoldoutHeaderGroup();
-
-        EditorGUI.indentLevel--;
-    }
-
     protected virtual void CustomInspector() {
         serializedObject.Update();
 
@@ -82,13 +62,11 @@ public class EntityControllerEditor : Editor
         EditorGUI.indentLevel++;
 
         EditorGUILayout.PropertyField(movementProviderProperty, new GUIContent("Movement Provider"));
-        Editor.CreateCachedEditor((MovementProvider)movementProviderProperty.objectReferenceValue, null, ref movementProviderEditor);
-        CreateFoldoutEditor(movementProviderEditor, ref movementProviderEditorOpen, "Edit");
+        EditorExtras.OpenPropertyButton(movementProviderProperty.objectReferenceValue, new GUIContent("Edit"));
         EditorGUILayout.Space();
 
         EditorGUILayout.PropertyField(behaviourProviderProperty, new GUIContent("Behaviour Provider"));
-        Editor.CreateCachedEditor((BehaviourProvider)behaviourProviderProperty.objectReferenceValue, null, ref behaviourProviderEditor);
-        CreateFoldoutEditor(behaviourProviderEditor, ref behaviourProviderEditorOpen, "Edit");
+        EditorExtras.OpenPropertyButton(behaviourProviderProperty.objectReferenceValue, new GUIContent("Edit"));
         EditorGUI.indentLevel--;
         EditorGUILayout.Space();
 
