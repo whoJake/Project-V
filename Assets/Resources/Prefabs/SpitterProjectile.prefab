@@ -131,12 +131,15 @@ MonoBehaviour:
   setGravity: 0
   gravity: 9.81
   speed: 0
-  heightOfApex: 20
+  heightOfApex: 5
   timeToReachApex: 1.2
   lifetime: 20
   damage: 5
   destructionRadius: 1.5
   destroyOnCollision: 1
+  ignoreTags:
+  - IgnoreProjectile
+  - Spitter
   target: {x: 0, y: 0, z: 0}
   verticalVelocity: 0
   horizontalVelocity: 0

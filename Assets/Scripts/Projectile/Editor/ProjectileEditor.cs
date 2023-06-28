@@ -6,7 +6,7 @@ using UnityEditor;
 [CustomEditor(typeof(Projectile))]
 public class ProjectileEditor : Editor
 {
-    private static bool useCustomInspector;
+    private static bool useCustomInspector = true;
 
     public override void OnInspectorGUI() {
         useCustomInspector = EditorGUILayout.Toggle("Use Custom Inspector?", useCustomInspector);
@@ -18,6 +18,7 @@ public class ProjectileEditor : Editor
             base.OnInspectorGUI();
     }
 
+    private SerializedProperty ignoreTagsProperty;
     private SerializedProperty useGravityProperty;
     private SerializedProperty setGravityProperty;
     private SerializedProperty gravityProperty;
@@ -32,6 +33,7 @@ public class ProjectileEditor : Editor
     private SerializedProperty horizontalVelocityProperty;
 
     private void OnEnable() {
+        ignoreTagsProperty = serializedObject.FindProperty("ignoreTags");
         useGravityProperty = serializedObject.FindProperty("useGravity");
         setGravityProperty = serializedObject.FindProperty("setGravity");
         gravityProperty = serializedObject.FindProperty("gravity");
@@ -69,6 +71,11 @@ public class ProjectileEditor : Editor
         EditorGUILayout.PropertyField(lifetimeProperty, new GUIContent("Lifetime"));
         EditorGUILayout.PropertyField(damageProperty, new GUIContent("Damage Dealt"));
         EditorGUILayout.PropertyField(destroyOnCollisionProperty, new GUIContent("Destroy On Collision"));
+        if (destroyOnCollisionProperty.boolValue) {
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(ignoreTagsProperty, new GUIContent("Ignore Collision Tags"));
+            EditorGUI.indentLevel--;
+        }
         EditorGUILayout.PropertyField(destructionRadiusProperty, new GUIContent("Terrain Destruction Radius"));
 
         EditorGUILayout.Space();

@@ -17,6 +17,7 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float damage;
     [SerializeField] private float destructionRadius;
     [SerializeField] private bool destroyOnCollision;
+    [SerializeField] private string[] ignoreTags;
 
     public Vector3 target;
 
@@ -37,8 +38,10 @@ public class Projectile : MonoBehaviour
     }
 
     private void OnTriggerEnter(Collider other) {
-        if (other.CompareTag("IgnoreProjectile") || other.CompareTag("Player"))
-            return;
+        foreach(string s in ignoreTags) {
+            if (other.CompareTag(s))
+                return;
+        }
 
         if (other.CompareTag("Terrain"))
             MakeHole(transform.position);
