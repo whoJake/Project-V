@@ -6,7 +6,7 @@ using UnityEditor;
 [CustomEditor(typeof(ThirdPersonController))]
 public class ThirdPersonControllerEditor : Editor
 {
-    private bool usingCustomInspector;
+    private static bool usingCustomInspector;
 
     public override void OnInspectorGUI() {
         usingCustomInspector = EditorGUILayout.Toggle("Use Custom Inspector?", usingCustomInspector);
