@@ -45,8 +45,8 @@ public class TerrainHandler : MonoBehaviour
 
     public static System.Action<int> OnLayerGenerated;
 
-
     private void Start() {
+        Unload();
         generationQueue = new List<LayerGenRequest>();
         loadedLayers = new Dictionary<int, TerrainLayer>();
         settings = authoredSettings;
@@ -63,6 +63,16 @@ public class TerrainHandler : MonoBehaviour
 
     private void OnDisable() {
         TerrainChunk.ReleaseBuffers();
+    }
+
+    private void Unload() {
+        if (loadedLayers == null)
+            return;
+
+        foreach(KeyValuePair<int, TerrainLayer> l in loadedLayers) {
+            l.Value.Unload();
+        }
+        loadedLayers = new Dictionary<int, TerrainLayer>();
     }
 
     private void UpdateLayerActivity() {

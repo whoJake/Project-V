@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Spitter
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 5254004645483560775, guid: 8797e81ffe5df5946b3bdfb1a6c27cf0, type: 3}
+  bulletFireOffset: {x: 0, y: 0, z: -0.75}
   attackSpeed: 0.75
   attackWindupTime: 0.2
   attackWinddownTime: 0.05

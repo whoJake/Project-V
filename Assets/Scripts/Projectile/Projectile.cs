@@ -74,12 +74,14 @@ public class Projectile : MonoBehaviour
             Vector3 targetModified = new Vector3(targetPosition.x, position.y, targetPosition.z);
             projectile.transform.LookAt(targetModified);
 
-            if(!script.setGravity) 
-                script.gravity = (2 * script.apex2targetHeight) / (script.apex2targetTime * script.apex2targetTime);
+            float start2apexHeight = targetPosition.y + script.apex2targetHeight > position.y + script.apex2targetHeight ?
+                                     (targetPosition.y + script.apex2targetHeight) - position.y :
+                                     script.apex2targetHeight;
 
-            float start2apexHeight = (targetPosition.y + script.apex2targetHeight) - position.y;
-            float start2apexTime = Mathf.Sqrt((2 * start2apexHeight) / script.gravity);
-            script.verticalVelocity = start2apexTime * script.gravity;
+            if (!script.setGravity) 
+                script.gravity = (2 * start2apexHeight) / (script.apex2targetTime * script.apex2targetTime);
+
+            script.verticalVelocity = script.apex2targetTime * script.gravity;
             float verticalDistance = targetPosition.y - position.y;
 
             //--QUADRATIC SOLVE FOR TIME--

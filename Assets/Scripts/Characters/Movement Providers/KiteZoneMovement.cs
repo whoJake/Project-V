@@ -25,7 +25,8 @@ public class KiteZoneMovement : MovementProvider {
             if (!(canOverride && !canMove)) {
                 if (controller.lockonTarget) {
                     Vector3 vec2target = controller.lockonTarget.transform.position - controller.transform.position;
-                    direction = new Vector2(vec2target.x, vec2target.z).normalized;
+                    controller.transform.forward = new Vector3(vec2target.x, 0f, vec2target.z).normalized;
+                    direction = new Vector2(0, 1f);
                 }
 
                 canOverride = currentZone.overridable;

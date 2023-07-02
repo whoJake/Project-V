@@ -98,6 +98,7 @@ public class TerrainLayer : MonoBehaviour
                     GameObject chunkGameObject = CreateChunkGameObject(chunkID.x + "," + (-chunkID.y) + "," + chunkID.z, position);
                     TerrainChunk chunk = chunkGameObject.AddComponent<TerrainChunk>().Initialize(this, position, state);
                     chunks.Add(chunk);
+
                     yield return null;
                 }
             }
