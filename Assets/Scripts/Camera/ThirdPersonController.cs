@@ -55,6 +55,15 @@ public class ThirdPersonController : MonoBehaviour
             currentLength = length;
     }
 
+    public void ManualUpdate() {
+        currentLength = length;
+        if (!controlCamera)
+            controlCamera = Camera.main;
+
+        UpdateLookDirection();
+        UpdatePosition();
+    }
+
     private void ReadInputs() {
         if (Application.isFocused && Cursor.lockState == CursorLockMode.Locked) {
             float tau = 2 * Mathf.PI;

@@ -13,7 +13,7 @@ public class EntityController : MonoBehaviour
     public BehaviourProvider BehaviourProvider { get { return behaviourProvider; } }
 
     [SerializeField] private float mass = 1f;
-    [SerializeField] private bool useGravity = true;
+    [SerializeField] public bool useGravity = true;
 
     public GameObject lockonTarget;
 

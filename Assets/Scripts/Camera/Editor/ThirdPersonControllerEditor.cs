@@ -6,7 +6,7 @@ using UnityEditor;
 [CustomEditor(typeof(ThirdPersonController))]
 public class ThirdPersonControllerEditor : Editor
 {
-    private static bool usingCustomInspector;
+    private static bool usingCustomInspector = true;
 
     public override void OnInspectorGUI() {
         usingCustomInspector = EditorGUILayout.Toggle("Use Custom Inspector?", usingCustomInspector);
@@ -76,6 +76,12 @@ public class ThirdPersonControllerEditor : Editor
             EditorGUILayout.PropertyField(avoidBufferProperty, new GUIContent("Buffer Length"));
             EditorGUILayout.PropertyField(avoidSmoothingTimeProperty, new GUIContent("Smoothing Time"));
             EditorGUI.indentLevel--;
+        }
+
+        EditorGUILayout.Space();
+        if(GUILayout.Button(new GUIContent("Manual Update"))){
+            ThirdPersonController script = (ThirdPersonController)target;
+            script.ManualUpdate();
         }
 
         serializedObject.ApplyModifiedProperties();
