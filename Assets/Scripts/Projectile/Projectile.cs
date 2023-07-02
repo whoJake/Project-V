@@ -10,8 +10,8 @@ public class Projectile : MonoBehaviour
     public float gravity = 9.81f;
 
     public float speed;
-    public float heightOfApex;
-    public float timeToReachApex;
+    public float apex2targetHeight;
+    public float apex2targetTime;
 
     [SerializeField] private float lifetime;
     [SerializeField] private float damage;
@@ -75,9 +75,11 @@ public class Projectile : MonoBehaviour
             projectile.transform.LookAt(targetModified);
 
             if(!script.setGravity) 
-                script.gravity = (2 * script.heightOfApex) / (script.timeToReachApex * script.timeToReachApex);
+                script.gravity = (2 * script.apex2targetHeight) / (script.apex2targetTime * script.apex2targetTime);
 
-            script.verticalVelocity = script.timeToReachApex * script.gravity;
+            float start2apexHeight = (targetPosition.y + script.apex2targetHeight) - position.y;
+            float start2apexTime = Mathf.Sqrt((2 * start2apexHeight) / script.gravity);
+            script.verticalVelocity = start2apexTime * script.gravity;
             float verticalDistance = targetPosition.y - position.y;
 
             //--QUADRATIC SOLVE FOR TIME--

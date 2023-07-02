@@ -23,8 +23,8 @@ public class ProjectileEditor : Editor
     private SerializedProperty setGravityProperty;
     private SerializedProperty gravityProperty;
     private SerializedProperty speedProperty;
-    private SerializedProperty heightOfApexProperty;
-    private SerializedProperty timeToReachApexProperty;
+    private SerializedProperty apex2targetHeightProperty;
+    private SerializedProperty apex2targetTimeProperty;
     private SerializedProperty lifetimeProperty;
     private SerializedProperty damageProperty;
     private SerializedProperty destructionRadiusProperty;
@@ -38,8 +38,8 @@ public class ProjectileEditor : Editor
         setGravityProperty = serializedObject.FindProperty("setGravity");
         gravityProperty = serializedObject.FindProperty("gravity");
         speedProperty = serializedObject.FindProperty("speed");
-        heightOfApexProperty = serializedObject.FindProperty("heightOfApex");
-        timeToReachApexProperty = serializedObject.FindProperty("timeToReachApex");
+        apex2targetHeightProperty = serializedObject.FindProperty("apex2targetHeight");
+        apex2targetTimeProperty = serializedObject.FindProperty("apex2targetTime");
         lifetimeProperty = serializedObject.FindProperty("lifetime");
         damageProperty = serializedObject.FindProperty("damage");
         destructionRadiusProperty = serializedObject.FindProperty("destructionRadius");
@@ -55,12 +55,12 @@ public class ProjectileEditor : Editor
         if (useGravityProperty.boolValue) {
             EditorGUI.indentLevel++;
 
-            EditorGUILayout.PropertyField(timeToReachApexProperty, new GUIContent("Time to reach apex"));
+            EditorGUILayout.PropertyField(apex2targetTimeProperty, new GUIContent("Time from apex to target"));
             EditorGUILayout.PropertyField(setGravityProperty, new GUIContent("Set Gravity?"));
             if (setGravityProperty.boolValue) {
                 EditorGUILayout.PropertyField(gravityProperty, new GUIContent("Gravity"));
             } else {
-                EditorGUILayout.PropertyField(heightOfApexProperty, new GUIContent("Height of apex"));
+                EditorGUILayout.PropertyField(apex2targetHeightProperty, new GUIContent("Height of apex to target"));
             }
             EditorGUI.indentLevel--;
         } else {

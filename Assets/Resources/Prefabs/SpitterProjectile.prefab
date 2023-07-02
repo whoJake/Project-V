@@ -131,8 +131,8 @@ MonoBehaviour:
   setGravity: 0
   gravity: 9.81
   speed: 0
-  heightOfApex: 5
-  timeToReachApex: 1.2
+  apex2targetHeight: 10
+  apex2targetTime: 1.2
   lifetime: 20
   damage: 5
   destructionRadius: 1.5

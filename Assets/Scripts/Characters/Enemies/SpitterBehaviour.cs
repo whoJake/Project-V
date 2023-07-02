@@ -6,6 +6,7 @@ using UnityEngine;
 public class SpitterBehaviour : BehaviourProvider {
 
     [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private Vector3 bulletFireOffset;
 
     [SerializeField] private float attackSpeed;
     [SerializeField] private float attackWindupTime;
@@ -72,9 +73,7 @@ public class SpitterBehaviour : BehaviourProvider {
             float ySpread = Mathf.Cos(angOnCircle) * radius;
 
             Vector3 bulletTarget = controller.lockonTarget.transform.position + Vector3.right * xSpread + Vector3.forward * ySpread;
-            Vector3 vec2target = (controller.lockonTarget.transform.position - controller.transform.position).normalized;
-            Vector3 bulletSpawn = controller.transform.position + vec2target * (controller.capsuleRadius + bulletPrefab.transform.localScale.x);
-            GameObject bullet = Projectile.Spawn(bulletPrefab, bulletSpawn, bulletTarget);
+            GameObject bullet = Projectile.Spawn(bulletPrefab, controller.transform.position + controller.transform.TransformDirection(bulletFireOffset), bulletTarget);
 
             bullet.GetComponent<MeshRenderer>().material.color = Random.ColorHSV();
         }
