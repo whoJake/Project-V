@@ -16,6 +16,7 @@ public class TerrainChunk : MonoBehaviour
     private Vector3 centre;
 
     private MeshFilter targetFilter;
+    [SerializeField]
     private MeshCollider targetCollider;
 
     public Vector3 origin { get { return centre - ((Vector3)handler.textureDimensions * handler.voxelScale / 2f); } }
@@ -27,12 +28,13 @@ public class TerrainChunk : MonoBehaviour
     private static bool shadersLoaded = false;
     private static ComputeShader computeVerticesShader;
 
-    private void Awake() {
-        targetFilter = GetComponent<MeshFilter>();
-        targetCollider = GetComponent<MeshCollider>();
-    }
+    private ComputeBuffer vertexBuffer;
+    private ComputeBuffer triangleCountBuffer;
 
     public TerrainChunk Initialize(TerrainLayer _layer, Vector3 _centre, ActiveState _state) {
+        targetFilter = GetComponent<MeshFilter>();
+        targetCollider = GetComponent<MeshCollider>();
+
         layer = _layer;
         centre = _centre;
         state = _state;
@@ -93,9 +95,6 @@ public class TerrainChunk : MonoBehaviour
     //     Uses the current density texture to calculate the vertices using marching cubes algorithm and then applies these to the mesh
     //
     private IEnumerator CalculateVerticesAndApplyToMesh() {
-        ComputeBuffer vertexBuffer;
-        ComputeBuffer triangleCountBuffer;
-
         int maxCubes = handler.textureDimensions.x * handler.textureDimensions.y * handler.textureDimensions.z;
         int maxTris = maxCubes * 5;
 
@@ -115,7 +114,8 @@ public class TerrainChunk : MonoBehaviour
         Vector3Int threads = RTUtils.CalculateThreadAmount(handler.textureDimensions, 8);
         computeVerticesShader.Dispatch(0, threads.x, threads.y, threads.z);
 
-        yield return ComputeUtils.WaitForResource(vertexBuffer);
+        if(handler.yieldOnChunk)
+            yield return ComputeUtils.WaitForResource(vertexBuffer);
 
         //Gets the number of times Append was called on the buffer (number of triangles added)
         //then uses that to read the buffer, annoying asf to deal with it like this
@@ -152,7 +152,9 @@ public class TerrainChunk : MonoBehaviour
     private IEnumerator ComputeDensity(RenderTexture densityTexture) {
         layer.generator.Generate(ref densityTexture, this, handler.settings.seed);
 
-        yield return ComputeUtils.WaitForResource(densityTexture);
+        if(handler.yieldOnChunk)
+            yield return ComputeUtils.WaitForResource(densityTexture);
+
         yield return CalculateVerticesAndApplyToMesh();
 
         generating = false;
@@ -186,15 +188,25 @@ public class TerrainChunk : MonoBehaviour
     //     Handles unloading all resources related to this chunk
     //     aswwell as releasing any associated textures or buffers
     //
-    public void Unload() {
-        densityTexture.Release();
-        Destroy(this);
+    public void Unload(bool fromEditor = false) {
+        vertexBuffer?.Release();
+        triangleCountBuffer?.Release();
+
+        if(densityTexture)
+            densityTexture.Release();
+
+        if (fromEditor)
+            DestroyImmediate(gameObject);
+        else
+            Destroy(gameObject);
+
         //Dump current edit requests
         //Save chunk
     }
 
     private void OnDestroy() {
-        densityTexture.Release();
+        if(densityTexture)
+            densityTexture.Release();
     }
 
     public void SetState(ActiveState state) {

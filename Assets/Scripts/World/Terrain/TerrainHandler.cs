@@ -1,15 +1,14 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class TerrainHandler : MonoBehaviour
 {
-
     [SerializeField]
     private Camera mainCamera;
 
     private Dictionary<int, TerrainLayer> loadedLayers;
 
-    
     [SerializeField]
     private TerrainSettings authoredSettings;
     public TerrainSettings settings;
@@ -43,36 +42,66 @@ public class TerrainHandler : MonoBehaviour
     [SerializeField]
     private bool showLayerBounds;
 
+    [HideInInspector]
+    public bool yieldOnChunk;
+    private bool active = false;
+
     public static System.Action<int> OnLayerGenerated;
 
     private void Start() {
-        Unload();
-        generationQueue = new List<LayerGenRequest>();
+        yieldOnChunk = true;
+        Unload(); //Just incase we have loaded during editor sequence
+        Initialize();
+        active = true;
+    }
+
+    public void ForceGenerate() {
+        yieldOnChunk = false;
+        Unload(true);
+        Initialize();
+
+        for(int i = 0; i < settings.layers.Length; i++) {
+            CreateLayer(i, ActiveState.Static);
+        }
+        yieldOnChunk = true;
+    }
+
+    private void Update() {
+        if (!active)
+            return;
+
+        //Process queue has to be done first or the generated layer will get destroyed before it can be removed from the queue :/
+        if (generationQueue.Count != 0) 
+            ProcessQueue();
+
+        UpdateLayerActivity();
+    }
+
+    private void Initialize() {
         loadedLayers = new Dictionary<int, TerrainLayer>();
+        generationQueue = new List<LayerGenRequest>();
         settings = authoredSettings;
 
         TerrainChunk.InitializeCompute();
     }
 
-    private void Update() {
-        //Process queue has to be done first or the generated layer will get destroyed before it can be removed from the queue :/
-        if (generationQueue.Count != 0) ProcessQueue();
-
-        UpdateLayerActivity();
-    }
-
-    private void OnDisable() {
-        TerrainChunk.ReleaseBuffers();
-    }
-
-    private void Unload() {
-        if (loadedLayers == null)
-            return;
-
-        foreach(KeyValuePair<int, TerrainLayer> l in loadedLayers) {
-            l.Value.Unload();
+    public void Unload(bool fromEditor = false) {
+        if (loadedLayers != null) {
+            foreach (KeyValuePair<int, TerrainLayer> l in loadedLayers) {
+                l.Value.Unload(fromEditor);
+            }
+        } else {
+            //Fail safe to unload
+            foreach (Transform child in transform) {
+                if (child.gameObject.TryGetComponent(out TerrainLayer layer))
+                    layer.Unload(fromEditor);
+            }
         }
-        loadedLayers = new Dictionary<int, TerrainLayer>();
+
+        loadedLayers = null;
+        settings = null;
+        generationQueue = null;
+        TerrainChunk.ReleaseBuffers();
     }
 
     private void UpdateLayerActivity() {
@@ -155,7 +184,6 @@ public class TerrainHandler : MonoBehaviour
             }
         }
     }
-
 }
 
 //Enum used for most terrain classes to dictate its activity state

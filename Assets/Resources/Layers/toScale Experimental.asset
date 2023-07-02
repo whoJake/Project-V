@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d09b404c84cc39f48aa820a7665397fe, type: 3}
   m_Name: toScale Experimental
   m_EditorClassIdentifier: 
-  randomizeSeed: 1
-  seed: 718
+  randomizeSeed: 0
+  seed: 372
   layers:
   - {fileID: 11400000, guid: 9752d7657ac82ec4c8a2dcdf45b712d3, type: 2}

@@ -108,8 +108,8 @@ public class StarterTerrain : TerrainLayerGenerator
     }
 
     public override void ReleaseBuffers() {
-        platformBuffer.Release();
-        noiseArgsBuffer.Release();
+        platformBuffer?.Release();
+        noiseArgsBuffer?.Release();
     }
 
     private float GetRadiusAtNormalizedHeight(float height) {

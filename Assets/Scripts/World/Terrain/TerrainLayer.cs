@@ -75,6 +75,7 @@ public class TerrainLayer : MonoBehaviour
     //     number of chunks per axis to generate
     //
     public IEnumerator Generate() {
+        generating = true;
         Vector3Int halfChunkCount = Vector3Int.CeilToInt((Vector3)chunkCount / 2f);
 
         //Bit of a hacky way to fix centering issues when chunkCount doesnt allow for an exact centre chunk
@@ -99,7 +100,8 @@ public class TerrainLayer : MonoBehaviour
                     TerrainChunk chunk = chunkGameObject.AddComponent<TerrainChunk>().Initialize(this, position, state);
                     chunks.Add(chunk);
 
-                    yield return null;
+                    if(handler.yieldOnChunk)
+                        yield return null;
                 }
             }
         }
@@ -115,13 +117,27 @@ public class TerrainLayer : MonoBehaviour
     //     Handles unloading the entirety of this layer
     //     When in unloaded state, the layer will have to either regenerate from noise or load from a file
     //
-    public void Unload() {
-        for(int i = 0; i < chunks.Count; i++) {
-            TerrainChunk chunk = chunks[i];
-            chunk.Unload();
-            chunks.Remove(chunk);
+    public void Unload(bool fromEditor = false) {
+        generator.ReleaseBuffers();
+
+        if (chunks != null) { 
+            for (int i = 0; i < chunks.Count; i++) {
+                TerrainChunk chunk = chunks[i];
+                chunk.Unload(fromEditor);
+                chunks.Remove(chunk);
+            }
+        } else {
+            //Fail safe
+            foreach(Transform child in transform) {
+                if(child.TryGetComponent(out TerrainChunk chunk)) {
+                    chunk.Unload(fromEditor);
+                }
+            }
         }
-        GameObject.Destroy(this);
+        if (fromEditor)
+            DestroyImmediate(gameObject);
+        else
+            Destroy(gameObject);
     }
 
     //

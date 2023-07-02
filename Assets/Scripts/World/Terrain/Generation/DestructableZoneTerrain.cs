@@ -59,7 +59,7 @@ public class DestructableZoneTerrain : TerrainLayerGenerator {
     }
 
     public override void ReleaseBuffers() {
-        if(wallsBuffer != null) wallsBuffer.Release();
+        wallsBuffer?.Release();
     }
 }
 
