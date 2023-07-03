@@ -1033,6 +1033,7 @@ MonoBehaviour:
   voxelScale: 1
   material: {fileID: 2100000, guid: 4d1e4909787630147a86fc4972d45811, type: 2}
   showLayerBounds: 0
+  yieldOnChunk: 0
 --- !u!4 &614753270
 Transform:
   m_ObjectHideFlags: 0
@@ -2168,7 +2169,7 @@ GameObject:
   - component: {fileID: 1434057223}
   - component: {fileID: 1434057227}
   - component: {fileID: 1434057226}
-  - component: {fileID: 1434057225}
+  - component: {fileID: 1434057228}
   - component: {fileID: 1434057224}
   m_Layer: 0
   m_Name: Spitter
@@ -2216,29 +2217,7 @@ MonoBehaviour:
   velocityDisplay: {x: 0, y: 0, z: 0}
   groundDrag: 4
   airDrag: 2
-  ignoreForGrounded:
-    serializedVersion: 2
-    m_Bits: 192
-  maxStepHeight: 0.5
-  maxSlopeAngle: 30
-  maxCollisionChecks: 5
-  minimumMoveDistance: 0.001
-  skinWidth: 0.005
   attackTarget: {fileID: 0}
---- !u!136 &1434057225
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1434057222}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 1
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!33 &1434057226
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -2289,6 +2268,24 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!143 &1434057228
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1434057222}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 35
+  m_StepOffset: 0
+  m_SkinWidth: 0.001
+  m_MinMoveDistance: 0
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1517198333
 GameObject:
   m_ObjectHideFlags: 0

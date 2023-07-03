@@ -19,6 +19,8 @@ public class UserMovement : MovementProvider {
         if (waitForLayer != -1) {
             controller.useGravity = false;
             TerrainHandler.OnLayerGenerated += (int index) => { if (index == waitForLayer) { active = true; controller.useGravity = true; } };
+        } else {
+            active = true;
         }
     }
 

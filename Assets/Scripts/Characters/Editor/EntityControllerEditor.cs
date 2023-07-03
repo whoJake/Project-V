@@ -27,13 +27,7 @@ public class EntityControllerEditor : Editor
     SerializedProperty velocityProperty;
     SerializedProperty groundDragProperty;
     SerializedProperty airDragProperty;
-    SerializedProperty ignoreForGroundedProperty;
-    SerializedProperty maxStepHeightProperty;
-    SerializedProperty maxSlopeAngleProperty;
     SerializedProperty currentSpeedProperty;
-    SerializedProperty maxCollisionChecksProperty;
-    SerializedProperty minimumMoveDistanceProperty;
-    SerializedProperty skinWidthProperty;
 
     protected virtual void OnEnable() {
         movementProviderProperty = serializedObject.FindProperty("movementProvider");
@@ -46,13 +40,7 @@ public class EntityControllerEditor : Editor
         velocityProperty = serializedObject.FindProperty("velocityDisplay");
         groundDragProperty = serializedObject.FindProperty("groundDrag");
         airDragProperty = serializedObject.FindProperty("airDrag");
-        ignoreForGroundedProperty = serializedObject.FindProperty("ignoreForGrounded");
-        maxStepHeightProperty = serializedObject.FindProperty("maxStepHeight");
-        maxSlopeAngleProperty = serializedObject.FindProperty("maxSlopeAngle");
         currentSpeedProperty = serializedObject.FindProperty("currentSpeedDisplay");
-        maxCollisionChecksProperty = serializedObject.FindProperty("maxCollisionChecks");
-        minimumMoveDistanceProperty = serializedObject.FindProperty("minimumMoveDistance");
-        skinWidthProperty = serializedObject.FindProperty("skinWidth");
     }
 
     protected virtual void CustomInspector() {
@@ -77,24 +65,17 @@ public class EntityControllerEditor : Editor
         EditorGUILayout.PropertyField(massProperty, new GUIContent("Mass"));
         EditorGUILayout.PropertyField(groundDragProperty, new GUIContent("Ground Drag"));
         EditorGUILayout.PropertyField(airDragProperty, new GUIContent("Air Drag"));
-        EditorGUILayout.PropertyField(ignoreForGroundedProperty, new GUIContent("Ignore Grounded Mask"));
 
         EditorGUILayout.Space();
         EditorGUI.indentLevel--;
         EditorGUILayout.LabelField(new GUIContent("Advanced"), EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
         EditorGUI.BeginDisabledGroup(true);
-        EditorGUILayout.PropertyField(velocityProperty, new GUIContent("Velocity"));
+        EditorGUILayout.PropertyField(velocityProperty, new GUIContent("Internal Velocity"));
         
-        EditorGUILayout.PropertyField(currentSpeedProperty, new GUIContent("Speed"));
+        EditorGUILayout.PropertyField(currentSpeedProperty, new GUIContent("Internal Speed"));
         EditorGUILayout.PropertyField(lockonTargetProperty, new GUIContent("Lockon Target"));
         EditorGUI.EndDisabledGroup();
-
-        EditorGUILayout.PropertyField(skinWidthProperty, new GUIContent("Skin Width"));
-        EditorGUILayout.PropertyField(minimumMoveDistanceProperty, new GUIContent("Min Move Distance"));
-        EditorGUILayout.PropertyField(maxStepHeightProperty, new GUIContent("Max Step Height"));
-        EditorGUILayout.PropertyField(maxSlopeAngleProperty, new GUIContent("Max Slope Angle"));
-        EditorGUILayout.PropertyField(maxCollisionChecksProperty, new GUIContent("Max Collision Checks"));
 
         EditorGUI.indentLevel--;
 
