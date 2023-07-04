@@ -28,9 +28,6 @@ public class TerrainChunk : MonoBehaviour
     private static bool shadersLoaded = false;
     private static ComputeShader computeVerticesShader;
 
-    private ComputeBuffer vertexBuffer;
-    private ComputeBuffer triangleCountBuffer;
-
     public TerrainChunk Initialize(TerrainLayer _layer, Vector3 _centre, ActiveState _state) {
         targetFilter = GetComponent<MeshFilter>();
         targetCollider = GetComponent<MeshCollider>();
@@ -98,8 +95,8 @@ public class TerrainChunk : MonoBehaviour
         int maxCubes = handler.textureDimensions.x * handler.textureDimensions.y * handler.textureDimensions.z;
         int maxTris = maxCubes * 5;
 
-        vertexBuffer = new ComputeBuffer(maxTris, sizeof(float) * 3 * 3, ComputeBufferType.Append);
-        triangleCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+        ComputeBuffer vertexBuffer = new ComputeBuffer(maxTris, sizeof(float) * 3 * 3, ComputeBufferType.Append);
+        ComputeBuffer triangleCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
 
         updatingMesh = true;
 
@@ -189,9 +186,6 @@ public class TerrainChunk : MonoBehaviour
     //     aswwell as releasing any associated textures or buffers
     //
     public void Unload(bool fromEditor = false) {
-        vertexBuffer?.Release();
-        triangleCountBuffer?.Release();
-
         if(densityTexture)
             densityTexture.Release();
 
