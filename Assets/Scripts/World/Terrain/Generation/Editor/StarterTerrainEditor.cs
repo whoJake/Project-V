@@ -39,6 +39,8 @@ public class StarterTerrainEditor : Editor
     SerializedProperty cliffFeatureDepthProperty;
     SerializedProperty cliffLedgeSizeProperty;
 
+    SerializedProperty starterPlatformProperty;
+
     SerializedProperty noiseArgsProperty;
 
     public override void OnInspectorGUI() {
@@ -81,6 +83,8 @@ public class StarterTerrainEditor : Editor
         cliffSlopeEasePowerProperty = serializedObject.FindProperty("cliffSlopeEasePower");
         cliffFeatureDepthProperty = serializedObject.FindProperty("cliffFeatureDepth");
         cliffLedgeSizeProperty = serializedObject.FindProperty("cliffLedgeSize");
+
+        starterPlatformProperty = serializedObject.FindProperty("starterPlatform");
 
         noiseArgsProperty = serializedObject.FindProperty("noiseArgs");
     }
@@ -139,6 +143,9 @@ public class StarterTerrainEditor : Editor
 
         EditorGUILayout.PropertyField(depthRangeProperty, new GUIContent("Depth Range"));
         EditorGUILayout.PropertyField(chasmRadiusRangeProperty, new GUIContent("Chasm Radius Range"));
+        EditorGUILayout.Space();
+
+        EditorGUILayout.PropertyField(starterPlatformProperty, new GUIContent("Starter Platform Settings"));
         EditorGUILayout.Space();
 
         EditorGUILayout.LabelField(new GUIContent("Noise Arguments"), EditorStyles.boldLabel);

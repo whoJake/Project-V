@@ -1,0 +1,114 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 917e3c5e44760d44eac3eaf6a04879a8, type: 3}
+  m_Name: Top Layer
+  m_EditorClassIdentifier: 
+  numOfPlatforms: 0
+  platformRadiusRange: {x: 110, y: 175}
+  platformShapeFeatureStrength: 0.3
+  platformFlatnessRange: {x: 0.5, y: 0.6}
+  platformTopDisplacement: 1.5
+  platformPathHorizontalDifferenceRange: {x: 10, y: 25}
+  platformPathVerticalDifferenceRange: {x: 10, y: 20}
+  platformPathDistanceFromWallRange: {x: -10, y: 15}
+  platformPathSwitchDirectionChance: 0.005
+  bonusPlatformMinDistance: 90
+  platformPathConnectingCountRange: {x: 1, y: 3}
+  platformPathConnectorsRadiusRange: {x: 65, y: 75}
+  platformPathConnectorsFlatnessRange: {x: 0.1, y: 0.3}
+  platformStemPinchRange: {x: 0.1, y: 1.1}
+  platformStemRadius: {x: 55, y: 90}
+  platformStemFeatureDepth: 20
+  depthRange: {x: 400, y: 500}
+  chasmRadiusRange: {x: 0, y: 0}
+  upperSurfaceDepth: 32
+  upperSurfaceFeatureDepth: 16
+  upperRadius: 750
+  lowerRadius: 350
+  cliffSlopeEasePower: 8
+  cliffFeatureDepth: 48
+  cliffLedgeSize: {x: 64, y: 16}
+  starterPlatform:
+    position: {x: 0, y: 0, z: 0}
+    radius: 250
+    flatness: 0.6
+    surfaceFeatureDepth: 5
+    shapeFeatureStrength: 0.6
+    hasStem: 0
+    stemRadius: {x: 120, y: 80}
+    stemPinchRange: {x: 0.05, y: 1.1}
+    stemFeatureStrength: 20
+    radiusNoiseArgID: 7
+    abovePlatformNoiseArgID: 8
+    platform3DShapeNoiseArgID: 9
+    stemRadiusNoiseArgID: 6
+  noiseArgs:
+  - tag: Platform Radial
+    scale: {x: 0.65, y: 0.8, z: 0.8}
+    octaves: 6
+    frequency: 0.01
+    persistance: 0.5
+    lacunarity: 1.5
+  - tag: Platform 3D
+    scale: {x: 0.5, y: 0.6, z: 0.5}
+    octaves: 3
+    frequency: 0.015
+    persistance: 0.6
+    lacunarity: 1.6
+  - tag: Chasm Radial
+    scale: {x: 1, y: 0.5, z: 1}
+    octaves: 5
+    frequency: 0.015
+    persistance: 0.5
+    lacunarity: 1.6
+  - tag: Platform Surface
+    scale: {x: 0, y: 0, z: 0}
+    octaves: 5
+    frequency: 0.02
+    persistance: 0.5
+    lacunarity: 1.7
+  - tag: Slope Surface
+    scale: {x: 0.6, y: 0.3, z: 0.6}
+    octaves: 5
+    frequency: 0.02
+    persistance: 0.5
+    lacunarity: 1.7
+  - tag: Top Surface
+    scale: {x: 0.7, y: 0.5, z: 0.7}
+    octaves: 7
+    frequency: 0.01
+    persistance: 0.6
+    lacunarity: 1.6
+  - tag: Stem Radius
+    scale: {x: 1.2, y: 0.7, z: 1.2}
+    octaves: 6
+    frequency: 0.01
+    persistance: 0.6
+    lacunarity: 1.5
+  - tag: First Platform Radial
+    scale: {x: 0.4, y: 0.3, z: 0.25}
+    octaves: 3
+    frequency: 0.011
+    persistance: 0.5
+    lacunarity: 1.5
+  - tag: First Platform Surface
+    scale: {x: 1, y: 1, z: 1}
+    octaves: 3
+    frequency: 0.012
+    persistance: 0.5
+    lacunarity: 1.7
+  - tag: First Platform 3D
+    scale: {x: 0.35, y: 0.4, z: 0.35}
+    octaves: 6
+    frequency: 0.015
+    persistance: 0.6
+    lacunarity: 1.6

@@ -67,6 +67,9 @@ public class StarterTerrain : TerrainLayerGenerator
     private Vector2 cliffLedgeSize;
 
     [SerializeField]
+    private Platform starterPlatform;
+
+    [SerializeField]
     private NamedNoiseArgs[] noiseArgs;
 
     private float depth = -1;
@@ -128,7 +131,12 @@ public class StarterTerrain : TerrainLayerGenerator
 
             stemRadius = platformStemRadius,
             stemPinchRange = platformStemPinchRange,
-            stemFeatureStrength = platformStemFeatureDepth
+            stemFeatureStrength = platformStemFeatureDepth,
+
+            radiusNoiseArgID = 0u,
+            abovePlatformNoiseArgID = 3u,
+            platform3DShapeNoiseArgID = 1u,
+            stemRadiusNoiseArgID = 6u
         };
         
         return result;
@@ -176,9 +184,11 @@ public class StarterTerrain : TerrainLayerGenerator
 
             float dstFromWall;
             float dstFromWall_t = Random.Range(0f, 1f);
+
+            Platform result = new Platform(); //Logic shows it should always be initialized but wont compile without first initializing
             if(firstPlatform) {
-                //First platform always connects to wall
-                dstFromWall = 0;
+                result = starterPlatform;
+                dstFromWall = -20f;
             }else if (isConnector) {
                 dstFromWall = 0;
                 placementRadius = prevPlacementRadius + Random.Range(-pRadius / 2f, +pRadius / 2f);
@@ -192,7 +202,11 @@ public class StarterTerrain : TerrainLayerGenerator
             placementRadius -= dstFromWall;
 
             Vector3 pPosition = new Vector3(vecToCurAngle.x * placementRadius, lOrigin.y - curDepth * lSize.y, vecToCurAngle.y * placementRadius);
-            Platform result = CreatePlatform(pPosition, pRadius, 1, !isConnector);
+            if (!firstPlatform)
+                result = CreatePlatform(pPosition, pRadius, 1, !isConnector);
+            else
+                result.position = pPosition;
+
             if (!isConnector) {
                 bool underPlatform = IsBelowExistingPlatform(result, platforms);
                 if (underPlatform)
@@ -207,7 +221,7 @@ public class StarterTerrain : TerrainLayerGenerator
                 connectingPlatformCount = Random.Range(platformPathConnectingCountRange.x, platformPathConnectingCountRange.y + 1);
 
             curDepth += Random.Range(platformPathVerticalDifferenceRange.x, platformPathVerticalDifferenceRange.y) / lSize.y;
-            curAngle += (pRadius + Random.Range(platformPathHorizontalDifferenceRange.x, platformPathHorizontalDifferenceRange.y)) / radiusAtDepth * direction;
+            curAngle += (result.radius + Random.Range(platformPathHorizontalDifferenceRange.x, platformPathHorizontalDifferenceRange.y)) / radiusAtDepth * direction;
             prevPlacementRadius = placementRadius;
             firstPlatform = false;
         }
@@ -319,8 +333,9 @@ public class StarterTerrain : TerrainLayerGenerator
     }
 }
 
+[System.Serializable]
 public struct Platform {
-    public static int stride = sizeof(float) * 13;
+    public static int stride = sizeof(float) * 13 + sizeof(uint) * 4;
     public Vector3 position;
     public float radius;
     public float flatness;
@@ -331,5 +346,10 @@ public struct Platform {
     public Vector2 stemRadius;
     public Vector2 stemPinchRange;
     public float stemFeatureStrength;
+
+    public uint radiusNoiseArgID;
+    public uint abovePlatformNoiseArgID;
+    public uint platform3DShapeNoiseArgID;
+    public uint stemRadiusNoiseArgID;
 }
 
