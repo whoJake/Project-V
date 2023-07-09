@@ -6,12 +6,19 @@ using UnityEngine.Rendering;
 
 public class TerrainChunk : MonoBehaviour
 {
+    struct ChunkData {
+        public RenderTexture densityTexture;
+        public RenderTexture heightMap;
+    }
+
     private ActiveState state;
     private List<ChunkEditRequest> editRequests;
-    private RenderTexture densityTexture;
+    private ChunkData data;
 
     public TerrainLayer layer;
     public TerrainHandler handler { get { return layer.handler; } }
+
+    public RenderTexture rt;
 
     private Vector3 centre;
 
@@ -23,7 +30,14 @@ public class TerrainChunk : MonoBehaviour
 
     public bool updatingMesh;
     public bool generating;
-    public bool generated { get { return densityTexture != null; } }
+    public bool generated { get { return data.densityTexture != null; } }
+
+    public bool generatingHeightMap = false;
+    public bool generatedHeightMap = false;
+
+    public bool showBounds = false;
+    static int gid = 0;
+    public int id;
 
     private static bool shadersLoaded = false;
     private static ComputeShader computeVerticesShader;
@@ -36,6 +50,8 @@ public class TerrainChunk : MonoBehaviour
         centre = _centre;
         state = _state;
         editRequests = new List<ChunkEditRequest>();
+        id = gid;
+        gid++;
 
         Generate();
 
@@ -78,8 +94,8 @@ public class TerrainChunk : MonoBehaviour
         if (!shadersLoaded) Debug.Log("Compute shader has not been initialized");
 
         generating = true;
-        densityTexture = RTUtils.Create3D_RFloat(handler.textureDimensions);
-        StartCoroutine(ComputeDensity(densityTexture));
+        data.densityTexture = RTUtils.Create3D_R8(handler.textureDimensions);
+        StartCoroutine(ComputeDensity(data.densityTexture));
     }
 
     public void UpdateMesh() {
@@ -101,7 +117,7 @@ public class TerrainChunk : MonoBehaviour
         updatingMesh = true;
 
         vertexBuffer.SetCounterValue(0);
-        computeVerticesShader.SetTexture(0, "_DensityTexture", densityTexture);
+        computeVerticesShader.SetTexture(0, "_DensityTexture", data.densityTexture);
         computeVerticesShader.SetBuffer(0, "_TriangleBuffer", vertexBuffer);
         computeVerticesShader.SetInts("texture_size", handler.textureDimensions.x, handler.textureDimensions.y, handler.textureDimensions.z);
         computeVerticesShader.SetFloat("voxel_scale", handler.voxelScale);
@@ -137,6 +153,59 @@ public class TerrainChunk : MonoBehaviour
         MeshInfo meshInfo = new MeshInfo(vertices, triangles);
         targetFilter.mesh = meshInfo.AsMesh();
         updatingMesh = false;
+
+        StartCoroutine(ComputeHeightMap(targetFilter.sharedMesh.vertices, targetFilter.sharedMesh.normals));
+    }
+
+    private IEnumerator ComputeHeightMap(Vector3[] positions, Vector3[] normals) {
+        generatingHeightMap = true;
+        Texture2D cpuHeightMap = new Texture2D(handler.textureDimensions.x, handler.textureDimensions.z, TextureFormat.R8, false);
+        //Initialize
+        for(int x = 0; x < handler.textureDimensions.x; x++) {
+            for(int y = 0; y < handler.textureDimensions.z; y++) {
+                cpuHeightMap.SetPixel(x, y, new Color(0, 0, 0, 0));
+            }
+        }
+
+        for(int i = 0; i < positions.Length; i++) {
+            if (i % 25 == 0)
+                if(handler.yieldOnChunk) yield return null; //Wait a frame between every 25 calculations ig?
+
+            if (Vector3.Dot(Vector3.up, normals[i]) <= 0.6)
+                continue;
+
+            Bounds bounds = GetBounds();
+            Vector2Int texturePos = new Vector2Int(
+                Mathf.FloorToInt(((positions[i].x + bounds.extents.x) / bounds.size.x) * 32.0f),
+                Mathf.FloorToInt(((positions[i].z + bounds.extents.z) / bounds.size.z) * 32.0f)
+                );
+
+            float currentHeight = cpuHeightMap.GetPixel(texturePos.x, texturePos.y).r;
+            float height = positions[i].y;
+            float chunkNormalizedHeight = (height + bounds.extents.y) / bounds.size.y;
+
+            //Debug.Log("CHUNKID: " + id + "\nSample Point: " + texturePos + "\nHeight :" + height + "\nChunkNormalizedHeight :" + chunkNormalizedHeight + "\nCurrentPixelHeight: " + currentHeight);
+
+            //Debug.Log(currentHeight + ": currentHeight");
+            //Debug.Log(currentHeight + ": chunkNormalizedHeight");
+            float val;
+
+            if(currentHeight == 0) 
+                val = chunkNormalizedHeight;
+            else 
+                val = Mathf.Min(currentHeight, chunkNormalizedHeight);
+            
+            cpuHeightMap.SetPixel(texturePos.x, texturePos.y, new Color(val, 0, 0, 0));
+        }
+
+        cpuHeightMap.Apply();
+        data.heightMap = RTUtils.Create2D_R8(new Vector2Int(handler.textureDimensions.x, handler.textureDimensions.z));
+        rt = RTUtils.Create2D_R8(new Vector2Int(handler.textureDimensions.x, handler.textureDimensions.z));
+        Graphics.Blit(cpuHeightMap, data.heightMap);
+        rt = data.heightMap;
+        generatingHeightMap = false;
+        generatedHeightMap = true;
+        yield break;
     }
 
     //
@@ -174,7 +243,7 @@ public class TerrainChunk : MonoBehaviour
     private void HandleEditRequests() {
         for (int i = editRequests.Count - 1; i >= 0; i--) {
             ChunkEditRequest request = editRequests[i];
-            if (!request.InProgress) request.Process(densityTexture, this);
+            if (!request.InProgress) request.Process(data.densityTexture, this);
             editRequests.Remove(request);
         }
         UpdateMesh();
@@ -186,8 +255,8 @@ public class TerrainChunk : MonoBehaviour
     //     aswwell as releasing any associated textures or buffers
     //
     public void Unload(bool fromEditor = false) {
-        if(densityTexture)
-            densityTexture.Release();
+        if(data.densityTexture)
+            data.densityTexture.Release();
 
         if (fromEditor)
             DestroyImmediate(gameObject);
@@ -199,8 +268,8 @@ public class TerrainChunk : MonoBehaviour
     }
 
     private void OnDestroy() {
-        if(densityTexture)
-            densityTexture.Release();
+        if(data.densityTexture)
+            data.densityTexture.Release();
     }
 
     public void SetState(ActiveState state) {
@@ -228,4 +297,13 @@ public class TerrainChunk : MonoBehaviour
     public static void ReleaseBuffers() {
         //layerSettingsBuffer.Release();
     }
+
+    private void OnDrawGizmosSelected() {
+        if (!showBounds)
+            return;
+
+        Bounds bounds = GetBounds();
+        Gizmos.DrawWireCube(transform.position, bounds.size);
+    }
+
 }

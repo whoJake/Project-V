@@ -110,6 +110,7 @@ public class TerrainLayer : MonoBehaviour
         generator.ReleaseBuffers();
         SetState(state);
         TerrainHandler.OnLayerGenerated?.Invoke(id);
+        Debug.Log("Generated " + chunks.Count + " chunks in layer " + id);
     }
 
     //

@@ -11,11 +11,27 @@ public static class RTUtils
     // Parameters:
     //   dimensions:
     //     size of each dimension in the created texture
-    public static RenderTexture Create3D_RFloat(Vector3Int dimensions) {
+    public static RenderTexture Create3D_R8(Vector3Int dimensions) {
         RenderTexture result = new RenderTexture(dimensions.x, dimensions.y, 0);
         result.dimension = UnityEngine.Rendering.TextureDimension.Tex3D;
         result.format = RenderTextureFormat.R8;
         result.volumeDepth = dimensions.z;
+        result.enableRandomWrite = true;
+        result.Create();
+        return result;
+    }
+
+    //
+    // Summery:
+    //      Creates a render 2 dimensional render texture of type RFloat
+    //
+    // Parameters:
+    //   dimensions:
+    //     size of each dimension in the created texture
+    public static RenderTexture Create2D_R8(Vector2Int dimensions) {
+        RenderTexture result = new RenderTexture(dimensions.x, dimensions.y, 0);
+        result.dimension = UnityEngine.Rendering.TextureDimension.Tex2D;
+        result.format = RenderTextureFormat.R8;
         result.enableRandomWrite = true;
         result.Create();
         return result;
