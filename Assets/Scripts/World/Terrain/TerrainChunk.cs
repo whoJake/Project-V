@@ -188,12 +188,7 @@ public class TerrainChunk : MonoBehaviour
 
             //Debug.Log(currentHeight + ": currentHeight");
             //Debug.Log(currentHeight + ": chunkNormalizedHeight");
-            float val;
-
-            if(currentHeight == 0) 
-                val = chunkNormalizedHeight;
-            else 
-                val = Mathf.Min(currentHeight, chunkNormalizedHeight);
+            float val = Mathf.Max(currentHeight, chunkNormalizedHeight);
             
             cpuHeightMap.SetPixel(texturePos.x, texturePos.y, new Color(val, 0, 0, 0));
         }
