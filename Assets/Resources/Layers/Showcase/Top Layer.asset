@@ -41,7 +41,7 @@ MonoBehaviour:
     position: {x: 0, y: 0, z: 0}
     radius: 250
     flatness: 0.6
-    surfaceFeatureDepth: 5
+    surfaceFeatureDepth: 2.5
     shapeFeatureStrength: 0.6
     hasStem: 0
     stemRadius: {x: 120, y: 80}

@@ -123,11 +123,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!4 &85385124 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5892844215232806125, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
-  m_PrefabInstance: {fileID: 221271753}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &221271753
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -135,6 +130,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1144011245939397617, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+      propertyPath: m_RootOrder
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 5892844216735093086, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
       propertyPath: m_RootOrder
       value: 5
@@ -185,6 +184,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+--- !u!4 &221271754 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1144011245939397617, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+  m_PrefabInstance: {fileID: 221271753}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &221271755 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1144011246116961858, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+  m_PrefabInstance: {fileID: 221271753}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &223971696
 GameObject:
   m_ObjectHideFlags: 0
@@ -584,11 +593,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &1797028051 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5892844216735093086, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
-  m_PrefabInstance: {fileID: 221271753}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2089967312
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -643,15 +647,15 @@ PrefabInstance:
     - target: {fileID: 4242243881959010750, guid: 9ec85c0198b40d74295fe7e82e38c998, type: 3}
       propertyPath: focusPoint
       value: 
-      objectReference: {fileID: 85385124}
+      objectReference: {fileID: 221271755}
     - target: {fileID: 4242243881959010750, guid: 9ec85c0198b40d74295fe7e82e38c998, type: 3}
       propertyPath: rotationPoint
       value: 
-      objectReference: {fileID: 85385124}
+      objectReference: {fileID: 221271755}
     - target: {fileID: 4242243881959010750, guid: 9ec85c0198b40d74295fe7e82e38c998, type: 3}
       propertyPath: controlTransform
       value: 
-      objectReference: {fileID: 1797028051}
+      objectReference: {fileID: 221271754}
     - target: {fileID: 4242243881959010751, guid: 9ec85c0198b40d74295fe7e82e38c998, type: 3}
       propertyPath: m_Name
       value: ThirdPersonCamera

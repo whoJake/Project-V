@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSpeed: 14
   waitForLayer: 0
-  jumpPower: 13
+  sprintMultiplier: 2.5
+  jumpPower: 7

@@ -9,6 +9,8 @@ public class UserMovement : MovementProvider {
     private float movementSpeed;
     [SerializeField]
     private int waitForLayer = -1;
+    [SerializeField]
+    private float sprintMultiplier = 1.5f;
     private bool active = false;
 
     [SerializeField]
@@ -33,8 +35,12 @@ public class UserMovement : MovementProvider {
             OnJump?.Invoke(jumpPower);
         }
 
+        float speed = movementSpeed;
+        if (Input.GetButton("Sprint"))
+            speed *= sprintMultiplier;
+
         return new MovementState {  direction = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized,
-                                    speed = movementSpeed,
+                                    speed = speed,
                                     isCrouched = false
                                     };
     }

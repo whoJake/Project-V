@@ -20,42 +20,23 @@ public class EntityControllerEditor : Editor {
     SerializedProperty movementProviderProperty;
     SerializedProperty behaviourProviderProperty;
 
-    SerializedProperty massProperty;
     SerializedProperty useGravityProperty;
+    SerializedProperty timeToReachApexProperty;
     SerializedProperty lockonTargetProperty;
-    SerializedProperty velocityProperty;
-    SerializedProperty groundDragProperty;
-    SerializedProperty airDragProperty;
-    SerializedProperty dragTransitionTimeProperty;
-    SerializedProperty ignoreForGroundedProperty;
-    SerializedProperty maxStepHeightProperty;
-    SerializedProperty maxSlopeAngleProperty;
-    SerializedProperty currentSpeedProperty;
+    SerializedProperty velocitySmoothingTimeProperty;
+    SerializedProperty velocitySmoothingProperty;
     SerializedProperty isGroundedProperty;
-    SerializedProperty minimumMoveDistanceProperty;
-    SerializedProperty skinWidthProperty;
-    SerializedProperty debugOptionsProperty;
 
     protected virtual void OnEnable() {
         movementProviderProperty = serializedObject.FindProperty("movementProvider");
-
         behaviourProviderProperty = serializedObject.FindProperty("behaviourProvider");
 
-        massProperty = serializedObject.FindProperty("mass");
         useGravityProperty = serializedObject.FindProperty("useGravity");
-        lockonTargetProperty = serializedObject.FindProperty("lockonTarget");
-        velocityProperty = serializedObject.FindProperty("velocityDisplay");
-        groundDragProperty = serializedObject.FindProperty("groundDrag");
-        airDragProperty = serializedObject.FindProperty("airDrag");
-        dragTransitionTimeProperty = serializedObject.FindProperty("dragTransitionTime");
-        ignoreForGroundedProperty = serializedObject.FindProperty("ignoreForGrounded");
-        maxStepHeightProperty = serializedObject.FindProperty("maxStepHeight");
-        maxSlopeAngleProperty = serializedObject.FindProperty("maxSlopeAngle");
-        currentSpeedProperty = serializedObject.FindProperty("currentSpeedDisplay");
+        timeToReachApexProperty = serializedObject.FindProperty("timeToReachApex");
+        velocitySmoothingTimeProperty = serializedObject.FindProperty("velocitySmoothTime");
         isGroundedProperty = serializedObject.FindProperty("isGroundedDisplay");
-        minimumMoveDistanceProperty = serializedObject.FindProperty("minimumMoveDistance");
-        skinWidthProperty = serializedObject.FindProperty("skinWidth");
-        debugOptionsProperty = serializedObject.FindProperty("debugOptions");
+        velocitySmoothingProperty = serializedObject.FindProperty("velocitySmoothingDisplay");
+        lockonTargetProperty = serializedObject.FindProperty("lockonTarget");
     }
 
     protected virtual void CustomInspector() {
@@ -77,31 +58,19 @@ public class EntityControllerEditor : Editor {
         EditorGUI.indentLevel++;
 
         EditorGUILayout.PropertyField(useGravityProperty, new GUIContent("Use Gravity?"));
-        EditorGUILayout.PropertyField(massProperty, new GUIContent("Mass"));
-        EditorGUILayout.PropertyField(groundDragProperty, new GUIContent("Ground Drag"));
-        EditorGUILayout.PropertyField(airDragProperty, new GUIContent("Air Drag"));
-        EditorGUILayout.PropertyField(dragTransitionTimeProperty, new GUIContent("Drag Transition Time"));
-        EditorGUILayout.PropertyField(ignoreForGroundedProperty, new GUIContent("Ignore Grounded Mask"));
+        EditorGUILayout.PropertyField(timeToReachApexProperty, new GUIContent("Time to reach apex"));
+        EditorGUILayout.PropertyField(velocitySmoothingTimeProperty, new GUIContent("Velocity Smooth Time"));
 
         EditorGUILayout.Space();
         EditorGUI.indentLevel--;
         EditorGUILayout.LabelField(new GUIContent("Advanced"), EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
         EditorGUI.BeginDisabledGroup(true);
-        EditorGUILayout.PropertyField(velocityProperty, new GUIContent("Velocity"));
 
-        EditorGUILayout.PropertyField(currentSpeedProperty, new GUIContent("Speed"));
         EditorGUILayout.PropertyField(isGroundedProperty, new GUIContent("Is Grounded?"));
         EditorGUILayout.PropertyField(lockonTargetProperty, new GUIContent("Lockon Target"));
+        EditorGUILayout.PropertyField(velocitySmoothingProperty, new GUIContent("Velocity Smoothing"));
         EditorGUI.EndDisabledGroup();
-
-        EditorGUILayout.PropertyField(skinWidthProperty, new GUIContent("Skin Width"));
-        EditorGUILayout.PropertyField(minimumMoveDistanceProperty, new GUIContent("Min Move Distance"));
-        EditorGUI.BeginDisabledGroup(true);
-        EditorGUILayout.PropertyField(maxStepHeightProperty, new GUIContent("Max Step Height"));
-        EditorGUILayout.PropertyField(maxSlopeAngleProperty, new GUIContent("Max Slope Angle"));
-        EditorGUI.EndDisabledGroup();
-        EditorGUILayout.PropertyField(debugOptionsProperty, new GUIContent("Debugging Options"));
 
         EditorGUI.indentLevel--;
 
