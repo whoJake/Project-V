@@ -100,10 +100,11 @@ void Generate (uint3 id : SV_DispatchThreadID)
     float top_surface_mask = GetTopSurfaceMask( world_position );
 
     PlatformResult platform_result = GetPlatformValue( world_position );
-    bool platform_stem_multiplier = distance(world_position.xz, _LayerOrigin.xz) < _LowerRadius;
+    bool platform_stem_multiplier = distance(world_position.xz, _LayerOrigin.xz) > _LowerRadius;
+    bool platform_multiplier = distance(world_position.xz, _LayerOrigin.xz) < (_UpperRadius + _CliffFeatureDepth * 0.5);
     float platform = max( platform_result.platformVal, platform_result.stemVal * platform_stem_multiplier );
 
     float chasm = GetChasmMask( world_position );
 
-    _Target[id] = max( base_surface * top_surface_mask, platform * (1 - base_surface) );
+    _Target[id] = max( base_surface * top_surface_mask, platform * platform_multiplier );
 }

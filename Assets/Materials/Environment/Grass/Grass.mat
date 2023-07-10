@@ -58,9 +58,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BladeBodyHeight: 0.2
-    - _BladeTipHeight: 0.1
-    - _BladeWidth: 0.02
+    - _BladeBodyHeight: 0.4
+    - _BladeTipHeight: 0.5
+    - _BladeWidth: 0.05
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
@@ -83,5 +83,5 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _MainColor: {r: 0.08223568, g: 0.5283019, b: 0.18058233, a: 1}
-    - _TipColor: {r: 0.637104, g: 0.9716981, b: 0.69144356, a: 1}
+    - _TipColor: {r: 0.41598436, g: 0.7169812, b: 0.42205912, a: 1}
   m_BuildTextureStacks: []
