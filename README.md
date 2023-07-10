@@ -14,7 +14,7 @@ into chunks that make handling this huge amount of data a little bit easier. Mos
 --------------------------------------------------
 
 ![Starter Layer Generation](https://github.com/whoJake/Project-V/assets/37589250/94fb3883-de53-4aa7-9d30-e1f7394357b9) 
-The underlying density texture generation is left to a single compute shader for each layer (in this example, everything visible is one layer). This particular layer can be found at [Assets/Resources/Compute/Layers/StarterTerrain.compute](Assets/Resources/Compute/Layers/StarterTerrain.compute)
+The underlying density texture generation is left to a single compute shader for each layer (in this example, everything visible is one layer). This particular layer can be found at [Assets/Resources/Compute/Layers/StarterTerrain.compute](Assets/Resources/Compute/Layers/StarterTerrain.compute). These compute shaders kind of perform like one giant Signed Distance Function which I find quite interesting to think about.
 
 
 ![Generation Seperated Into Chunks](https://github.com/whoJake/Project-V/assets/37589250/29c59b56-6f5d-43ac-839c-b4690c349786)
@@ -23,6 +23,8 @@ The underlying density texture generation is left to a single compute shader for
 Here you can see each chunk loading, one chunk per frame, when in play mode.
 
 Since the terrain is split into chunks, I can edit them pretty much on command and then recalculate the mesh to see the result. Here are some edit actions that I've already implemented
+
+
 ![DynamicChunkEditing](https://github.com/whoJake/Project-V/assets/37589250/40fcf363-d3f9-46df-b8f8-d89d0ab551e4)
 
 -----------------------------------------------
