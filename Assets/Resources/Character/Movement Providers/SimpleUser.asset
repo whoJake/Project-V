@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: SimpleUser
   m_EditorClassIdentifier: 
   movementSpeed: 14
-  waitForLayer: 0
+  waitForLayer: -1
   sprintMultiplier: 2.5
   jumpPower: 7
