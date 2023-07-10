@@ -13,27 +13,25 @@ into chunks that make handling this huge amount of data a little bit easier. Mos
 
 --------------------------------------------------
 
-![Starter Layer Generation](https://github.com/whoJake/Project-V/assets/37589250/94fb3883-de53-4aa7-9d30-e1f7394357b9) 
+![Starter Layer Generation](https://github.com/whoJake/Project-V/assets/37589250/e2eece4f-f8e9-4791-91ef-047b64874a6e)
 The underlying density texture generation is left to a single compute shader for each layer (in this example, everything visible is one layer). This particular layer can be found at [Assets/Resources/Compute/Layers/StarterTerrain.compute](Assets/Resources/Compute/Layers/StarterTerrain.compute). These compute shaders kind of perform like one giant Signed Distance Function which I find quite interesting to think about.
 
-
-![Generation Seperated Into Chunks](https://github.com/whoJake/Project-V/assets/37589250/29c59b56-6f5d-43ac-839c-b4690c349786)
-![ChunkLoading](https://github.com/whoJake/Project-V/assets/37589250/46b606b4-8001-411d-a958-d11f647a3ed5) 
+![Generation Seperated Into Chunks](https://github.com/whoJake/Project-V/assets/37589250/e232fcc5-692b-48b1-8589-682a6f2bec5f)
+![ChunkLoading](https://github.com/whoJake/Project-V/assets/37589250/f826c4eb-ae99-4cc1-9875-917028d2dcbb)
 
 Here you can see each chunk loading, one chunk per frame, when in play mode.
 
 Since the terrain is split into chunks, I can edit them pretty much on command and then recalculate the mesh to see the result. Here are some edit actions that I've already implemented
 
-
-![DynamicChunkEditing](https://github.com/whoJake/Project-V/assets/37589250/40fcf363-d3f9-46df-b8f8-d89d0ab551e4)
+![DynamicChunkEditing](https://github.com/whoJake/Project-V/assets/37589250/c0fe6d24-d54b-40c9-aa4d-7058c4893cb0)
 
 -----------------------------------------------
 
 ## Geometry Shader Grass
 Only recently have I got to understanding the workings of the geometry shader pass but since the results can look quite pleasing I might aswell show the results of them here. Points randomized and sent to the material as vertices, then each of these vertices acts as a base for the grass mesh
 which is built up inside the geometry shader.
-![Geometry Shader Grass 2](https://github.com/whoJake/Project-V/assets/37589250/f5453483-7ee6-4864-a6c7-b96cfb60d374)
-![GeometryShaderGrassChanging](https://github.com/whoJake/Project-V/assets/37589250/0002c87f-b1ec-4eb7-ae13-7cff69ec4650)
+![Geometry Shader Grass 2](https://github.com/whoJake/Project-V/assets/37589250/7c4236d7-e6d5-45d5-8ec5-c11df11fb91d)
+![GeometryShaderGrassChanging](https://github.com/whoJake/Project-V/assets/37589250/6b4f7d01-83ab-4426-91c8-4d392727ec05)
 
 ---------------------------------------------
 Theres other things I've worked on but I'll save adding them to here until they are a bit more presentable
