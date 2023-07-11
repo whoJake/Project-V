@@ -6,14 +6,14 @@ using UnityEngine.Rendering;
 
 public class TerrainChunk : MonoBehaviour
 {
-    struct ChunkData {
+    public struct ChunkData {
         public RenderTexture densityTexture;
         public RenderTexture heightMap;
     }
 
     private ActiveState state;
     private List<ChunkEditRequest> editRequests;
-    private ChunkData data;
+    public ChunkData data;
 
     public TerrainLayer layer;
     public TerrainHandler handler { get { return layer.handler; } }
@@ -34,6 +34,7 @@ public class TerrainChunk : MonoBehaviour
 
     public bool generatingHeightMap = false;
     public bool generatedHeightMap = false;
+    public bool hasHeightMap = false;
 
     public bool showBounds = false;
     static int gid = 0;
@@ -55,10 +56,18 @@ public class TerrainChunk : MonoBehaviour
 
         Generate();
 
+        GameObject grass = new GameObject("Grass", typeof(MeshFilter), typeof(MeshRenderer), typeof(GeometryGrass));
+        grass.transform.parent = transform;
+        grass.transform.localPosition = Vector3.zero;
+        grass.GetComponent<MeshRenderer>().material = handler.grassMaterial;
+        grass.GetComponent<GeometryGrass>().chunk = this;
+
         return this;
     }
 
     private void Update() {
+        transform.GetChild(0).gameObject.SetActive(Vector3.Distance(centre, Camera.main.transform.position) <= 250);
+
         bool rendererEnabled;
         Mesh colliderMesh;
 
@@ -176,8 +185,8 @@ public class TerrainChunk : MonoBehaviour
 
             Bounds bounds = GetBounds();
             Vector2Int texturePos = new Vector2Int(
-                Mathf.FloorToInt(((positions[i].x + bounds.extents.x) / bounds.size.x) * 32.0f),
-                Mathf.FloorToInt(((positions[i].z + bounds.extents.z) / bounds.size.z) * 32.0f)
+                Mathf.FloorToInt(((positions[i].x + bounds.extents.x) / bounds.size.x) * handler.textureDimensions.x),
+                Mathf.FloorToInt(((positions[i].z + bounds.extents.z) / bounds.size.z) * handler.textureDimensions.z)
                 );
 
             float currentHeight = cpuHeightMap.GetPixel(texturePos.x, texturePos.y).r;
@@ -191,13 +200,16 @@ public class TerrainChunk : MonoBehaviour
             float val = Mathf.Max(currentHeight, chunkNormalizedHeight);
             
             cpuHeightMap.SetPixel(texturePos.x, texturePos.y, new Color(val, 0, 0, 0));
+            hasHeightMap = true;
         }
 
-        cpuHeightMap.Apply();
-        data.heightMap = RTUtils.Create2D_R8(new Vector2Int(handler.textureDimensions.x, handler.textureDimensions.z));
-        rt = RTUtils.Create2D_R8(new Vector2Int(handler.textureDimensions.x, handler.textureDimensions.z));
-        Graphics.Blit(cpuHeightMap, data.heightMap);
-        rt = data.heightMap;
+        if (hasHeightMap) {
+            cpuHeightMap.Apply();
+            data.heightMap = RTUtils.Create2D_R8(new Vector2Int(handler.textureDimensions.x, handler.textureDimensions.z));
+            rt = RTUtils.Create2D_R8(new Vector2Int(handler.textureDimensions.x, handler.textureDimensions.z));
+            Graphics.Blit(cpuHeightMap, data.heightMap);
+            rt = data.heightMap;
+        }
         generatingHeightMap = false;
         generatedHeightMap = true;
         yield break;

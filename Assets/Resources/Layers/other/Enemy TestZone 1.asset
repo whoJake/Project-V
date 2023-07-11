@@ -9,10 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b308f0f18f395d44aa5c68a8b1212a2, type: 3}
-  m_Name: SimpleUser
+  m_Script: {fileID: 11500000, guid: f9072e0cc23f1b74db9b99d839126897, type: 3}
+  m_Name: Enemy TestZone 1
   m_EditorClassIdentifier: 
-  movementSpeed: 14
-  waitForLayer: 0
-  sprintMultiplier: 2.5
-  jumpPower: 7
+  depth: 128
+  walls:
+  - position: {x: 0, y: -32.1, z: 0}
+    bounds: {x: 32, y: 32, z: 32}
+  - position: {x: 0, y: 5, z: 15}
+    bounds: {x: 15, y: 15, z: 5}

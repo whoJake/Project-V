@@ -9,7 +9,7 @@ struct Triangle{
 	float3 vertexC;
 };
 
-RWTexture3D<float> _DensityTexture;
+Texture3D<float> _DensityTexture;
 AppendStructuredBuffer<Triangle> _TriangleBuffer;
 
 uint3 texture_size;

@@ -1,0 +1,36 @@
+#pragma kernel CSMain
+
+#include "../Noise/Hash.cginc"
+
+Texture2D<float> _HeightMap;
+SamplerState sampler_HeightMap;
+AppendStructuredBuffer<float3> _GrassPoints;
+
+float3 _CameraWorldPosition;
+float _DistanceCullingThreshold;
+float3 _ChunkOrigin;
+float3 _ChunkSize;
+int2 _TextureSize;
+float _JitterScale;
+int _PointsPerTexel;
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    for(int i = 0; i < _PointsPerTexel; i++){
+        uint pointID = _PointsPerTexel * (id.x + id.y * _TextureSize.x) + i;
+        float2 pointJitter = ((float2(Random(pointID), Random(pointID + 1))) - 0.5) * _JitterScale;
+        float2 pixelSamplePoint = id.xy + float2(0.5, 0.5) + pointJitter;
+        float height = _HeightMap.SampleLevel(sampler_HeightMap, pixelSamplePoint / float2(_TextureSize), 0);
+        if(height == 0 || height == 1) continue;
+
+        float2 texelSize = _ChunkSize.xz / _TextureSize;
+        float3 chunkNormalizedPosition = float3(pixelSamplePoint.x / _TextureSize.x, height, pixelSamplePoint.y / _TextureSize.y);
+        float3 worldPosition = _ChunkOrigin + chunkNormalizedPosition * _ChunkSize;
+
+        if(distance(_CameraWorldPosition, worldPosition) < _DistanceCullingThreshold){
+            float3 meshPosition = chunkNormalizedPosition * _ChunkSize - (_ChunkSize / 2);
+            _GrassPoints.Append(meshPosition);
+        }
+    }
+}

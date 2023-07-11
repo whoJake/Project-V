@@ -22,6 +22,8 @@ public class TerrainHandler : MonoBehaviour
     public Vector2Int generatedArea; //Only an approximate area that will be generated. Should always generate slightly larger than this but problems exist !
     [SerializeField]
     private Vector3Int chunkSize;
+    
+    public Material grassMaterial;
 
     public Vector3Int voxelsPerAxis { get { return new Vector3Int(chunkSize.x - 1,
                                                                   chunkSize.y - 1,

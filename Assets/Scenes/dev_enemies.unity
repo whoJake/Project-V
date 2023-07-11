@@ -751,7 +751,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &396942794
 Transform:
   m_ObjectHideFlags: 0
@@ -1029,6 +1029,7 @@ MonoBehaviour:
   settings: {fileID: 0}
   generatedArea: {x: 64, y: 64}
   chunkSize: {x: 16, y: 16, z: 16}
+  grassMaterial: {fileID: 2100000, guid: 8754180db30e45242bf3471106a889f7, type: 2}
   margin: 0
   voxelScale: 1
   material: {fileID: 2100000, guid: 4d1e4909787630147a86fc4972d45811, type: 2}
