@@ -44,6 +44,8 @@ public class TerrainHandler : MonoBehaviour
     [SerializeField]
     private bool showLayerBounds;
 
+    public bool enableGrass;
+
     [HideInInspector]
     public bool yieldOnChunk;
     private bool active = false;
@@ -191,6 +193,7 @@ public class TerrainHandler : MonoBehaviour
 //Enum used for most terrain classes to dictate its activity state
 public enum ActiveState {
     Inactive, //Cannot be changed and game object is disabled
+    Static_NoGrass,
     Static, //Edits can be added to its queue but it will not update the mesh, collider mesh is not set
     Active //Edits can be added and will be updated immediately
 }

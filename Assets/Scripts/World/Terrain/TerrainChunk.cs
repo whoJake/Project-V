@@ -40,6 +40,8 @@ public class TerrainChunk : MonoBehaviour
     static int gid = 0;
     public int id;
 
+    private bool updateGrass;
+
     private static bool shadersLoaded = false;
     private static ComputeShader computeVerticesShader;
 
@@ -55,18 +57,23 @@ public class TerrainChunk : MonoBehaviour
         gid++;
 
         Generate();
+        if (handler.enableGrass)
+            GenerateGrassObject();
 
+        return this;
+    }
+
+    private void GenerateGrassObject() {
         GameObject grass = new GameObject("Grass", typeof(MeshFilter), typeof(MeshRenderer), typeof(GeometryGrass));
         grass.transform.parent = transform;
         grass.transform.localPosition = Vector3.zero;
         grass.GetComponent<MeshRenderer>().material = handler.grassMaterial;
         grass.GetComponent<GeometryGrass>().chunk = this;
-
-        return this;
     }
 
     private void Update() {
-        transform.GetChild(0).gameObject.SetActive(Vector3.Distance(centre, Camera.main.transform.position) <= 250);
+        if(handler.enableGrass && updateGrass)
+            transform.GetChild(0).gameObject.SetActive(Vector3.Distance(centre, Camera.main.transform.position) <= 250);
 
         bool rendererEnabled;
         Mesh colliderMesh;
@@ -75,16 +82,25 @@ public class TerrainChunk : MonoBehaviour
             case ActiveState.Inactive:
                 rendererEnabled = false;
                 colliderMesh = null;
+                updateGrass = false;
+                break;
+
+            case ActiveState.Static_NoGrass:
+                rendererEnabled = true;
+                colliderMesh = null;
+                updateGrass = false;
                 break;
 
             case ActiveState.Static:
                 rendererEnabled = true;
                 colliderMesh = null;
+                updateGrass = true;
                 break;
 
             case ActiveState.Active:
                 rendererEnabled = true;
                 colliderMesh = targetFilter.mesh;
+                updateGrass = true;
                 if (editRequests.Count != 0) HandleEditRequests();
                 break;
 
