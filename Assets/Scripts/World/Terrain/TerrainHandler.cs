@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class TerrainHandler : MonoBehaviour
 {
-    [SerializeField]
-    private Camera mainCamera;
+    public Camera mainCamera;
+    public bool enableLayerLODs;
+    public bool enableChunkLODs;
 
     private Dictionary<int, TerrainLayer> loadedLayers;
 
@@ -15,6 +16,7 @@ public class TerrainHandler : MonoBehaviour
 
     struct LayerGenRequest {
         public int id;
+        public Vector3 origin;
         public ActiveState state;
     }
     private List<LayerGenRequest> generationQueue;
@@ -30,8 +32,6 @@ public class TerrainHandler : MonoBehaviour
                                                                   chunkSize.z - 1); } }
 
     public Vector3Int textureDimensions { get { return chunkSize + (Vector3Int.one * margin * 2); } }
-
-    private Vector3 generationStartPosition { get { return transform.position; } }
 
     [Min(0)]
     public int margin;
@@ -53,6 +53,9 @@ public class TerrainHandler : MonoBehaviour
     public static System.Action<int> OnLayerGenerated;
 
     private void Start() {
+        if (!mainCamera)
+            mainCamera = Camera.main;
+
         yieldOnChunk = true;
         Unload(); //Just incase we have loaded during editor sequence
         Initialize();
@@ -64,8 +67,10 @@ public class TerrainHandler : MonoBehaviour
         Unload(true);
         Initialize();
 
+        Vector3 currentLayerOrigin = transform.position;
         for(int i = 0; i < settings.layers.Length; i++) {
-            CreateLayer(i, ActiveState.Static);
+            CreateLayer(i, currentLayerOrigin, ActiveState.Static_NoGrass).ForceProcessQueue();
+            currentLayerOrigin += Vector3.down * settings.layers[i].depth;
         }
         yieldOnChunk = true;
     }
@@ -82,9 +87,16 @@ public class TerrainHandler : MonoBehaviour
     }
 
     private void Initialize() {
+        loadedLayers = null;
         loadedLayers = new Dictionary<int, TerrainLayer>();
+        generationQueue = null;
         generationQueue = new List<LayerGenRequest>();
-        settings = authoredSettings;
+        settings = Instantiate(authoredSettings);
+        for(int i = 0; i < settings.layers.Length; i++) {
+            settings.layers[i] = Instantiate(settings.layers[i]);
+            settings.layers[i].name = authoredSettings.layers[i].name + " (Layer " + i + ")";
+            settings.layers[i].SetDepth(voxelsPerAxis.y, voxelScale);
+        }
 
         TerrainChunk.InitializeCompute();
     }
@@ -109,27 +121,73 @@ public class TerrainHandler : MonoBehaviour
     }
 
     private void UpdateLayerActivity() {
-        if (true) { 
-        //if (!mainCamera) {
+        Vector3 currentLayerOrigin = transform.position;
+
+        if (!enableLayerLODs) {
+            //Spawn all layers
             for(int i = 0; i < settings.layers.Length; i++) {
                 if (!loadedLayers.ContainsKey(i)) {
-                    LayerGenRequest info = new LayerGenRequest { id = i, state = ActiveState.Active };
+                    LayerGenRequest info = new LayerGenRequest { id = i, origin = currentLayerOrigin, state = ActiveState.Active };
                     if (!generationQueue.Contains(info)) {
                         generationQueue.Add(info);
                     }
                 }
+                currentLayerOrigin += Vector3.down * settings.layers[i].depth;
             }
             return;
         }
+
+        float cameraLookDirection = (Vector3.Dot(Vector3.up, mainCamera.transform.forward) > 0) ? 1 : -1;
+        for(int i = 0; i < settings.layers.Length; i++) {
+            Vector2 layerHeightRange = new Vector3(currentLayerOrigin.y, currentLayerOrigin.y - settings.layers[i].depth);
+            float cameraHeight = mainCamera.transform.position.y;
+
+            float topDst = cameraHeight - layerHeightRange.x;
+            float btmDst = layerHeightRange.y - cameraHeight;
+            float dstFromLayer = Mathf.Max(topDst, btmDst);
+
+            ActiveState layerTargetState;
+            if (dstFromLayer < 100)
+                layerTargetState = ActiveState.Active;
+            else if (dstFromLayer < 500)
+                layerTargetState = ActiveState.Static;
+            else if (dstFromLayer < 800)
+                layerTargetState = ActiveState.Static_NoGrass;
+            else if (dstFromLayer < 900)
+                layerTargetState = ActiveState.Inactive;
+            else {
+                if (loadedLayers.ContainsKey(i)) {
+                    loadedLayers[i].Unload();
+                    loadedLayers.Remove(i);
+                }
+                currentLayerOrigin += Vector3.down * settings.layers[i].depth;
+                continue;
+            }
+
+            if (loadedLayers.ContainsKey(i)) {
+                loadedLayers[i].SetState(layerTargetState);
+            } else {
+                LayerGenRequest info = new LayerGenRequest { id = i, origin = currentLayerOrigin, state = layerTargetState };
+                if (!generationQueue.Contains(info)) {
+                    generationQueue.Add(info);
+                }
+            }
+
+            currentLayerOrigin += Vector3.down * settings.layers[i].depth;
+        }
+
     }
 
     private void ProcessQueue() {
         LayerGenRequest toProcess = generationQueue[0];
         if (!loadedLayers.ContainsKey(toProcess.id)) {
-            CreateLayer(toProcess.id, toProcess.state);
+            CreateLayer(toProcess.id, toProcess.origin, toProcess.state);
         }
-        if (loadedLayers[toProcess.id].generating) return;
-        if (loadedLayers[toProcess.id].generated) generationQueue.RemoveAt(0);
+        TerrainLayer layer = loadedLayers[toProcess.id];
+        if (layer.generated) {
+            layer.SetState(toProcess.state);
+            generationQueue.RemoveAt(0);
+        }
     }
 
     public void DistributeEditRequest(ChunkEditRequest request) {
@@ -141,7 +199,7 @@ public class TerrainHandler : MonoBehaviour
         }
     }
 
-    private TerrainLayer CreateLayer(int layerIndex, ActiveState createState) {
+    private TerrainLayer CreateLayer(int layerIndex, Vector3 origin, ActiveState createState) {
         if (loadedLayers.ContainsKey(layerIndex)) {
             Debug.Log("Layer already created");
             return loadedLayers[layerIndex];
@@ -150,46 +208,24 @@ public class TerrainHandler : MonoBehaviour
         GameObject layerGObj = new GameObject("Layer: " + layerIndex);
         layerGObj.transform.parent = transform;
 
-        Vector3 layerOrigin = generationStartPosition;
-        if (layerIndex-1 >= 0 && loadedLayers[layerIndex-1] != null) {
-            layerOrigin = loadedLayers[layerIndex - 1].origin + Vector3.down * loadedLayers[layerIndex - 1].generator.GetDepth(0);
-        }
-
-        TerrainLayer layer = layerGObj.AddComponent<TerrainLayer>().Initialize(layerIndex, layerOrigin, this, Instantiate(settings.layers[layerIndex]), createState);
-
+        TerrainLayer layer = layerGObj.AddComponent<TerrainLayer>().Initialize(layerIndex, origin, this, settings.layers[layerIndex], createState);
         loadedLayers.Add(layerIndex, layer);
         return layer;
     }
 
-    //
-    // Summery:
-    //   Generate randomly generated layers
-    //
-    // Parameters:
-    //   count:
-    //     number of layers to be generated
-    /*
-    TerrainSettings GenerateLayerSettings(int count) {
-        TerrainSettings result = ScriptableObject.CreateInstance<TerrainSettings>();
-        result.layers = new TerrainLayerSettings[count + 1];
-        result.layers[0] = Resources.Load<TerrainLayerSettings>("Layers/AIR");
-
-        for(int i = 0; i < count; i++) {
-            result.layers[i + 1] = TerrainLayerSettings.GetAllRandom();
-        }
-        return result;
-    }
-    */
-
     private void OnDrawGizmos() {
         if(loadedLayers != null && showLayerBounds) {
-            for(int layer = 0; layer < loadedLayers.Count; layer++) {
-                Gizmos.DrawWireCube(loadedLayers[layer].origin - new Vector3(0, loadedLayers[layer].generator.GetDepth(0) / 2f, 0), new Vector3(generatedArea.x, loadedLayers[layer].generator.GetDepth(0), generatedArea.y));
+            for (int layer = 0; layer < loadedLayers.Count; layer++) {
+                if (loadedLayers.ContainsKey(layer)) {
+                    Bounds bounds = loadedLayers[layer].GetBounds();
+                    Gizmos.DrawWireCube(bounds.center, bounds.size);
+                }
             }
         }
     }
 }
 
+[System.Serializable]
 //Enum used for most terrain classes to dictate its activity state
 public enum ActiveState {
     Inactive, //Cannot be changed and game object is disabled

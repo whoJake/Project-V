@@ -71,8 +71,6 @@ public class StarterTerrain : TerrainLayerGenerator
     [SerializeField]
     private NamedNoiseArgs[] noiseArgs;
 
-    private float depth = -1;
-
     private bool layerInitialized = false;
     private ComputeBuffer platformBuffer;
     private ComputeBuffer noiseArgsBuffer;
@@ -157,7 +155,7 @@ public class StarterTerrain : TerrainLayerGenerator
 
     private void AddPathPlatforms(ref List<Platform> platforms, Vector3 lSize, Vector3 lOrigin) {
         float minDepth = (upperSurfaceDepth + cliffLedgeSize.y) / lSize.y;
-        float maxDepth = 1.0f - (platformRadiusRange.y / lSize.y);
+        float maxDepth = 0.9f;// - (platformRadiusRange.y / lSize.y);
 
         float curDepth = minDepth;
         float curAngle = 0f;
@@ -172,6 +170,8 @@ public class StarterTerrain : TerrainLayerGenerator
             float pRadius = isConnector ? Random.Range(platformPathConnectorsRadiusRange.x, platformPathConnectorsRadiusRange.y) :
                                           Random.Range(platformRadiusRange.x, platformRadiusRange.y);
             float radiusAtDepth = GetRadiusAtNormalizedHeight(curDepth);
+            float t = Mathf.InverseLerp(maxDepth - 0.2f, maxDepth, curDepth);
+            float flatnessMultiplier = Mathf.Lerp(0f, 1f, t);
             curAngle += (pRadius / radiusAtDepth) * direction;
 
             Vector2 vecToCurAngle = new Vector2(Mathf.Sin(curAngle), Mathf.Cos(curAngle));
@@ -211,7 +211,7 @@ public class StarterTerrain : TerrainLayerGenerator
                 if (underPlatform)
                     result.hasStem = 0;
             }
-
+            result.flatness += flatnessMultiplier;
             platforms.Add(result);
 
             if (isConnector)
@@ -236,7 +236,7 @@ public class StarterTerrain : TerrainLayerGenerator
             go.transform.position = pos;
             go.transform.localScale = new Vector3(radius * 2, 1, radius * 2);
             float greyScale = colorStep * i;
-            go.GetComponent<MeshRenderer>().material.color = new Color(greyScale, greyScale, greyScale);
+            go.GetComponent<MeshRenderer>().sharedMaterial.color = new Color(greyScale, greyScale, greyScale);
         }
     }
 
@@ -296,7 +296,7 @@ public class StarterTerrain : TerrainLayerGenerator
 
         Debug.Log(platforms.Count + " platforms spawned\n" + numOfBonusPlatforms + " of them are bonus platforms");
         //DisplayPlatformPositions(platforms);
-        platformBuffer = new ComputeBuffer(platforms.Count, Platform.stride);
+        platformBuffer = new ComputeBuffer(Mathf.Max(platforms.Count, 1), Platform.stride);
         platformBuffer.SetData(platforms.ToArray());
     }
 
@@ -322,13 +322,10 @@ public class StarterTerrain : TerrainLayerGenerator
         shader.Dispatch(0, threads.x, threads.y, threads.z);
     }
 
-    public override float GetDepth(float chunkHeight) {
-        if (depth == -1.0) {
-            depth = Random.Range(depthRange.x, depthRange.y);
-            depth = Mathf.Round(depth / chunkHeight) * chunkHeight;
-        }
-
-        return depth;
+    public override void SetDepth(float voxelsPerY, float voxelScale) {
+        float desiredDepth = Random.Range(depthRange.x, depthRange.y);
+        float chunkCount = Mathf.FloorToInt(desiredDepth / voxelsPerY / voxelScale);
+        depth = chunkCount * voxelsPerY * voxelScale;
     }
 }
 

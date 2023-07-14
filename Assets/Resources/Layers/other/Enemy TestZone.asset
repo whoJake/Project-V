@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9072e0cc23f1b74db9b99d839126897, type: 3}
   m_Name: Enemy TestZone
   m_EditorClassIdentifier: 
-  depth: 128
+  depth: -1
+  desiredDepth: 128
   walls:
   - position: {x: 0, y: -32.1, z: 0}
     bounds: {x: 32, y: 32, z: 32}

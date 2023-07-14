@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 917e3c5e44760d44eac3eaf6a04879a8, type: 3}
   m_Name: Top Layer
   m_EditorClassIdentifier: 
+  depth: -1
   numOfPlatforms: 0
   platformRadiusRange: {x: 110, y: 175}
   platformShapeFeatureStrength: 0.3
@@ -28,7 +29,7 @@ MonoBehaviour:
   platformStemPinchRange: {x: 0.1, y: 1.1}
   platformStemRadius: {x: 55, y: 90}
   platformStemFeatureDepth: 20
-  depthRange: {x: 400, y: 500}
+  depthRange: {x: 500, y: 600}
   chasmRadiusRange: {x: 0, y: 0}
   upperSurfaceDepth: 32
   upperSurfaceFeatureDepth: 16

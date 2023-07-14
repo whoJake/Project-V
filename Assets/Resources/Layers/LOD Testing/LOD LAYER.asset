@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9072e0cc23f1b74db9b99d839126897, type: 3}
-  m_Name: Enemy TestZone 1
+  m_Name: LOD LAYER
   m_EditorClassIdentifier: 
   depth: -1
-  desiredDepth: 250
+  desiredDepth: 256
   walls:
-  - position: {x: 0, y: -250, z: 0}
-    bounds: {x: 32, y: 200, z: 32}
+  - position: {x: 0, y: -256, z: 0}
+    bounds: {x: 512, y: 64, z: 512}

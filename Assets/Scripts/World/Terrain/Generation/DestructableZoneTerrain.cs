@@ -7,13 +7,13 @@ public class DestructableZoneTerrain : TerrainLayerGenerator {
     private ComputeShader shader;
 
     [SerializeField]
-    private float depth = 64f;
+    private float desiredDepth = 64f;
 
     [SerializeField]
     private Wall[] walls;
     private ComputeBuffer wallsBuffer;
 
-    private static bool layerInitialized = false;
+    private bool layerInitialized = false;
 
     private void OnEnable() {
         shader = Resources.Load<ComputeShader>("Compute/Layers/DestructableZoneTerrain");
@@ -52,10 +52,9 @@ public class DestructableZoneTerrain : TerrainLayerGenerator {
         shader.Dispatch(0, threads.x, threads.y, threads.z);
     }
 
-    public override float GetDepth(float chunkHeight) {
-        depth = Mathf.Round(depth / chunkHeight) * chunkHeight;
-
-        return depth;
+    public override void SetDepth(float voxelsPerY, float voxelScale) {
+        float chunkCount = Mathf.FloorToInt(desiredDepth / voxelsPerY / voxelScale);
+        depth = chunkCount * voxelsPerY * voxelScale;
     }
 
     public override void ReleaseBuffers() {

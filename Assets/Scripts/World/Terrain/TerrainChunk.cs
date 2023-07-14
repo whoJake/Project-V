@@ -2,15 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class TerrainChunk : MonoBehaviour
 {
+    [System.Serializable]
     public struct ChunkData {
         public RenderTexture densityTexture;
         public RenderTexture heightMap;
     }
 
+    private bool stateChanged;
+    [SerializeField]
     private ActiveState state;
     private List<ChunkEditRequest> editRequests;
     public ChunkData data;
@@ -18,9 +20,7 @@ public class TerrainChunk : MonoBehaviour
     public TerrainLayer layer;
     public TerrainHandler handler { get { return layer.handler; } }
 
-    public RenderTexture rt;
-
-    private Vector3 centre;
+    public Vector3 centre;
 
     private MeshFilter targetFilter;
     [SerializeField]
@@ -72,47 +72,10 @@ public class TerrainChunk : MonoBehaviour
     }
 
     private void Update() {
-        if(handler.enableGrass && updateGrass)
-            transform.GetChild(0).gameObject.SetActive(Vector3.Distance(centre, Camera.main.transform.position) <= 250);
+        if(handler.enableGrass)
+            transform.GetChild(0).gameObject.SetActive(updateGrass);
 
-        bool rendererEnabled;
-        Mesh colliderMesh;
-
-        switch (state) {
-            case ActiveState.Inactive:
-                rendererEnabled = false;
-                colliderMesh = null;
-                updateGrass = false;
-                break;
-
-            case ActiveState.Static_NoGrass:
-                rendererEnabled = true;
-                colliderMesh = null;
-                updateGrass = false;
-                break;
-
-            case ActiveState.Static:
-                rendererEnabled = true;
-                colliderMesh = null;
-                updateGrass = true;
-                break;
-
-            case ActiveState.Active:
-                rendererEnabled = true;
-                colliderMesh = targetFilter.mesh;
-                updateGrass = true;
-                if (editRequests.Count != 0) HandleEditRequests();
-                break;
-
-            default:
-                Debug.Log("Chunk active state is not set. This should never happen");
-                rendererEnabled = false;
-                colliderMesh = null;
-                break;
-        }
-
-        GetComponent<MeshRenderer>().enabled = rendererEnabled;
-        targetCollider.sharedMesh = colliderMesh;
+        if (state == ActiveState.Active && editRequests.Count != 0) HandleEditRequests();
     }
 
     private void Generate() {
@@ -179,6 +142,10 @@ public class TerrainChunk : MonoBehaviour
         targetFilter.mesh = meshInfo.AsMesh();
         updatingMesh = false;
 
+        ActiveState temp = state;
+        state = ActiveState.Inactive;
+        SetState(temp);
+
         StartCoroutine(ComputeHeightMap(targetFilter.sharedMesh.vertices, targetFilter.sharedMesh.normals));
     }
 
@@ -222,9 +189,7 @@ public class TerrainChunk : MonoBehaviour
         if (hasHeightMap) {
             cpuHeightMap.Apply();
             data.heightMap = RTUtils.Create2D_R8(new Vector2Int(handler.textureDimensions.x, handler.textureDimensions.z));
-            rt = RTUtils.Create2D_R8(new Vector2Int(handler.textureDimensions.x, handler.textureDimensions.z));
             Graphics.Blit(cpuHeightMap, data.heightMap);
-            rt = data.heightMap;
         }
         generatingHeightMap = false;
         generatedHeightMap = true;
@@ -245,7 +210,6 @@ public class TerrainChunk : MonoBehaviour
             yield return ComputeUtils.WaitForResource(densityTexture);
 
         yield return CalculateVerticesAndApplyToMesh();
-
         generating = false;
     }
 
@@ -296,7 +260,49 @@ public class TerrainChunk : MonoBehaviour
     }
 
     public void SetState(ActiveState state) {
+        if (this.state == state)
+            return;
+
         this.state = state;
+
+        bool rendererEnabled;
+        Mesh colliderMesh;
+
+        switch (state) {
+            case ActiveState.Inactive:
+                rendererEnabled = false;
+                colliderMesh = null;
+                updateGrass = false;
+                break;
+
+            case ActiveState.Static_NoGrass:
+                rendererEnabled = true;
+                colliderMesh = null;
+                updateGrass = false;
+                break;
+
+            case ActiveState.Static:
+                rendererEnabled = true;
+                colliderMesh = null;
+                updateGrass = true;
+                break;
+
+            case ActiveState.Active:
+                rendererEnabled = true;
+                colliderMesh = targetFilter.sharedMesh;
+                updateGrass = true;
+                break;
+
+            default:
+                Debug.Log("Chunk active state is not set. This should never happen");
+                rendererEnabled = false;
+                colliderMesh = null;
+                break;
+        }
+
+        GetComponent<MeshRenderer>().enabled = rendererEnabled;
+        targetCollider.sharedMesh = colliderMesh;
+
     }
 
     public Bounds GetBounds() {
@@ -313,12 +319,12 @@ public class TerrainChunk : MonoBehaviour
 
         //Compute Vertices
         computeVerticesShader = Resources.Load<ComputeShader>("Compute/MCubes/MarchingCube");
-
+        gid = 0;
         shadersLoaded = true;
     }
 
     public static void ReleaseBuffers() {
-        //layerSettingsBuffer.Release();
+        gid = 0;
     }
 
     private void OnDrawGizmosSelected() {

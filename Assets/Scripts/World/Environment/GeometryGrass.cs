@@ -6,7 +6,7 @@ public class GeometryGrass : MonoBehaviour
 {
     public TerrainChunk chunk;
     [SerializeField] private float distanceCullingThreshold = 250f;
-    [SerializeField] private int pointsPerTexel = 64;
+    [SerializeField] private int pointsPerTexel = 128;
     [Range(0f, 1f)]
     [SerializeField] private float jitterScale = 1f;
 
@@ -14,6 +14,7 @@ public class GeometryGrass : MonoBehaviour
     private static int bladeCount = 0;
 
     private void Update() {
+        if (Vector3.Distance(chunk.handler.mainCamera.transform.position, transform.position) > distanceCullingThreshold * 1.5) return;
         if (pointCreation == null) pointCreation = Resources.Load<ComputeShader>("Compute/Environment/GrassPointCreation");
         if (!chunk.hasHeightMap || chunk.generatingHeightMap)
             return;

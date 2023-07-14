@@ -134,6 +134,22 @@ PrefabInstance:
       propertyPath: m_RootOrder
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 1144011245939397617, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -359
+      objectReference: {fileID: 0}
+    - target: {fileID: 1144011245939397617, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -336.38
+      objectReference: {fileID: 0}
+    - target: {fileID: 1144011245939397617, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 306.82
+      objectReference: {fileID: 0}
+    - target: {fileID: 1144011245939397630, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+      propertyPath: useGravity
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5892844216735093086, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
       propertyPath: m_RootOrder
       value: 5
@@ -515,14 +531,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 0}
-  authoredSettings: {fileID: 11400000, guid: c8f81f2e0c0686d44b7e576340519d1a, type: 2}
+  enableLayerLODs: 1
+  enableChunkLODs: 1
+  authoredSettings: {fileID: 11400000, guid: b47943d5c555224468067b9563bf96c3, type: 2}
   settings: {fileID: 0}
-  generatedArea: {x: 2048, y: 2048}
+  generatedArea: {x: 700, y: 700}
   chunkSize: {x: 32, y: 32, z: 32}
+  grassMaterial: {fileID: 2100000, guid: 8754180db30e45242bf3471106a889f7, type: 2}
   margin: 0
   voxelScale: 4
   material: {fileID: 2100000, guid: 4d1e4909787630147a86fc4972d45811, type: 2}
-  showLayerBounds: 0
+  showLayerBounds: 1
+  enableGrass: 0
   yieldOnChunk: 1
 --- !u!4 &1526815154
 Transform:
@@ -569,14 +589,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 0}
+  enableLayerLODs: 0
+  enableChunkLODs: 0
   authoredSettings: {fileID: 11400000, guid: 3539cbf7906da09488c2129b7752856e, type: 2}
   settings: {fileID: 0}
   generatedArea: {x: 768, y: 768}
   chunkSize: {x: 32, y: 32, z: 32}
+  grassMaterial: {fileID: 0}
   margin: 0
   voxelScale: 2
   material: {fileID: 2100000, guid: 4d1e4909787630147a86fc4972d45811, type: 2}
   showLayerBounds: 0
+  enableGrass: 0
   yieldOnChunk: 0
 --- !u!4 &1617017914
 Transform:

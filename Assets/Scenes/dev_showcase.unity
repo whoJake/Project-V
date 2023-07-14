@@ -236,8 +236,28 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1144011245939397617, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1144011245939397617, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1144011245939397617, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
       propertyPath: m_LocalPosition.z
       value: 800
+      objectReference: {fileID: 0}
+    - target: {fileID: 1144011245939397617, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1144011245939397617, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1144011245939397617, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5892844216735093086, guid: 86618b60da46f224a9af46fd78c4d37b, type: 3}
       propertyPath: m_RootOrder
@@ -564,15 +584,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 0}
+  enableLayerLODs: 1
+  enableChunkLODs: 1
   authoredSettings: {fileID: 11400000, guid: 2d3a8223ee51c1e42ae8a792767ab6a8, type: 2}
   settings: {fileID: 0}
   generatedArea: {x: 2048, y: 2048}
-  chunkSize: {x: 32, y: 32, z: 32}
+  chunkSize: {x: 64, y: 64, z: 64}
   grassMaterial: {fileID: 2100000, guid: 8754180db30e45242bf3471106a889f7, type: 2}
   margin: 0
   voxelScale: 4
   material: {fileID: 2100000, guid: 4d1e4909787630147a86fc4972d45811, type: 2}
-  showLayerBounds: 0
+  showLayerBounds: 1
+  enableGrass: 0
   yieldOnChunk: 1
 --- !u!4 &1223794659
 Transform:
