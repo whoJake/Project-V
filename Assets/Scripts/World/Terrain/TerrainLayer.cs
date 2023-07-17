@@ -147,8 +147,9 @@ public class TerrainLayer : MonoBehaviour
                         chunkTargetState = ActiveState.Inactive;
 
                     ChunkGenRequest info = new ChunkGenRequest { id = id, position = position, state = chunkTargetState };
-                    if (!generationQueue.Contains(info))
+                    if (!generationQueue.Contains(info)) {
                         generationQueue.Add(info);
+                    }
                     
                 }
             }
@@ -219,7 +220,7 @@ public class TerrainLayer : MonoBehaviour
     //     When in unloaded state, the layer will have to either regenerate from noise or load from a file
     //
     public void Unload(bool fromEditor = false) {
-        generator.ReleaseBuffers();
+        generator.Reset();
 
         if (loadedChunks != null) { 
             foreach(var item in loadedChunks) {

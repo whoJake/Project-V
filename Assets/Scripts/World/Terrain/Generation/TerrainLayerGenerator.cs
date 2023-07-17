@@ -9,6 +9,7 @@ public abstract class TerrainLayerGenerator : ScriptableObject {
     public abstract void Generate(ref RenderTexture target, TerrainChunk chunk, int seed);
     public abstract void SetDepth(float voxelsPerY, float voxelScale);
     public abstract void ReleaseBuffers();
+    public abstract void Reset();
 }
 
 [System.Serializable]

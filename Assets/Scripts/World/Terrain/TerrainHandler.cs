@@ -170,6 +170,7 @@ public class TerrainHandler : MonoBehaviour
                 LayerGenRequest info = new LayerGenRequest { id = i, origin = currentLayerOrigin, state = layerTargetState };
                 if (!generationQueue.Contains(info)) {
                     generationQueue.Add(info);
+                    Debug.Log("Layer " + i + " added to generation queue");
                 }
             }
 
@@ -182,6 +183,7 @@ public class TerrainHandler : MonoBehaviour
         LayerGenRequest toProcess = generationQueue[0];
         if (!loadedLayers.ContainsKey(toProcess.id)) {
             CreateLayer(toProcess.id, toProcess.origin, toProcess.state);
+            Debug.Log("Layer " + toProcess.id + " being generated");
         }
         TerrainLayer layer = loadedLayers[toProcess.id];
         if (layer.generated) {

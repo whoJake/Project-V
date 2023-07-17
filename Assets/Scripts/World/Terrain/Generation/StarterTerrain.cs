@@ -76,12 +76,13 @@ public class StarterTerrain : TerrainLayerGenerator
     private ComputeBuffer noiseArgsBuffer;
 
     private void OnEnable() {
-        shader = Resources.Load<ComputeShader>("Compute/Layers/StarterTerrain");
+        //shader = Resources.Load<ComputeShader>("Compute/Layers/StarterTerrain");
     }
 
     private void InitializeLayer(TerrainLayer layer, int seed) {
         Debug.Log("Initializing Starter Terrain Generator");
 
+        shader = Resources.Load<ComputeShader>("Compute/Layers/StarterTerrain");
         Random.InitState(seed);
 
         CreatePlatformBuffer(layer);
@@ -105,6 +106,13 @@ public class StarterTerrain : TerrainLayerGenerator
 
         shader.SetFloat("_VoxelScale", layer.handler.voxelScale);
         layerInitialized = true;
+    }
+
+    public override void Reset() {
+        layerInitialized = false;
+        platformBuffer?.Release();
+        noiseArgsBuffer?.Release();
+        shader = null;
     }
 
     public override void ReleaseBuffers() {

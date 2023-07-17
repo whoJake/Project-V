@@ -585,7 +585,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 0}
   enableLayerLODs: 1
-  enableChunkLODs: 1
+  enableChunkLODs: 0
   authoredSettings: {fileID: 11400000, guid: 2d3a8223ee51c1e42ae8a792767ab6a8, type: 2}
   settings: {fileID: 0}
   generatedArea: {x: 2048, y: 2048}

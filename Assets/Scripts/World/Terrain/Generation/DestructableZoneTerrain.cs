@@ -16,10 +16,18 @@ public class DestructableZoneTerrain : TerrainLayerGenerator {
     private bool layerInitialized = false;
 
     private void OnEnable() {
-        shader = Resources.Load<ComputeShader>("Compute/Layers/DestructableZoneTerrain");
+        //shader = Resources.Load<ComputeShader>("Compute/Layers/DestructableZoneTerrain");
+    }
+
+    public override void Reset() {
+        wallsBuffer?.Release();
+        shader = null;
+        layerInitialized = false;
     }
 
     private void InitializeLayer(TerrainLayer layer) {
+        shader = Resources.Load<ComputeShader>("Compute/Layers/DestructableZoneTerrain");
+
         wallsBuffer = new ComputeBuffer(walls.Length, Wall.stride);
         Wall[] wallArray = new Wall[walls.Length];
 

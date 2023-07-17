@@ -146,7 +146,8 @@ public class TerrainChunk : MonoBehaviour
         state = ActiveState.Inactive;
         SetState(temp);
 
-        StartCoroutine(ComputeHeightMap(targetFilter.sharedMesh.vertices, targetFilter.sharedMesh.normals));
+        if(handler.enableGrass)
+            StartCoroutine(ComputeHeightMap(targetFilter.sharedMesh.vertices, targetFilter.sharedMesh.normals));
     }
 
     private IEnumerator ComputeHeightMap(Vector3[] positions, Vector3[] normals) {
