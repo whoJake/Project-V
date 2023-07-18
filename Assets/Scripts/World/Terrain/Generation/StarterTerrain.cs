@@ -96,11 +96,12 @@ public class StarterTerrain : TerrainLayerGenerator
 
         shader.SetFloat("_UpperRadius", upperRadius);
         shader.SetFloat("_LowerRadius", lowerRadius);
+
         shader.SetInt("_CliffSlopeEasePower", cliffSlopeEasePower);
         shader.SetFloat("_CliffFeatureDepth", cliffFeatureDepth);
 
-        shader.SetVector("_LayerOrigin", layer.origin);
-        shader.SetVector("_LayerSize", layer.GetBounds().size);
+        shader.SetVector("_LayerOrigin", layer.oldOrigin);
+        shader.SetVector("_LayerSize", layer.bounds.size);
 
         shader.SetFloat("_ChasmRadius", Random.Range(chasmRadiusRange.x, chasmRadiusRange.y));
 
@@ -254,8 +255,8 @@ public class StarterTerrain : TerrainLayerGenerator
 
     private void CreatePlatformBuffer(TerrainLayer layer) {
         List<Platform> platforms = new List<Platform>();
-        Vector3 layerSize = layer.GetBounds().size;
-        Vector3 layerOrigin = layer.origin;
+        Vector3 layerSize = layer.bounds.size;
+        Vector3 layerOrigin = layer.oldOrigin;
 
         AddPathPlatforms(ref platforms, layerSize, layerOrigin);
         //AddBonusPlatforms(ref platforms, layerSize, layerOrigin);
@@ -303,7 +304,6 @@ public class StarterTerrain : TerrainLayerGenerator
         }
 
         Debug.Log(platforms.Count + " platforms spawned\n" + numOfBonusPlatforms + " of them are bonus platforms");
-        //DisplayPlatformPositions(platforms);
         platformBuffer = new ComputeBuffer(Mathf.Max(platforms.Count, 1), Platform.stride);
         platformBuffer.SetData(platforms.ToArray());
     }
@@ -324,7 +324,7 @@ public class StarterTerrain : TerrainLayerGenerator
         shader.SetTexture(0, "_Target", target);
         shader.SetFloat("_Seed", seed);
         shader.SetVector("_ChunkOrigin", chunk.origin);
-        shader.SetVector("_ChunkSize", chunk.GetBounds().size);
+        shader.SetVector("_ChunkSize", chunk.bounds.size);
 
         Vector3Int threads = RTUtils.CalculateThreadAmount(chunk.handler.textureDimensions, 8);
         shader.Dispatch(0, threads.x, threads.y, threads.z);

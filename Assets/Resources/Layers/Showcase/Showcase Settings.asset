@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d09b404c84cc39f48aa820a7665397fe, type: 3}
   m_Name: Showcase Settings
   m_EditorClassIdentifier: 
-  randomizeSeed: 0
-  seed: 613
+  randomizeSeed: 1
+  seed: 1014
   layers:
   - {fileID: 11400000, guid: 0c2c892d6e62f2f4b8f36e5d4479c101, type: 2}

@@ -24,7 +24,7 @@ public class GeometryGrass : MonoBehaviour
         pointCreation.SetVector("_CameraWorldPosition", Camera.main.transform.position);
         pointCreation.SetFloat("_DistanceCullingThreshold", distanceCullingThreshold);
         pointCreation.SetVector("_ChunkOrigin", chunk.origin);
-        pointCreation.SetVector("_ChunkSize", chunk.GetBounds().size);
+        pointCreation.SetVector("_ChunkSize", chunk.bounds.size);
         pointCreation.SetInts("_TextureSize", chunk.handler.textureDimensions.x, chunk.handler.textureDimensions.z);
         pointCreation.SetFloat("_JitterScale", jitterScale);
         pointCreation.SetInt("_PointsPerTexel", pointsPerTexel);

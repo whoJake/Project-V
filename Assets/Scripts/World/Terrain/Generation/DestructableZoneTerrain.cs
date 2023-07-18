@@ -43,8 +43,8 @@ public class DestructableZoneTerrain : TerrainLayerGenerator {
         wallsBuffer.SetData(walls);
         
         shader.SetBuffer(0, "_WallBuffer", wallsBuffer);
-        shader.SetVector("_LayerOrigin", layer.origin);
-        shader.SetVector("_LayerSize", layer.GetBounds().size);
+        shader.SetVector("_LayerOrigin", layer.oldOrigin);
+        shader.SetVector("_LayerSize", layer.bounds.size);
         shader.SetFloat("_VoxelScale", layer.handler.voxelScale);
         layerInitialized = true;
     }
@@ -54,7 +54,7 @@ public class DestructableZoneTerrain : TerrainLayerGenerator {
 
         shader.SetTexture(0, "_Target", target);
         shader.SetVector("_ChunkOrigin", chunk.origin);
-        shader.SetVector("_ChunkSize", chunk.GetBounds().size);
+        shader.SetVector("_ChunkSize", chunk.bounds.size);
 
         Vector3Int threads = RTUtils.CalculateThreadAmount(chunk.handler.textureDimensions, 8);
         shader.Dispatch(0, threads.x, threads.y, threads.z);

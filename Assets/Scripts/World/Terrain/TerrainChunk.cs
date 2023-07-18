@@ -17,16 +17,14 @@ public class TerrainChunk : MonoBehaviour
     private List<ChunkEditRequest> editRequests;
     public ChunkData data;
 
-    public TerrainLayer layer;
+    public TerrainLayer layer { get; private set; }
     public TerrainHandler handler { get { return layer.handler; } }
 
-    public Vector3 centre;
-
     private MeshFilter targetFilter;
-    [SerializeField]
     private MeshCollider targetCollider;
 
-    public Vector3 origin { get { return centre - ((Vector3)handler.textureDimensions * handler.voxelScale / 2f); } }
+    public Vector3 origin { get; private set; }
+    public Bounds bounds { get; private set; }
 
     public bool updatingMesh;
     public bool generating;
@@ -45,13 +43,17 @@ public class TerrainChunk : MonoBehaviour
     private static bool shadersLoaded = false;
     private static ComputeShader computeVerticesShader;
 
-    public TerrainChunk Initialize(TerrainLayer _layer, Vector3 _centre, ActiveState _state) {
+    public TerrainChunk Initialize(TerrainLayer _layer, Vector3 _origin, ActiveState _state) {
         targetFilter = GetComponent<MeshFilter>();
         targetCollider = GetComponent<MeshCollider>();
 
         layer = _layer;
-        centre = _centre;
+        origin = _origin;
         state = _state;
+        Vector3 centre = origin + ((Vector3)handler.textureDimensions * handler.voxelScale / 2f);
+        bounds = new Bounds(centre, (Vector3)handler.textureDimensions * handler.voxelScale);
+        transform.position = centre;
+
         editRequests = new List<ChunkEditRequest>();
         id = gid;
         gid++;
@@ -75,6 +77,7 @@ public class TerrainChunk : MonoBehaviour
         if(handler.enableGrass)
             transform.GetChild(0).gameObject.SetActive(updateGrass);
 
+        if (!handler.enableChunkLODs) SetState(layer.state);
         if (state == ActiveState.Active && editRequests.Count != 0) HandleEditRequests();
     }
 
@@ -143,7 +146,7 @@ public class TerrainChunk : MonoBehaviour
         updatingMesh = false;
 
         ActiveState temp = state;
-        state = ActiveState.Inactive;
+        state = ActiveState.None;
         SetState(temp);
 
         if(handler.enableGrass)
@@ -161,13 +164,12 @@ public class TerrainChunk : MonoBehaviour
         }
 
         for(int i = 0; i < positions.Length; i++) {
-            if (i % 25 == 0)
+            if (i % (positions.Length / 10f) == 0)
                 if(handler.yieldOnChunk) yield return null; //Wait a frame between every 25 calculations ig?
 
-            if (Vector3.Dot(Vector3.up, normals[i]) <= 0.6)
+            if (Vector3.Dot(Vector3.up, normals[i]) <= 0.8)
                 continue;
 
-            Bounds bounds = GetBounds();
             Vector2Int texturePos = new Vector2Int(
                 Mathf.FloorToInt(((positions[i].x + bounds.extents.x) / bounds.size.x) * handler.textureDimensions.x),
                 Mathf.FloorToInt(((positions[i].z + bounds.extents.z) / bounds.size.z) * handler.textureDimensions.z)
@@ -306,10 +308,6 @@ public class TerrainChunk : MonoBehaviour
 
     }
 
-    public Bounds GetBounds() {
-        return new Bounds(centre, (Vector3)handler.textureDimensions * handler.voxelScale);
-    }
-
     //
     // Summery:
     //   Loads the resources needed to start compute
@@ -332,7 +330,6 @@ public class TerrainChunk : MonoBehaviour
         if (!showBounds)
             return;
 
-        Bounds bounds = GetBounds();
         Gizmos.DrawWireCube(transform.position, bounds.size);
     }
 

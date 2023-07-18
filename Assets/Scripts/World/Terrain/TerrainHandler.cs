@@ -69,7 +69,7 @@ public class TerrainHandler : MonoBehaviour
 
         Vector3 currentLayerOrigin = transform.position;
         for(int i = 0; i < settings.layers.Length; i++) {
-            CreateLayer(i, currentLayerOrigin, ActiveState.Static_NoGrass).ForceProcessQueue();
+            CreateLayer(i, currentLayerOrigin, ActiveState.Static_NoGrass).ForceGenerateAllChunks(ActiveState.Static_NoGrass, false);
             currentLayerOrigin += Vector3.down * settings.layers[i].depth;
         }
         yieldOnChunk = true;
@@ -182,12 +182,13 @@ public class TerrainHandler : MonoBehaviour
     private void ProcessQueue() {
         LayerGenRequest toProcess = generationQueue[0];
         if (!loadedLayers.ContainsKey(toProcess.id)) {
-            CreateLayer(toProcess.id, toProcess.origin, toProcess.state);
+            CreateLayer(toProcess.id, toProcess.origin, toProcess.state).ForceGenerateAllChunks(ActiveState.Inactive, true);
             Debug.Log("Layer " + toProcess.id + " being generated");
         }
         TerrainLayer layer = loadedLayers[toProcess.id];
         if (layer.generated) {
             layer.SetState(toProcess.state);
+            OnLayerGenerated?.Invoke(toProcess.id);
             generationQueue.RemoveAt(0);
         }
     }
@@ -195,7 +196,7 @@ public class TerrainHandler : MonoBehaviour
     public void DistributeEditRequest(ChunkEditRequest request) {
         foreach(var item in loadedLayers) {
             TerrainLayer layer = item.Value;
-            if (layer.GetBounds().Intersects(request.GetBounds())) {
+            if (layer.bounds.Intersects(request.GetBounds())) {
                 layer.DistributeEditRequest(request);
             }
         }
@@ -219,7 +220,7 @@ public class TerrainHandler : MonoBehaviour
         if(loadedLayers != null && showLayerBounds) {
             for (int layer = 0; layer < loadedLayers.Count; layer++) {
                 if (loadedLayers.ContainsKey(layer)) {
-                    Bounds bounds = loadedLayers[layer].GetBounds();
+                    Bounds bounds = loadedLayers[layer].bounds;
                     Gizmos.DrawWireCube(bounds.center, bounds.size);
                 }
             }
@@ -230,6 +231,7 @@ public class TerrainHandler : MonoBehaviour
 [System.Serializable]
 //Enum used for most terrain classes to dictate its activity state
 public enum ActiveState {
+    None,
     Inactive, //Cannot be changed and game object is disabled
     Static_NoGrass,
     Static, //Edits can be added to its queue but it will not update the mesh, collider mesh is not set

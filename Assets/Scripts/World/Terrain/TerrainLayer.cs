@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class TerrainLayer : MonoBehaviour
 {
-    [SerializeField]
-    private ActiveState state;
-    private Dictionary<Vector3Int, TerrainChunk> loadedChunks;
-    private List<ChunkGenRequest> generationQueue;
+    public ActiveState state { get; private set; }
+    private TerrainChunk[,,] loadedChunks;
+    private Queue<ChunkGenRequest> generationQueue;
 
     struct ChunkGenRequest {
         public Vector3Int id;
@@ -20,8 +20,10 @@ public class TerrainLayer : MonoBehaviour
 
     public TerrainHandler handler;
     public int id;
+    public Vector3 oldOrigin;
     public Vector3 origin;
 
+    public Bounds bounds { get; private set; }
     [SerializeField]
     private Vector3Int chunkCount;
 
@@ -30,51 +32,43 @@ public class TerrainLayer : MonoBehaviour
 
     public TerrainLayer Initialize(int _id, Vector3 _origin, TerrainHandler _handler, TerrainLayerGenerator _generator, ActiveState _state) {
         id = _id;
-        origin = _origin;
         handler = _handler;
         generator = _generator;
-        SetState(_state);
         generating = false;
         generated = false;
-
-        loadedChunks = new Dictionary<Vector3Int, TerrainChunk>();
-        generationQueue = new List<ChunkGenRequest>();
+        SetState(_state);
+        generationQueue = new Queue<ChunkGenRequest>();
 
         chunkCount = new Vector3Int(Mathf.CeilToInt((float)handler.generatedArea.x / handler.voxelsPerAxis.x / handler.voxelScale),
-                                    Mathf.RoundToInt(generator.depth / handler.voxelsPerAxis.x / handler.voxelScale),
+                                    Mathf.CeilToInt(generator.depth / handler.voxelsPerAxis.x / handler.voxelScale),
                                     Mathf.CeilToInt((float)handler.generatedArea.y / handler.voxelsPerAxis.z / handler.voxelScale));
+        {
+            Vector3 centre = new Vector3(_origin.x,
+                                         _origin.y - (handler.voxelsPerAxis.y * chunkCount.y * handler.voxelScale / 2f),
+                                         _origin.z); ;
+            Vector3 size = new Vector3(handler.voxelsPerAxis.x * chunkCount.x,
+                                       handler.voxelsPerAxis.y * chunkCount.y,
+                                       handler.voxelsPerAxis.z * chunkCount.z) * handler.voxelScale;
+            bounds = new Bounds(centre, size);
+        }
 
-        if (!handler.enableChunkLODs)
-            FillGenerationQueue(state);
-        else
-            FillGenerationQueue(ActiveState.Inactive);
+        oldOrigin = _origin;
+        origin = _origin - new Vector3(bounds.extents.x, bounds.size.y, bounds.extents.z);
+        loadedChunks = new TerrainChunk[chunkCount.x, chunkCount.y, chunkCount.z];
 
         return this;
     }
 
     private void Update() {
-        if (!handler.enableChunkLODs) {
-            foreach(var item in loadedChunks) {
-                item.Value.SetState(state);
-            }
-        }
-
         if (handler.enableChunkLODs && generated) {
             UpdateChunkActivity();
-            ForceProcessQueue();
-        } else {
-            if (generationQueue.Count != 0) {
-                generating = true;
-                ProcessQueue();
-            } else {
-                generated = true;
-                generating = false;
-                TerrainHandler.OnLayerGenerated?.Invoke(id);
-            }
         }
+        ProcessQueue();
     }
 
-    private void FillGenerationQueue(ActiveState state) {
+    public void ForceGenerateAllChunks(ActiveState _state, bool inQueue) {
+        loadedChunks = new TerrainChunk[chunkCount.x, chunkCount.y, chunkCount.z];
+
         Vector3Int halfChunkCount = Vector3Int.FloorToInt((Vector3)chunkCount / 2f);
         //Bit of a hacky way to fix centering issues when chunkCount doesnt allow for an exact centre chunk
         Vector3 originOffset = Vector3.zero;
@@ -85,21 +79,17 @@ public class TerrainLayer : MonoBehaviour
         for (int z = 0; z < chunkCount.z; z++) {
             for (int y = 0; y < chunkCount.y; y++) {
                 for (int x = 0; x < chunkCount.x; x++) {
-                    Vector3Int id = new Vector3Int(-halfChunkCount.x + x,
-                                                    y,
-                                                   -halfChunkCount.z + z);
-                    if (!loadedChunks.ContainsKey(id)) {
+                    Vector3Int id = new Vector3Int(x, y, z);
 
-                        Vector3 position = origin + new Vector3(handler.voxelsPerAxis.x * id.x,
-                                                              -(handler.voxelsPerAxis.y * id.y + (handler.voxelsPerAxis.y / 2f)), //To account for y position being at the start not the centre
-                                                                handler.voxelsPerAxis.z * id.z)
-                                                              * handler.voxelScale
-                                                              + originOffset;
+                    Vector3 position = origin + originOffset + new Vector3(handler.voxelsPerAxis.x * id.x,
+                                                                            handler.voxelsPerAxis.y * id.y,
+                                                                            handler.voxelsPerAxis.z * id.z)
+                                                                          * handler.voxelScale;
 
-                        ChunkGenRequest info = new ChunkGenRequest { id = id, position = position, state = state };
-                        if (!generationQueue.Contains(info)) {
-                            generationQueue.Add(info);
-                        }
+                    if (inQueue) {
+                        generationQueue.Enqueue(new ChunkGenRequest { id = id, position = position, state = _state });
+                    } else {
+                        CreateChunk(id, position, _state);
                     }
                 }
             }
@@ -114,41 +104,43 @@ public class TerrainLayer : MonoBehaviour
             originOffset = new Vector3(handler.voxelsPerAxis.x * handler.voxelScale / 2f, 0, handler.voxelsPerAxis.z * handler.voxelScale / 2f);
 
         //Find chunkID player is in
-        Bounds bounds = GetBounds();
-        Vector3 relativeOriginCamPosition = handler.mainCamera.transform.position - (origin - new Vector3(bounds.extents.x, 0, bounds.extents.z));
-        relativeOriginCamPosition.y *= -1;
-
+        Vector3 relativeOriginCamPosition = handler.mainCamera.transform.position - origin;
         Vector3 chunkWorldSize = (Vector3)handler.voxelsPerAxis * handler.voxelScale;
         Vector3Int chunksFromOrigin = Vector3Int.FloorToInt(new Vector3(relativeOriginCamPosition.x / chunkWorldSize.x, relativeOriginCamPosition.y / chunkWorldSize.y, relativeOriginCamPosition.z / chunkWorldSize.z));
+       
+        for (int z = -6; z <= 6; z++) {
+            for (int y = -6; y <= 6; y++) {
+                for (int x = -6; x <= 6; x++) {
+                    Vector3Int id = chunksFromOrigin + new Vector3Int(x, y, z);
 
-        for(int z = -4; z <= 4; z++) {
-            for (int y = -4; y <= 4; y++) {
-                for (int x = -4; x <= 4; x++) {
-                    Vector3Int id = chunksFromOrigin - new Vector3Int(halfChunkCount.x + x,
-                                                                     y,
-                                                                     halfChunkCount.z + z);
-                    if (x == 0 && y == 0 && z == 0)
-                        Debug.Log("Player in Chunk: " + (Vector3)id);
-                    if (id.x < -halfChunkCount.x || id.x >= -halfChunkCount.x + chunkCount.x) continue;
-                    if (id.y < -halfChunkCount.y || id.y >= -halfChunkCount.y + chunkCount.y) continue;
-                    if (id.z < -halfChunkCount.z || id.z >= -halfChunkCount.z + chunkCount.z) continue;
+                    if (id.x < 0 || id.x >= chunkCount.x) continue;
+                    if (id.y < 0 || id.y >= chunkCount.y) continue;
+                    if (id.z < 0 || id.z >= chunkCount.z) continue;
 
-                    Vector3 position = origin + new Vector3(handler.voxelsPerAxis.x * id.x,
-                                                  -(handler.voxelsPerAxis.y * id.y + (handler.voxelsPerAxis.y / 2f)), //To account for y position being at the start not the centre
-                                                    handler.voxelsPerAxis.z * id.z)
-                                                  * handler.voxelScale
-                                                  + originOffset;
+                    Vector3 position = origin + originOffset + new Vector3(handler.voxelsPerAxis.x * id.x,
+                                                                           handler.voxelsPerAxis.y * id.y,
+                                                                           handler.voxelsPerAxis.z * id.z)
+                                                                         * handler.voxelScale;
 
                     float manDst = Mathf.Abs(x) + Mathf.Abs(y) + Mathf.Abs(z);
                     ActiveState chunkTargetState;
-                    if (manDst <= 2)
+                    if (manDst <= 3)
                         chunkTargetState = ActiveState.Active;
+                    else if (manDst <= 4)
+                        chunkTargetState = ActiveState.Static;
+                    else if (manDst <= 5)
+                        chunkTargetState = ActiveState.Static_NoGrass;
                     else
                         chunkTargetState = ActiveState.Inactive;
 
-                    ChunkGenRequest info = new ChunkGenRequest { id = id, position = position, state = chunkTargetState };
-                    if (!generationQueue.Contains(info)) {
-                        generationQueue.Add(info);
+                    TerrainChunk target = loadedChunks[id.x, id.y, id.z];
+                    if (target == null) {
+                        ChunkGenRequest info = new ChunkGenRequest { id = id, position = position, state = chunkTargetState };
+                        if (!generationQueue.Contains(info)) {
+                            generationQueue.Enqueue(info);
+                        }
+                    } else {
+                        loadedChunks[id.x, id.y, id.z].SetState(chunkTargetState);
                     }
                     
                 }
@@ -157,43 +149,42 @@ public class TerrainLayer : MonoBehaviour
 
     }
 
-    public void ForceProcessQueue() {
-        if (handler.enableChunkLODs) //Just as a safeguard against filling it twice
-            FillGenerationQueue(ActiveState.Static_NoGrass);
-        while(generationQueue.Count != 0) {
-            ProcessQueue();
-        }
-    }
-
     private void ProcessQueue() {
-        ChunkGenRequest toProcess = generationQueue[0];
-        if (!loadedChunks.ContainsKey(toProcess.id)) {
-            CreateChunk(toProcess.id, toProcess.position, toProcess.state);
+        ChunkGenRequest request;
+        if (!generationQueue.TryPeek(out request)) {
+            generating = false;
+            generated = true;
+            return;
         }
-        TerrainChunk chunk = loadedChunks[toProcess.id];
-        if (chunk.generated) {
-            chunk.SetState(toProcess.state);
-            generationQueue.RemoveAt(0);
+
+        TerrainChunk chunk = loadedChunks[request.id.x, request.id.y, request.id.z];
+
+        if(chunk == null) {
+            generating = true;
+            CreateChunk(request.id, request.position, request.state);
+        }
+        else if (chunk.generated) {
+            chunk.SetState(request.state);
+            generationQueue.Dequeue();
         }
     }
 
     private TerrainChunk CreateChunk(Vector3Int id, Vector3 position, ActiveState createState) {
-        if (loadedChunks.ContainsKey(id)) {
+        if (loadedChunks[id.x, id.y, id.z] != null) {
             Debug.Log("Chunk already created");
-            return loadedChunks[id];
+            return loadedChunks[id.x, id.y, id.z];
         }
 
-        GameObject chunkGObj = new GameObject(id.x + ", " + (-id.y) + ", " + id.z);
+        GameObject chunkGObj = new GameObject(id.x + ", " + id.y + ", " + id.z);
         chunkGObj.transform.parent = transform;
-        chunkGObj.transform.position = position;
         chunkGObj.tag = "Terrain";
         chunkGObj.layer = LayerMask.NameToLayer("Terrain");
         chunkGObj.AddComponent<MeshFilter>();
         chunkGObj.AddComponent<MeshRenderer>().material = handler.material;
         chunkGObj.AddComponent<MeshCollider>();
 
-        TerrainChunk chunk = chunkGObj.AddComponent<TerrainChunk>().Initialize(this, position, state);
-        loadedChunks.Add(id, chunk);
+        TerrainChunk chunk = chunkGObj.AddComponent<TerrainChunk>().Initialize(this, position, createState);
+        loadedChunks[id.x, id.y, id.z] = chunk;
         return chunk;
     }
 
@@ -206,9 +197,8 @@ public class TerrainLayer : MonoBehaviour
     public void DistributeEditRequest(ChunkEditRequest request) {
         if (state == ActiveState.Inactive) return;
 
-        foreach(var item in loadedChunks) {
-            TerrainChunk chunk = item.Value;
-            if (chunk.GetBounds().Intersects(request.GetBounds())) {
+        foreach(TerrainChunk chunk in loadedChunks) {
+            if (chunk.bounds.Intersects(request.GetBounds())) {
                 chunk.MakeEditRequest(request.Clone());
             }
         }
@@ -223,8 +213,7 @@ public class TerrainLayer : MonoBehaviour
         generator.Reset();
 
         if (loadedChunks != null) { 
-            foreach(var item in loadedChunks) {
-                TerrainChunk chunk = item.Value;
+            foreach(TerrainChunk chunk in loadedChunks) {
                 chunk.Unload(fromEditor);
             }
             loadedChunks = null;
@@ -241,17 +230,4 @@ public class TerrainLayer : MonoBehaviour
         else
             Destroy(gameObject);
     }
-
-    public Bounds GetBounds() {
-        Vector3 centre = new Vector3(origin.x,
-                                     origin.y - (handler.voxelsPerAxis.y * chunkCount.y * handler.voxelScale / 2f),
-                                     origin.z); ;
-
-        Vector3 size = new Vector3(handler.voxelsPerAxis.x * chunkCount.x,
-                                   handler.voxelsPerAxis.y * chunkCount.y,
-                                   handler.voxelsPerAxis.z * chunkCount.z) * handler.voxelScale;
-
-        return new Bounds(centre, size);
-    }
-    
 }
