@@ -28,10 +28,26 @@ Since the terrain is split into chunks, I can edit them pretty much on command a
 -----------------------------------------------
 
 ## Geometry Shader Grass
-Only recently have I got to understanding the workings of the geometry shader pass but since the results can look quite pleasing I might aswell show the results of them here. Points randomized and sent to the material as vertices, then each of these vertices acts as a base for the grass mesh
-which is built up inside the geometry shader.
-![Geometry Shader Grass 2](https://github.com/whoJake/Project-V/assets/37589250/7c4236d7-e6d5-45d5-8ec5-c11df11fb91d)
-![GeometryShaderGrassChanging](https://github.com/whoJake/Project-V/assets/37589250/6b4f7d01-83ab-4426-91c8-4d392727ec05)
+Only recently have I got to understanding the workings of the geometry shader pass but since the results can look quite pleasing I might aswell show the results of them here. Points get randomized, placed on the pre-baked heightmap of terrain then frustum culled. They are then sent to the material as vertices where they each act as a base for the grass mesh which is built up inside the geometry shader.
+
+![grassFrustumCulling](https://github.com/whoJake/Project-V/assets/37589250/ba844924-e4f0-42f6-ac33-f202da50dc99)
+Example of the frustum culling
+
+...
+
+...
+![alternateShape1](https://github.com/whoJake/Project-V/assets/37589250/14724b65-5f34-40ac-af02-b685882e7e3b)
+Since the mesh is produced procedurally, the parameters for the grass shape can be inputted as a material property and updated in real time
+
+...
+
+...
+![alternateColors3](https://github.com/whoJake/Project-V/assets/37589250/267753d4-8c53-4891-b51f-06f93df4c150)
+The same applys to the colour of the blades ( just a simple gradient based on height in current implementation )
+
+...
+
+The current implmentation is far from performant but being able to mess with this part of the pipeline makes it easy to produce some good looking results.
 
 ---------------------------------------------
 Theres other things I've worked on but I'll save adding them to here until they are a bit more presentable
