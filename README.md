@@ -1,6 +1,6 @@
-# Project-V (Passion Project)
+# Project-V
 
-Being my passion project, I have huge plans that are likely far too big for me to ever complete but the process is the reason I keep at it and I have a lot of really interesting tech that I've implemented for it
+Being lead as my passion project, I have huge plans that are likely far too big for me to ever complete but the process is the reason I keep at it and I have a lot of really interesting tech that I've implemented for it
 and feel proud to show off. The project is made in Unity, but a lot of the parts I've created are custom, despite having Unity counterparts.
 For example I have my own [custom camera controlling script](Assets/Scripts/Camera/ThirdPersonController.cs). Things like this happened simply because I was interested in it and decided to write my own implementation for my needs so they're not always feature complete.
 
